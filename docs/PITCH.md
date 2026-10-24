@@ -156,14 +156,14 @@ Slide-by-slide text for the organisers' Canva template: 10 slides, the limit. Th
 
 | Limit today | Round 2 |
 |---|---|
-| Simulated devices; ESP trusts calibration data | Real IBM hardware runs |
+| One real run (Grover, ibm_fez): saboteur rejected, measured 1-TVD 0.744 vs honest 0.828; otherwise simulated; ESP trusts calibration data | More hardware runs: circuits, devices, repeats |
 | QCEC proves up to 10 qubits, times out at 14; padding grows as n² | QCEC past 10 qubits, cheaper padding |
 | Own stand-in compilers | Qiskit transpiler plugin |
 | Scheduled compiles: idle time only estimated from T1/T2 | Check the idle model on hardware |
 
 - **Impact:** pharma (VQE weights) and finance (QAOA angles) keep trained parameters secret; vendors get a checkable receipt.
 
-*Speaker note:* `demo.py --ibm` is written to submit an honest and a sabotaged compile to the least busy real IBM device with your own IBM Quantum account; we have no hardware results yet. Padding gives every qubit pair the busiest pair's CX count: 6 pairs at 4 qubits, 8,001 at 127. In our scaling benchmark lock, compile and audit stay under half a second at 20 qubits; QCEC is the limit, proving QAOA up to 10 qubits and timing out at 14. Honest ALAP-scheduled compiles now pass, with idle time estimated from T1/T2 only; weaker scheduled compiles (levels 1-2) are often rejected because idle now counts. The QAOA graph is hidden statistically, not exactly, and an attacker who sees input/output pairs of the unlocked circuit is out of scope; an oracle-guided attack suite is also on the Round 2 list. In India, the National Quantum Mission (₹6,003.65 crore, 2023-24 to 2030-31) aims at intermediate-scale quantum computers with 50-1,000 physical qubits; anyone who compiles circuits for them through a third party faces the same question. The receipt for vendors is an equivalence proof plus an ESP ratio of at least 0.90.
+*Speaker note:* `demo.py --ibm` submits an honest and a sabotaged compile to the least busy real IBM device with your own IBM Quantum account. Our one run (Grover, ibm_fez, 2026-10-24, job dbe5hp7pc3tc739l5al0): the audit rejected the saboteur (ESP ratio 0.83) and on the device it measured 1-TVD 0.744 and P(101) 0.688 against the honest compile's 0.828 and 0.772. One run, one circuit, one device. Padding gives every qubit pair the busiest pair's CX count: 6 pairs at 4 qubits, 8,001 at 127. In our scaling benchmark lock, compile and audit stay under half a second at 20 qubits; QCEC is the limit, proving QAOA up to 10 qubits and timing out at 14. Honest ALAP-scheduled compiles now pass, with idle time estimated from T1/T2 only; weaker scheduled compiles (levels 1-2) are often rejected because idle now counts. The QAOA graph is hidden statistically, not exactly, and an attacker who sees input/output pairs of the unlocked circuit is out of scope; an oracle-guided attack suite is also on the Round 2 list. In India, the National Quantum Mission (₹6,003.65 crore, 2023-24 to 2030-31) aims at intermediate-scale quantum computers with 50-1,000 physical qubits; anyone who compiles circuits for them through a third party faces the same question. The receipt for vendors is an equivalence proof plus an ESP ratio of at least 0.90.
 
 ---
 

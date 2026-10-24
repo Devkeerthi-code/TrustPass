@@ -156,6 +156,17 @@ Other QCEC configurations do not fix this yet. `bench/qcec_configs.py` ran the 1
 
 None gave a proof, so `verify.py` is unchanged. We did not try QCEC's hybrid Schrödinger-Feynman checker, which only checks approximate equivalence.
 
+## Real hardware run
+
+One run of `python demo.py --ibm` on 2026-10-24: Grover-3 (marked item `101`), one fresh lock, compiled honestly and by the saboteur for the least busy device, **ibm_fez** (156 qubits), transpiler seed 7, 4,000 shots each, job `dbe5hp7pc3tc739l5al0`. Both compiles were verified with the device's own target before submission; 1-TVD is against the ideal simulated histogram. Raw counts are in [bench/ibm_ibm_fez_2026-10-24.json](bench/ibm_ibm_fez_2026-10-24.json).
+
+| | QCEC | ESP (ratio to honest) | Verdict | Measured 1-TVD | Measured P(101) |
+|---|---|---|---|---|---|
+| Honest | `equivalent_up_to_global_phase` | 0.868 (1.00) | ACCEPT | 0.828 | 0.772 |
+| Saboteur | `equivalent_up_to_global_phase` | 0.721 (0.83) | REJECT | 0.744 | 0.688 |
+
+The audit rejected the saboteur before it ran, and on the device the sabotaged compile did measurably worse, though by less than ESP predicted (measured 1-TVD ratio 0.90 against an ESP ratio of 0.83). This is one run of one circuit on one device, with no repeats, so it shows the check pointing the right way once, not how reliable it is.
+
 ## Scorecard per demo
 
 FakeBrisbane, transpiler seed 7, no extra decoys. Each column is 16 runs (8 honest, 8 saboteur), each with a fresh lock: 8 from our first measurement and 8 re-run on 2026-10-07 with the current code. Numbers are min-max over all 16 plus the web demo's snapshot (`web/snapshot.json`, one more lock per demo), except the two rows marked * (see the first note). Confidentiality numbers come from 30 random wrong keys; "random inputs" means 5 Haar-random input states.
@@ -242,7 +253,7 @@ What remains after the fixes is listed under limitations: lone-CX skeletons, the
 - **The key is a list of continuous angles, not bits.** There is no key-length security argument; leakage is measured empirically against random guessing, not proven.
 - **The naive test is an ideal-simulator best case.** TVD < 0.10 stands in for "the histogram looks right", and we run it noiselessly, the most favourable case for it. An honest compile on the FakeBrisbane noise model already lands 0.05-0.29 TVD from the ideal histogram (1 - noisy-sim fidelity above), so a user reading real hardware output could not demand tighter, and the occasional naive catch of the masked Trojan on QAOA and VQE would vanish in that noise.
 - **The fidelity audit trusts calibration data.** ESP ignores crosstalk, coherent errors and (unless the compile is scheduled) idle time, the 0.90 threshold is a heuristic, and the audit needs a local compile as a baseline. It checks that the returned circuit is not measurably worse than that baseline; it does not prove the compile is good. A better third-party compiler simply scores above 1.0.
-- **Small, simulated, self-built.** Demos use 3-4 active qubits on fake backends, and we have not run on real hardware. In the scaling benchmark (QAOA on random 3-regular graphs) QCEC proves equivalence up to 10 qubits and times out at 14 and 20, so beyond about 10 qubits an honest compile is a false REJECT. The attacks are our own stand-ins modelled on the literature, not captured from real malicious compilers.
+- **Small, simulated, self-built.** Demos use 3-4 active qubits on fake backends; our only real-hardware result is the single Grover run on ibm_fez above. In the scaling benchmark (QAOA on random 3-regular graphs) QCEC proves equivalence up to 10 qubits and times out at 14 and 20, so beyond about 10 qubits an honest compile is a false REJECT. The attacks are our own stand-ins modelled on the literature, not captured from real malicious compilers.
 
 ## Round 2 roadmap
 
@@ -275,7 +286,7 @@ python test_trustpass.py                                     # 10 checks, ~10 s 
 
 `--decoys` adds extra padding rounds on top of the uniform pair counts (default 0). `--seed` only fixes the transpiler (default 7); the lock always draws fresh OS randomness, so key angles, CX counts and depth can differ slightly between runs.
 
-`python demo.py --ibm` runs an honest vs sabotaged compile on real IBM hardware with an IBM Quantum account you have saved yourself; this README reports no hardware results.
+`python demo.py --ibm` runs an honest vs sabotaged compile on real IBM hardware with an IBM Quantum account you have saved yourself; our one result is under [Real hardware run](#real-hardware-run).
 
 From Python:
 
