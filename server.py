@@ -159,8 +159,9 @@ def run_json(cid, mode, backend_name, decoys=0, seed=7):
 
 
 def matrix_json(cid, backend_name, decoys=0, seed=7):
+    circuit, locked, _, _ = prepared(cid, decoys)  # the panel's lock, so the matrix agrees with CH1-CH3
     with HEAVY:
-        return detection_matrix(DEMOS[CIRCUITS[cid]](), backend(backend_name), decoys, seed)
+        return detection_matrix(circuit, backend(backend_name), decoys, seed, locked=locked)
 
 
 META = {"circuits": {k: {"name": v, "kind": DEMOS[v]().metadata["kind"]} for k, v in CIRCUITS.items()},

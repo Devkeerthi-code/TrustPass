@@ -39,9 +39,12 @@ def run(circuit, backend, mode="honest", decoys=0, seed=7, evidence=True, locked
     return report
 
 
-def detection_matrix(circuit, backend, decoys=0, seed=7):
-    """Which check catches which attack: the one table the pitch is built on."""
-    locked = lock(circuit, decoys=decoys)
+def detection_matrix(circuit, backend, decoys=0, seed=7, locked=None):
+    """Which check catches which attack: the one table the pitch is built on.
+
+    Pass `locked` to judge the same lock a run used (the app does, so panel and matrix agree).
+    """
+    locked = locked or lock(circuit, decoys=decoys)
     rows = []
     for mode in COMPILERS:
         final, _, functional, fidelity = _verify(circuit, locked, backend, mode, seed)
