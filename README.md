@@ -321,11 +321,14 @@ print(report["trust"])  # e.g. {'confidentiality': 100, 'integrity': 100, 'quali
 - Anthropic's Claude (Claude Code) was our coding and research assistant: it drafted code, ran the red-team attacks and many of the measurement runs, and helped build the UI (the Impeccable design workflow, and Figma image generation for the panel hardware renders in `assets/plates/`).
 - Every number in this README comes from code in this repo that anyone can re-run.
 
-
 ## Team
+
 Team name: Team Kairo
-College:RV College of Engineering
+
+College: RV College of Engineering
+
 | Name | Role |
+|---|---|
 | Dev Keerthi P | Ideation & Backend |
 | Abijith Kumar Sinha | Full Stack |
-| Saniya Ali Kokkanti | Frontend & Presentation|
+| Saniya Ali Kokkanti | Frontend & Presentation |
