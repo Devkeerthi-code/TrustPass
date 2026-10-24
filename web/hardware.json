@@ -1,0 +1,85 @@
+{
+  "metric": "measured 1-TVD vs ideal",
+  "runs": [
+    {
+      "run": 1,
+      "device": "ibm_fez",
+      "date": "2026-10-24",
+      "job_id": "dbe5hp7pc3tc739l5al0",
+      "circuit": "Grover",
+      "honest": {
+        "verdict": "ACCEPT",
+        "measured": 0.8277
+      },
+      "saboteur": {
+        "verdict": "REJECT",
+        "measured": 0.744,
+        "esp_ratio": 0.831
+      }
+    },
+    {
+      "run": 2,
+      "device": "ibm_kingston",
+      "date": "2026-10-24",
+      "job_id": "dbefmkom94ac738rnks0",
+      "circuit": "Grover",
+      "honest": {
+        "verdict": "ACCEPT",
+        "measured": 0.8507
+      },
+      "saboteur": {
+        "verdict": "REJECT",
+        "measured": 0.7242,
+        "esp_ratio": 0.894
+      }
+    },
+    {
+      "run": 3,
+      "device": "ibm_fez",
+      "date": "2026-10-24",
+      "job_id": "dbefmkvsstms73fbvl4g",
+      "circuit": "Grover",
+      "honest": {
+        "verdict": "ACCEPT",
+        "measured": 0.8342
+      },
+      "saboteur": {
+        "verdict": "REJECT",
+        "measured": 0.1822,
+        "esp_ratio": 0.005
+      }
+    },
+    {
+      "run": 3,
+      "device": "ibm_fez",
+      "date": "2026-10-24",
+      "job_id": "dbefmkvsstms73fbvl4g",
+      "circuit": "QAOA",
+      "honest": {
+        "verdict": "ACCEPT",
+        "measured": 0.9251
+      },
+      "saboteur": {
+        "verdict": "REJECT",
+        "measured": 0.697,
+        "esp_ratio": 0.193
+      }
+    },
+    {
+      "run": 3,
+      "device": "ibm_fez",
+      "date": "2026-10-24",
+      "job_id": "dbefmkvsstms73fbvl4g",
+      "circuit": "VQE",
+      "honest": {
+        "verdict": "ACCEPT",
+        "measured": 0.8726
+      },
+      "saboteur": {
+        "verdict": "REJECT",
+        "measured": 0.6642,
+        "esp_ratio": 0.108
+      }
+    }
+  ]
+}
