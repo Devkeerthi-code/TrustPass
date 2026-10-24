@@ -113,9 +113,9 @@ Slide-by-slide text for the organisers' Canva template: 10 slides, the limit. Th
 - **MQT QCEC 3.10:** formal equivalence checking.
 - **Pipeline modules:** circuits · lock · compilers · verify · score · pipeline.
 - **UI:** hand-built HTML/CSS/JS instrument; GitHub Pages serves a snapshot of real runs.
-- **9 automated tests**, about 10 s.
+- **10 automated tests**, about 10 s.
 
-*Speaker note:* Everything is open source and runs on Python 3.12. `lock.py` rewrites the circuit; `compilers.py` holds five stand-in compilers (honest, three Trojans, saboteur); `verify.py` runs the naive test, the output-map check plus QCEC, and the ESP audit; `score.py` builds the scorecard; `pipeline.py` ties them together. `server.py` serves the instrument UI with live runs; `server.py --export` writes the snapshot the public page uses. A QCEC check took 0.02-0.34 s in 473 of 474 calls. The tests include regressions for the red-team findings.
+*Speaker note:* Everything is open source and runs on Python 3.12. `lock.py` rewrites the circuit; `compilers.py` holds five stand-in compilers (honest, three Trojans, saboteur); `verify.py` runs the naive test, the output-map check plus QCEC, and the ESP audit; `score.py` builds the scorecard; `pipeline.py` ties them together. `server.py` serves the instrument UI with live runs; `server.py --export` writes the snapshot the public page uses. A QCEC check took 0.02-0.34 s in 473 of 474 calls. It does not scale far: on QAOA with random 3-regular graphs it proves equivalence up to 10 qubits (10.3 s) and hits its 30 s timeout at 14 qubits, which is a false REJECT, never an ACCEPT. Scheduled compiles are now verified: delays are removed before QCEC, and the ESP audit charges their idle time from each qubit's T1 and T2. The tests include regressions for the red-team findings.
 
 ---
 
@@ -124,11 +124,12 @@ Slide-by-slide text for the organisers' Canva template: 10 slides, the limit. Th
 **8 secrets in, 1 identical compiler view out**
 
 - **View test (it can fail):** Grover's 8 possible secrets give the compiler 1 identical circuit. VQE: 8 weight sets, 1 view.
-- **QAOA graph:** hidden statistically; block order is a uniform shuffle (800 locks, p = 0.62-0.93).
+- **QAOA graph:** hidden statistically; block order is a uniform shuffle (800 locks).
 - **Cost:** Grover 39 → 45 two-qubit gates; VQE pays most, 6 → 18-24.
-- **False rejects:** **0 of 360** honest compiles (3 circuits × 2 devices × optimisation levels 1-3 × 20 seeds). Lowest ESP ratio 0.948, threshold 0.90.
+- **False rejects:** **0 of 360** honest compiles (3 circuits × 2 devices × 3 levels × 20 seeds).
+- **Threshold sweep, 5 locks:** honest 0.912-1.055, saboteurs 0.540-0.779; any threshold 0.78-0.91 separates them.
 
-*Speaker note:* The compiler learns nothing about the angles: it sees no gate angles, no name or metadata, and the same CX count on every qubit pair. The view test holds the lock's randomness fixed and locks the same circuit with every possible secret; it correctly fails for QAOA graphs, whose structure is the secret, so for graphs we measured instead: block positions were uniform and no different between graphs. VQE pays most because its 6 qubit pairs all need padding to the same count. The false-reject sweep compiled every demo honestly at three optimisation levels and 20 transpiler seeds on both device models; every one was accepted, and the lowest ESP ratio sat about 0.05 above the threshold. If a judge asks how we know the compiler learns nothing about the angles: the view test, and two rounds of attackers trying to read the secret off the locked circuit.
+*Speaker note:* The compiler learns nothing about the angles: it sees no gate angles, no name or metadata, and the same CX count on every qubit pair. The view test holds the lock's randomness fixed and locks the same circuit with every possible secret; it correctly fails for QAOA graphs, whose structure is the secret, so for graphs we measured instead: block positions were uniform and no different between graphs. VQE pays most because its 6 qubit pairs all need padding to the same count. The false-reject sweep compiled every demo honestly at three optimisation levels and 20 transpiler seeds on both device models; every one was accepted. The threshold sweep adds lock randomness: 450 honest compiles over 5 locks scored 0.912-1.055 and 150 saboteurs 0.540-0.779, so any threshold from 0.78 to 0.91 separates them; 0.90 works, but the lowest honest compile is only 0.012 above it. If a judge asks how we know the compiler learns nothing about the angles: the view test, and two rounds of attackers trying to read the secret off the locked circuit.
 
 ---
 
@@ -143,9 +144,9 @@ Slide-by-slide text for the organisers' Canva template: 10 slides, the limit. Th
 | Self-cancelling CX on unconnected qubits scored error-free: ACCEPT | Audit rejects gates the device cannot run |
 
 - Attackers played the malicious compiler: our code, not the key.
-- Each finding confirmed before fixing; 9 automated tests guard the fixes.
+- Each finding confirmed before fixing; 10 automated tests guard the fixes.
 
-*Speaker note:* Two rounds of attackers found 14 findings; a final review before submitting found the 15th, the last row. Before that fix, a self-cancelling CX pair on an unconnected qubit pair came back with an ESP ratio of 1.0 on both device models, and QCEC said equivalent, so the verdict was ACCEPT. Other examples: the public transpiler seed let an attacker replay decoy placement (100% QAOA graph recovery), and a single delay crashed the checker, which now fails closed. The ones we did not fix are listed as limits in the README. The attacks were run with Claude Code; the README's AI-use section says who did what.
+*Speaker note:* Two rounds of attackers found 14 findings; a final review before submitting found the 15th, the last row. Before that fix, a self-cancelling CX pair on an unconnected qubit pair came back with an ESP ratio of 1.0 on both device models, and QCEC said equivalent, so the verdict was ACCEPT. Other examples: the public transpiler seed let an attacker replay decoy placement (100% QAOA graph recovery), and a single delay crashed the checker. The checker now fails closed, and since delays are logically the identity, QCEC checks the circuit without them while the ESP audit charges their idle time. The ones we did not fix are listed as limits in the README. The attacks were run with Claude Code; the README's AI-use section says who did what.
 
 ---
 
@@ -156,13 +157,13 @@ Slide-by-slide text for the organisers' Canva template: 10 slides, the limit. Th
 | Limit today | Round 2 |
 |---|---|
 | Simulated devices; ESP trusts calibration data | Real IBM hardware runs |
-| 3-4 qubit demos; padding grows as n²; QCEC proves QAOA up to 10 qubits, times out at 14 | Cheaper padding, QCEC past 10 qubits |
-| Wraps our own stand-in compilers | Package as a Qiskit transpiler plugin |
-| Idle time of scheduled compiles only estimated from T1/T2 | Test dynamical decoupling and the idle model on hardware |
+| QCEC proves up to 10 qubits, times out at 14; padding grows as n² | QCEC past 10 qubits, cheaper padding |
+| Own stand-in compilers | Qiskit transpiler plugin |
+| Scheduled compiles: idle time only estimated from T1/T2 | Check the idle model on hardware |
 
-- **Impact:** pharma (VQE weights) and finance (QAOA angles) keep trained parameters from the compiler; compiler vendors get a receipt customers can check.
+- **Impact:** pharma (VQE weights) and finance (QAOA angles) keep trained parameters secret; vendors get a checkable receipt.
 
-*Speaker note:* `demo.py --ibm` is written to submit an honest and a sabotaged compile to the least busy real IBM device with your own IBM Quantum account; we have no hardware results yet. Padding gives every qubit pair the busiest pair's CX count: 6 pairs at 4 qubits, 8,001 at 127. The QAOA graph is hidden statistically, not exactly, and an attacker who sees input/output pairs of the unlocked circuit is out of scope; an oracle-guided attack suite is also on the Round 2 list. In India, the National Quantum Mission (₹6,003.65 crore, 2023-24 to 2030-31) aims at intermediate-scale quantum computers with 50-1,000 physical qubits; anyone who compiles circuits for them through a third party faces the same question. The receipt for vendors is an equivalence proof plus an ESP ratio of at least 0.90.
+*Speaker note:* `demo.py --ibm` is written to submit an honest and a sabotaged compile to the least busy real IBM device with your own IBM Quantum account; we have no hardware results yet. Padding gives every qubit pair the busiest pair's CX count: 6 pairs at 4 qubits, 8,001 at 127. In our scaling benchmark lock, compile and audit stay under half a second at 20 qubits; QCEC is the limit, proving QAOA up to 10 qubits and timing out at 14. Honest ALAP-scheduled compiles now pass, with idle time estimated from T1/T2 only; weaker scheduled compiles (levels 1-2) are often rejected because idle now counts. The QAOA graph is hidden statistically, not exactly, and an attacker who sees input/output pairs of the unlocked circuit is out of scope; an oracle-guided attack suite is also on the Round 2 list. In India, the National Quantum Mission (₹6,003.65 crore, 2023-24 to 2030-31) aims at intermediate-scale quantum computers with 50-1,000 physical qubits; anyone who compiles circuits for them through a third party faces the same question. The receipt for vendors is an equivalence proof plus an ESP ratio of at least 0.90.
 
 ---
 
