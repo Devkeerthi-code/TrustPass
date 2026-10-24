@@ -116,6 +116,15 @@ All 90 matrices (3 demos × 2 backends × 15 locks) rejected every attack and ac
 
 A detection matrix (one lock, five compiles, no scoring) takes 0.6-3 s after imports (2 of 90 took 5 s and 11 s); a full `pipeline.run` with scorecard and noisy-sim evidence takes 3-11 s. A QCEC check took 0.02-0.34 s in 473 of 474 calls; one took 4.1 s.
 
+### Why 0.90 and 0.10
+
+`bench/thresholds.py` sweeps both thresholds: 3 demos × FakeBrisbane and FakeTorino × 5 fresh locks; per lock, 15 honest compiles (optimization levels 1-3 × transpiler seeds 0-4), 5 saboteur and 5 masked-Trojan compiles (seeds 0-4), each against the pipeline's level-3, seed-7 baseline. Raw numbers in `bench/thresholds.csv`.
+
+![False rejects and missed attacks as the ESP threshold (0.50-1.00) and the naive TVD tolerance (0-0.20) are swept](bench/thresholds.png)
+
+- **ESP ratio threshold.** Honest compiles score 0.912-1.055 (450 compiles), saboteurs 0.540-0.779 (150). Every threshold from 0.78 to 0.91 gives 0 false rejects and 0 missed saboteurs, so 0.90 works, but it sits near the top of that window: the lowest honest compile (VQE-4, FakeBrisbane, level 2) is only 0.012 above it, and at 0.95 71 of 450 honest compiles would be false rejects.
+- **Naive TVD tolerance.** No tolerance separates honest compiles from the masked Trojan. At 0.10 there are 0 false rejects, and 127 of 150 masked Trojans pass. The best tolerance in the sweep, 0.025, still lets 54 of 150 through and falsely rejects 5 of 450 honest compiles, on an ideal simulator; on a noisy device honest compiles already land 0.05-0.29 from the ideal histogram (see limitations).
+
 ## Scorecard per demo
 
 FakeBrisbane, transpiler seed 7, no extra decoys. Each column is 16 runs (8 honest, 8 saboteur), each with a fresh lock: 8 from our first measurement and 8 re-run on 2026-10-07 with the current code. Numbers are min-max over all 16 plus the web demo's snapshot (`web/snapshot.json`, one more lock per demo), except the two rows marked * (see the first note). Confidentiality numbers come from 30 random wrong keys; "random inputs" means 5 Haar-random input states.
@@ -262,6 +271,7 @@ print(report["trust"])  # e.g. {'confidentiality': 100, 'integrity': 100, 'quali
 | `.impeccable/`, `DESIGN.md`, `PRODUCT.md` | The UI design record: product brief and decisions (`PRODUCT.md`), design tokens and rules (`DESIGN.md`), and the Impeccable workflow's comps, reviews and captures (`.impeccable/`) |
 | `demo.py` | The terminal demo |
 | `test_trustpass.py` | 9 checks, including regressions for the red-team findings |
+| `bench/` | Measurements behind the README: threshold sweep, README capture (`pip install -r bench/requirements.txt`) |
 
 ## How we built this (AI use)
 

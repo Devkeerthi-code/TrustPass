@@ -1,2 +1,3 @@
 playwright~=1.64
 pillow~=13.0
+matplotlib~=3.11
