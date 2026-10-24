@@ -112,7 +112,7 @@ Which checks caught each attack, all three demos, FakeBrisbane and FakeTorino (1
 | trojan-dormant | QCEC | QCEC | QCEC |
 | saboteur | fidelity audit | fidelity audit | fidelity audit |
 
-All 90 matrices (3 demos × 2 backends × 15 locks) rejected every attack and accepted every honest compile. The masked Trojan lands at the compiled circuit's midpoint, which moves with the random lock, so its ideal-simulator TVD varies: 0.03-0.13 on QAOA and 0.02-0.13 on VQE, straddling the 0.10 tolerance (40 extra locks per demo, both backends). The saboteur's ESP ratio on FakeTorino is 0.78 (Grover), 0.61-0.71 (QAOA) and 0.54-0.67 (VQE).
+All 90 matrices (3 demos × 2 backends × 15 locks) rejected every attack and accepted every honest compile. The masked Trojan lands at the compiled circuit's midpoint, which moves with the random lock, so its ideal-simulator TVD varies: 0.03-0.13 on QAOA and 0.02-0.13 on VQE, straddling the 0.10 tolerance (40 extra locks per demo, both backends). The saboteur's ESP ratio on FakeTorino is 0.78 (Grover), 0.61-0.71 (QAOA) and 0.54-0.67 (VQE; 0.68 on the current web snapshot's lock).
 
 A detection matrix (one lock, five compiles, no scoring) takes 0.6-3 s after imports (2 of 90 took 5 s and 11 s); a full `pipeline.run` with scorecard and noisy-sim evidence takes 3-11 s. A QCEC check took 0.02-0.34 s in 473 of 474 calls; one took 4.1 s.
 
@@ -192,7 +192,7 @@ What remains after the fixes is listed under limitations: lone-CX skeletons, the
   |---|---|---|
   | Grover-3 | 39 → 45 | 174 → 367-390 |
   | QAOA-4 | 16 → 18-21 | 85 → 140-168 |
-  | VQE-4 | 6 → 18-24 | 30 → 133-172 |
+  | VQE-4 | 6 → 18-24 | 30 → 133-185 |
 
   The fidelity audit compares against a locked baseline, so it does not see this cost; it is the price of confidentiality.
 - **Padding grows as O(n²).** Every one of the n(n-1)/2 qubit pairs gets as many CX as the busiest pair: 3 pairs at 3 qubits, 6 at 4, 190 at 20, 8,001 at 127. Our demos are dense or tiny, so it is cheap here (0-3 decoy pairs). A sparse 20-qubit circuit whose busiest pair carries 2 CX gets at least 380 CX after locking, and on heavy-hex hardware the far-apart pairs then need SWAPs. If a pair's gap to the busiest pair is odd, `lock()` refuses the circuit rather than leave a visible gap (none of our demos hits this).
