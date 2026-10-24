@@ -13,7 +13,7 @@ python server.py                  # the live instrument UI: http://localhost:860
 
 **Stack:** Qiskit 2.5 · Qiskit Aer · MQT QCEC 3.10 · IBM fake backends with real calibration data · hand-built HTML/CSS/JS UI.
 
-**Try it in your browser: https://abijith-kumar-sinha.github.io/TrustPass/** (a snapshot of real pipeline runs, nothing to install; run `python server.py` locally for live runs).
+**Try it in your browser: https://devkeerthi-code.github.io/TrustPass/** (a snapshot of real pipeline runs, nothing to install; run `python server.py` locally for live runs).
 
 ![The TrustPass TP-1 front panel: the locked circuit on the graticule, the SOURCE knob set to Saboteur, the detection matrix, three channel readouts and a red REJECT lamp](docs/panel.png)
 

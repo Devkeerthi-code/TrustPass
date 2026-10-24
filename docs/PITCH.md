@@ -16,7 +16,7 @@ Slide-by-slide text for the organisers' Canva template: 10 slides, the limit. Th
 - Caught **4 of 4** attacks in all 90 test matrices; the usual histogram check caught 1 or 2.
 - Q-HACK INDIA 2026 · Quantum Security & Cryptography track
 - Team [name]: [Name], [Name], [Name] · [College]
-- github.com/Abijith-Kumar-Sinha/TrustPass · Live demo: abijith-kumar-sinha.github.io/TrustPass
+- github.com/Devkeerthi-code/TrustPass · Live demo: devkeerthi-code.github.io/TrustPass
 
 *Speaker note:* Compiling a quantum circuit often means running someone else's code on it. TrustPass lets you do that without trusting them. [One line per person on what they built.]
 
