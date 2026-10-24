@@ -1,0 +1,8 @@
+config,timeout_s,seconds,verdict
+"pipeline, 300 s",300,301.3,probably_equivalent
+zx on,120,121.7,probably_equivalent
+zx only,120,1.4,probably_not_equivalent
+construction only,120,124.5,no_information
+"alternating, gate_cost (qiskit O3 profile)",120,150.1,killed_at_deadline
+"alternating, lookahead",120,123.7,no_information
+"alternating, one_to_one",120,150.1,killed_at_deadline

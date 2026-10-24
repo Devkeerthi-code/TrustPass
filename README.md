@@ -142,6 +142,20 @@ A detection matrix (one lock, five compiles, no scoring) takes 0.6-3 s after imp
 
 Lock, compile and the ESP audit stay under half a second at 20 qubits. QCEC is where it stops scaling: its time grows about 5-7× per 2 qubits from 6 to 10, and at 14 and 20 qubits the pipeline's 30 s timeout fires, so an honest compile there is a false REJECT (the check fails closed; it never turns into an ACCEPT). Given 110 s, QCEC still found no proof: `probably_equivalent` at 14 qubits (simulation found no difference) and `no_information` at 20. No step hit the benchmark's 120 s limit. Padding gives exactly n(n-1) visible CX here (every pair carries the 2 CX of one `rzz`), and the compiled two-qubit count grows faster because far-apart pairs need SWAPs on heavy-hex.
 
+Other QCEC configurations do not fix this yet. `bench/qcec_configs.py` ran the 14-qubit case once per configuration, sequentially, each in a worker killed 30 s after its timeout (QCEC 3.11.0, the version installed here; results in `bench/qcec_configs.csv`):
+
+| Configuration | Timeout | Time | Verdict |
+|---|---|---|---|
+| Pipeline settings (ZX off) | 300 s | 301 s | `probably_equivalent` |
+| ZX checker on | 120 s | 122 s | `probably_equivalent` |
+| ZX checker only | 120 s | 1.4 s | `probably_not_equivalent` (wrong: the compile is honest) |
+| Construction checker only | 120 s | 125 s | `no_information` |
+| Alternating, `gate_cost` scheme with QCEC's Qiskit O3 profile | 120 s | 150 s | killed at the deadline |
+| Alternating, `lookahead` scheme | 120 s | 124 s | `no_information` |
+| Alternating, `one_to_one` scheme | 120 s | 150 s | killed at the deadline |
+
+None gave a proof, so `verify.py` is unchanged. We did not try QCEC's hybrid Schrödinger-Feynman checker, which only checks approximate equivalence.
+
 ## Scorecard per demo
 
 FakeBrisbane, transpiler seed 7, no extra decoys. Each column is 16 runs (8 honest, 8 saboteur), each with a fresh lock: 8 from our first measurement and 8 re-run on 2026-10-07 with the current code. Numbers are min-max over all 16 plus the web demo's snapshot (`web/snapshot.json`, one more lock per demo), except the two rows marked * (see the first note). Confidentiality numbers come from 30 random wrong keys; "random inputs" means 5 Haar-random input states.
