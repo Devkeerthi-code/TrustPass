@@ -1,0 +1,96 @@
+{
+  "job": "B",
+  "device": "ibm_kingston",
+  "job_id": "dbefmkom94ac738rnks0",
+  "submitted_utc": "2026-10-24T18:39:16+00:00",
+  "calibration_utc": "2026-10-24T17:49:33+00:00",
+  "shots": 2000,
+  "transpiler_seed": 7,
+  "naive_tol": 0.1,
+  "circuits": [
+    {
+      "circuit": "Grover search (marked item)",
+      "secret": "101",
+      "mode": "honest",
+      "qcec": "equivalent_up_to_global_phase",
+      "audit": "ok",
+      "verdict": "ACCEPT",
+      "esp": 0.9027,
+      "esp_ratio": 1.0,
+      "qubits": [
+        80,
+        81,
+        82
+      ],
+      "predicted_one_minus_tvd": 0.8957,
+      "ideal": {
+        "000": 0.007812,
+        "001": 0.007812,
+        "010": 0.007812,
+        "011": 0.007812,
+        "100": 0.007812,
+        "101": 0.945312,
+        "110": 0.007812,
+        "111": 0.007812
+      },
+      "counts": {
+        "101": 1592,
+        "110": 45,
+        "111": 56,
+        "100": 75,
+        "001": 95,
+        "010": 40,
+        "000": 42,
+        "011": 55
+      },
+      "measured_one_minus_tvd": 0.8507,
+      "naive_hw_tvd": 0.1493,
+      "naive_hw_passed": false,
+      "p_secret": 0.796,
+      "measured_ratio": 1.0
+    },
+    {
+      "circuit": "Grover search (marked item)",
+      "secret": "101",
+      "mode": "saboteur",
+      "qcec": "equivalent_up_to_global_phase",
+      "audit": "low_fidelity",
+      "verdict": "REJECT",
+      "esp": 0.8071,
+      "esp_ratio": 0.894,
+      "qubits": [
+        69,
+        70,
+        78
+      ],
+      "predicted_one_minus_tvd": 0.8202,
+      "ideal": {
+        "000": 0.007812,
+        "001": 0.007812,
+        "010": 0.007812,
+        "011": 0.007812,
+        "100": 0.007812,
+        "101": 0.945312,
+        "110": 0.007812,
+        "111": 0.007812
+      },
+      "counts": {
+        "101": 1339,
+        "010": 72,
+        "111": 120,
+        "001": 123,
+        "011": 74,
+        "100": 114,
+        "000": 96,
+        "110": 62
+      },
+      "measured_one_minus_tvd": 0.7242,
+      "naive_hw_tvd": 0.2758,
+      "naive_hw_passed": false,
+      "p_secret": 0.6695,
+      "measured_ratio": 0.851
+    }
+  ],
+  "finished_utc": "2026-10-24T18:40:13+00:00",
+  "qpu_seconds": 3
+}

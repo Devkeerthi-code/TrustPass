@@ -1,0 +1,64 @@
+{
+  "job": "B",
+  "device": "ibm_marrakesh",
+  "job_id": "dbefmkvgdj9s73flmk80",
+  "submitted_utc": "2026-10-24T18:39:16+00:00",
+  "calibration_utc": "2026-10-24T14:11:05+00:00",
+  "shots": 2000,
+  "transpiler_seed": 7,
+  "naive_tol": 0.1,
+  "circuits": [
+    {
+      "circuit": "Grover search (marked item)",
+      "secret": "101",
+      "mode": "honest",
+      "qcec": "equivalent_up_to_global_phase",
+      "audit": "ok",
+      "verdict": "ACCEPT",
+      "esp": 0.8698,
+      "esp_ratio": 1.0,
+      "qubits": [
+        10,
+        11,
+        12
+      ],
+      "predicted_one_minus_tvd": 0.8682,
+      "ideal": {
+        "000": 0.007812,
+        "001": 0.007812,
+        "010": 0.007812,
+        "011": 0.007812,
+        "100": 0.007812,
+        "101": 0.945312,
+        "110": 0.007812,
+        "111": 0.007812
+      }
+    },
+    {
+      "circuit": "Grover search (marked item)",
+      "secret": "101",
+      "mode": "saboteur",
+      "qcec": "equivalent_up_to_global_phase",
+      "audit": "low_fidelity",
+      "verdict": "REJECT",
+      "esp": 0.6352,
+      "esp_ratio": 0.73,
+      "qubits": [
+        96,
+        102,
+        103
+      ],
+      "predicted_one_minus_tvd": 0.6677,
+      "ideal": {
+        "000": 0.007812,
+        "001": 0.007812,
+        "010": 0.007812,
+        "011": 0.007812,
+        "100": 0.007812,
+        "101": 0.945312,
+        "110": 0.007812,
+        "111": 0.007812
+      }
+    }
+  ]
+}
