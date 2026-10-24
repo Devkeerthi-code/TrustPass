@@ -4,6 +4,8 @@
 
 **Zero-trust compilation for quantum circuits: lock the circuit before an untrusted compiler sees it, then check that what comes back is the same circuit and does not run measurably worse than a free local compile.**
 
+![The TrustPass TP-1 front panel (static snapshot, Grover-3 on FakeBrisbane): SOURCE turns from Honest to Saboteur, and the lamp goes from green ACCEPT to red REJECT while the naive and equivalence channels still say PASS](docs/source-honest-to-saboteur.gif)
+
 Q-HACK INDIA 2026 (IBM Qiskit Fall Fest), Quantum Security & Cryptography track. Round 1 prototype.
 
 ```bash
@@ -16,8 +18,6 @@ python server.py                  # the live instrument UI: http://localhost:860
 **Stack:** Qiskit 2.5 · Qiskit Aer · MQT QCEC 3.10 · IBM fake backends with real calibration data · hand-built HTML/CSS/JS UI.
 
 **Try it in your browser: https://devkeerthi-code.github.io/TrustPass/** (a snapshot of real pipeline runs, nothing to install; run `python server.py` locally for live runs).
-
-![The TrustPass TP-1 front panel: the locked circuit on the graticule, the SOURCE knob set to Saboteur, the detection matrix, three channel readouts and a red REJECT lamp](docs/panel.png)
 
 The interface is a bench instrument: put a circuit on the panel, turn **SOURCE** to pick the untrusted compiler, and read three channels. Every number on it comes from a real run of the pipeline below. Run it locally with `python server.py` (live runs), or open the static snapshot (`index.html` + `web/snapshot.json`, precomputed by the same pipeline) on any static host.
 
