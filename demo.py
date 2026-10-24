@@ -5,7 +5,10 @@
   python demo.py --ibm        honest vs sabotaged compile on real IBM hardware (saved account needed)
 """
 import argparse
+import json
 import sys
+from datetime import datetime, timezone
+from pathlib import Path
 
 from qiskit.circuit import ParameterExpression
 from qiskit_ibm_runtime import QiskitRuntimeService, SamplerV2, fake_provider
@@ -15,7 +18,7 @@ from compilers import COMPILERS
 from lock import lock, unlock
 from pipeline import detection_matrix, run
 from score import secret_blind, view
-from verify import counts, esp, tvd
+from verify import audit_fidelity, check_function, counts, tvd
 
 SHOTS = 4000
 NO_ACCOUNT = """To run on real IBM hardware, save your own IBM Quantum account once on this machine:
@@ -74,7 +77,7 @@ def story(name, circuit, backend, args):
     print(f"   depth                         {o['depth_plain']} -> {o['depth_locked']}")
 
 
-def ibm(circuit, args):
+def ibm(name, circuit, args):
     try:
         service = QiskitRuntimeService()
     except Exception as e:  # no saved account, or it no longer works
@@ -85,15 +88,37 @@ def ibm(circuit, args):
     locked = lock(circuit, decoys=args.decoys)  # OS entropy: never lock with a guessable seed
     finals = {m: unlock(COMPILERS[m](locked.circuit, backend, seed=args.seed), locked.key)
               for m in ("honest", "saboteur")}
+    # Full verification before anything runs; the honest compile of the same lock is the baseline.
+    checks = {}
+    for mode, final in finals.items():
+        functional = check_function(circuit, final)
+        fidelity = audit_fidelity(final, backend, finals["honest"])
+        checks[mode] = {"qcec": functional["verdict"], "audit": fidelity["verdict"],
+                        "esp": fidelity["esp"], "esp_ratio": fidelity["ratio"],
+                        "verdict": "ACCEPT" if functional["passed"] and fidelity["passed"] else "REJECT"}
+    print(f"About to submit {len(finals)} circuits x {SHOTS} shots")
+    if len(finals) > 2:
+        sys.exit("More than 2 circuits: not submitting.")
+    submitted = datetime.now(timezone.utc).isoformat(timespec="seconds")
     job = SamplerV2(mode=backend).run(list(finals.values()), shots=SHOTS)
-    print(f"Job {job.job_id()} submitted ({SHOTS} shots each), waiting for results...")
+    print(f"Job {job.job_id()} submitted {submitted}, waiting for results...")
     ideal, secret = counts(circuit, shots=SHOTS), circuit.metadata.get("secret")
     for (mode, final), res in zip(finals.items(), job.result()):
-        got = res.join_data().get_counts()
-        line = f"   {mode:<9} ESP {esp(final, backend.target):.3f}   1-TVD vs ideal {1 - tvd(ideal, got):.3f}"
+        got, c = res.join_data().get_counts(), checks[mode]
+        c.update(counts=got, one_minus_tvd=round(1 - tvd(ideal, got), 4))
+        line = (f"   {mode:<9} {c['verdict']}  QCEC {c['qcec']}  ESP {c['esp']:.3f} (ratio {c['esp_ratio']:.2f})"
+                f"   1-TVD vs ideal {c['one_minus_tvd']:.3f}")
         if isinstance(secret, str):
-            line += f"   P(secret {secret}) {got.get(secret, 0) / SHOTS:.3f}"
+            c["p_secret"] = round(got.get(secret, 0) / SHOTS, 4)
+            line += f"   P({secret}) {c['p_secret']:.3f}"
         print(line)
+    finished = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    out = Path(__file__).parent / "bench" / f"ibm_{backend.name}_{submitted[:10]}.json"
+    out.write_text(json.dumps({"device": backend.name, "job_id": job.job_id(), "submitted_utc": submitted,
+                               "finished_utc": finished, "circuit": name, "secret": secret, "shots": SHOTS,
+                               "decoys": args.decoys, "transpiler_seed": args.seed, "ideal_counts": ideal,
+                               "runs": checks}, indent=2), encoding="utf-8")
+    print(f"Saved {out.relative_to(Path(__file__).parent)}")
 
 
 def main(argv=None):
@@ -112,7 +137,7 @@ def main(argv=None):
     circuit = DEMOS[name]()
     if args.ibm:
         print(f"TrustPass | {name} | real IBM hardware | extra decoys={args.decoys} transpiler seed={args.seed}")
-        return ibm(circuit, args)
+        return ibm(name, circuit, args)
     if not args.backend.startswith("Fake") or not hasattr(fake_provider, args.backend):
         p.error(f"unknown --backend {args.backend!r}; use a class from qiskit_ibm_runtime.fake_provider")
     backend = getattr(fake_provider, args.backend)()
