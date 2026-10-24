@@ -49,8 +49,8 @@ Then it sees the unlocked circuit: TrustPass still checks integrity and fidelity
 **13. What about oracle-guided attacks (Zhang & Liu)?**
 Out of our threat model, because the compiler never sees results, but we measured it: for a 2-qubit, 1-edge QAOA, a least-squares fit of all 18 key angles to the outputs of 6 random product-state inputs reproduced held-out inputs exactly and recovered (γ, β) = (0.79, 0.39) for the true (0.80, 0.40) [README, Honest limitations; Research gaps, row 3]. A defence and an attack suite on larger circuits are Round 2.
 
-**14. You have no real hardware results. Why should we trust the numbers?**
-We don't claim hardware results: everything runs on IBM fake backends with real calibration data, and the attacks are our own stand-ins modelled on the literature [README, Honest limitations]. `demo.py --ibm` is written to submit an honest and a sabotaged compile with your own IBM Quantum account, and comparing the ESP audit's prediction with measured fidelity is on the Round 2 roadmap [README, Quickstart; Round 2 roadmap].
+**14. You have only one real hardware result. Why should we trust the numbers?**
+Everything else runs on IBM fake backends with real calibration data, and the attacks are our own stand-ins modelled on the literature [README, Honest limitations]. The one hardware run is Grover-3 on ibm_fez on 2026-10-24 (job dbe5hp7pc3tc739l5al0, 4,000 shots each): the audit accepted the honest compile and rejected the saboteur (ESP ratio 0.83), and on the device the saboteur measured 1-TVD 0.744 and P(101) 0.688 against the honest compile's 0.828 and 0.772 [README, Real hardware run]. That is one run of one circuit on one device with no repeats: the check pointed the right way once, which says nothing yet about how reliable it is.
 
 ## Originality
 
