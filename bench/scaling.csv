@@ -1,0 +1,7 @@
+qubits,edges,lock_s,visible_cx,decoy_pairs,compile_s,compiled_2q,qcec_s,qcec_verdict,audit_s,audit_verdict,qcec_110_s,qcec_110_verdict,status
+4,6,0.127,12,0,0.256,18,0.056,equivalent_up_to_global_phase,0.005,ok,0.026,equivalent_up_to_global_phase,ok
+6,9,0.125,30,6,0.282,57,0.255,equivalent_up_to_global_phase,0.014,ok,0.229,equivalent_up_to_global_phase,ok
+8,12,0.15,56,16,0.262,125,1.412,equivalent_up_to_global_phase,0.025,ok,1.406,equivalent_up_to_global_phase,ok
+10,15,0.241,90,30,0.251,234,10.349,equivalent_up_to_global_phase,0.035,ok,10.624,equivalent_up_to_global_phase,ok
+14,21,0.238,182,70,0.328,578,30.225,no_information,0.092,ok,110.136,probably_equivalent,ok
+20,30,0.374,380,160,0.394,1508,30.489,no_information,0.21,ok,110.438,no_information,ok

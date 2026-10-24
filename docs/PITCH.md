@@ -156,7 +156,7 @@ Slide-by-slide text for the organisers' Canva template: 10 slides, the limit. Th
 | Limit today | Round 2 |
 |---|---|
 | Simulated devices; ESP trusts calibration data | Real IBM hardware runs |
-| 3-4 qubit demos; padding grows as n² | Cheaper padding, QCEC on larger circuits |
+| 3-4 qubit demos; padding grows as n²; QCEC proves QAOA up to 10 qubits, times out at 14 | Cheaper padding, QCEC past 10 qubits |
 | Wraps our own stand-in compilers | Package as a Qiskit transpiler plugin |
 | Scheduled compiles are falsely rejected | Delay-aware verification |
 

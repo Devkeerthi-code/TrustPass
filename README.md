@@ -47,7 +47,7 @@ What most users do today is run the circuit on |0...0⟩ and eyeball the histogr
 | 3 | Zhang & Liu, "Security Evaluation of Quantum Circuit Split Compilation under an Oracle-Guided Attack" ([arXiv:2511.04842](https://arxiv.org/abs/2511.04842), Nov 2025) | A few input/output pairs recover split-compiled circuits; new schemes need security evaluation. | Measured, not defended: in our red team, the outputs of 6 inputs fit the whole key of a 2-qubit QAOA (see limitations). Out of our threat model, since the compiler never sees results; a defence is Round 2. |
 | 4 | Rahman, Haghparast, Mikkonen, "On the Figures of Merit for Quantum Software Security: Toward a Benchmarking Rubric" ([arXiv:2608.05831](https://arxiv.org/abs/2608.05831), Aug 2026) | TVD/DFC metrics are ad hoc and incompatible across papers. | One fixed scorecard for every run: confidentiality, integrity, quality, cost. |
 | 5 | John, Golla, Wang, "Quantum Trojan Insertion: Controlled Activation for Covert Circuit Manipulation" ([arXiv:2502.08880](https://arxiv.org/abs/2502.08880), 2025) | Trojans can stay dormant until a specific input triggers them. | A dormant Trojan is one of our attack modes; it passes the \|0⟩ test and is caught by the equivalence check. |
-| 6 | Zheng, Shang, Tan, "A Dual-Mode Quantum Circuit Trojan Attack Detection Scheme Based on Unitary Matrix Features", CQCC 2025, Springer CCIS 2026 ([doi:10.1007/978-981-95-4791-3_6](https://doi.org/10.1007/978-981-95-4791-3_6)) | A CNN classifies circuits as Trojaned or clean from their unitary-matrix features: 91.6% accuracy on 1,550 benchmark circuits, so some circuits are misclassified. | Formal equivalence checking with [MQT QCEC](https://github.com/cda-tum/mqt-qcec) (Burgholzer & Wille): a proof for the circuit at hand, not a classifier with an error rate. Scaling beyond our small demos is not yet measured. |
+| 6 | Zheng, Shang, Tan, "A Dual-Mode Quantum Circuit Trojan Attack Detection Scheme Based on Unitary Matrix Features", CQCC 2025, Springer CCIS 2026 ([doi:10.1007/978-981-95-4791-3_6](https://doi.org/10.1007/978-981-95-4791-3_6)) | A CNN classifies circuits as Trojaned or clean from their unitary-matrix features: 91.6% accuracy on 1,550 benchmark circuits, so some circuits are misclassified. | Formal equivalence checking with [MQT QCEC](https://github.com/cda-tum/mqt-qcec) (Burgholzer & Wille): a proof for the circuit at hand, not a classifier with an error rate. In our scaling benchmark the proof finishes up to 10 qubits (QAOA) and times out at 14 (see Scaling). |
 | 7 | MacNeil, Sunkavilli, Yu, "Authenticating Quantum Circuits Through Localized Noise Fingerprints", QSec '25 (ACM CCS workshop) ([doi:10.1145/3733825.3765283](https://doi.org/10.1145/3733825.3765283)) | Proposes, as a forward-looking concept, comparing a circuit's output distribution (TVD) on an untrusted quantum computer with a trusted noise fingerprint, using diagnostic ancilla qubits, to detect structural tampering such as gate reordering or injection. | Checks the returned circuit before it runs, with no extra qubits: QCEC for structural tampering, and an ESP audit for equivalence-preserving sabotage, in the same pipeline as locking. |
 | 8 | Broadbent, Fitzsimons, Kashefi, "Universal Blind Quantum Computation", FOCS 2009 ([arXiv:0807.4154](https://arxiv.org/abs/0807.4154)) | Hides inputs, outputs and the computation from the server, but the client must prepare single qubits and run an interactive measurement-based protocol. | Works on today's circuit-model toolchains with no quantum client, and hides less: the CX skeleton stays visible (see limitations). |
 | 9 | Saki, Suresh, Topaloglu, Ghosh, "Split Compilation for Security of Quantum Circuits", ICCAD 2021 ([doi:10.1109/ICCAD51958.2021.9643478](https://doi.org/10.1109/ICCAD51958.2021.9643478)) | Splits the circuit and sends the parts to several compilers, or to one compiler at different times, so no single compile sees all of it. | One compiler sees the whole locked circuit; the key keeps the angles secret, and the returned circuit is verified. Gap 3 is an attack on split compilation. |
@@ -124,6 +124,23 @@ A detection matrix (one lock, five compiles, no scoring) takes 0.6-3 s after imp
 
 - **ESP ratio threshold.** Honest compiles score 0.912-1.055 (450 compiles), saboteurs 0.540-0.779 (150). Every threshold from 0.78 to 0.91 gives 0 false rejects and 0 missed saboteurs, so 0.90 works, but it sits near the top of that window: the lowest honest compile (VQE-4, FakeBrisbane, level 2) is only 0.012 above it, and at 0.95 71 of 450 honest compiles would be false rejects.
 - **Naive TVD tolerance.** No tolerance separates honest compiles from the masked Trojan. At 0.10 there are 0 false rejects, and 127 of 150 masked Trojans pass. The best tolerance in the sweep, 0.025, still lets 54 of 150 through and falsely rejects 5 of 450 honest compiles, on an ideal simulator; on a noisy device honest compiles already land 0.05-0.29 from the ideal histogram (see limitations).
+
+### Scaling
+
+`bench/scaling.py`: one-layer QAOA MaxCut on a random 3-regular graph (fixed graph per size, fresh lock), compiled honestly for FakeBrisbane (optimization level 3, transpiler seed 7), one run per size; times vary between runs. Raw numbers in `bench/scaling.csv`.
+
+| Qubits | Visible CX after padding (decoy pairs) | Compiled 2q gates | Lock | Compile | QCEC check | ESP audit |
+|---|---|---|---|---|---|---|
+| 4 | 12 (0) | 18 | 0.13 s | 0.26 s | 0.06 s | 0.005 s |
+| 6 | 30 (6) | 57 | 0.13 s | 0.28 s | 0.26 s | 0.014 s |
+| 8 | 56 (16) | 125 | 0.15 s | 0.26 s | 1.4 s | 0.025 s |
+| 10 | 90 (30) | 234 | 0.24 s | 0.25 s | 10.3 s | 0.035 s |
+| 14 | 182 (70) | 578 | 0.24 s | 0.33 s | 30 s timeout, no proof | 0.092 s |
+| 20 | 380 (160) | 1,508 | 0.37 s | 0.39 s | 30 s timeout, no proof | 0.21 s |
+
+![Time per pipeline step (log scale) and gate counts for QAOA at 4-20 qubits](bench/scaling.png)
+
+Lock, compile and the ESP audit stay under half a second at 20 qubits. QCEC is where it stops scaling: its time grows about 5-7× per 2 qubits from 6 to 10, and at 14 and 20 qubits the pipeline's 30 s timeout fires, so an honest compile there is a false REJECT (the check fails closed; it never turns into an ACCEPT). Given 110 s, QCEC still found no proof: `probably_equivalent` at 14 qubits (simulation found no difference) and `no_information` at 20. No step hit the benchmark's 120 s limit. Padding gives exactly n(n-1) visible CX here (every pair carries the 2 CX of one `rzz`), and the compiled two-qubit count grows faster because far-apart pairs need SWAPs on heavy-hex.
 
 ## Scorecard per demo
 
@@ -211,7 +228,7 @@ What remains after the fixes is listed under limitations: lone-CX skeletons, the
 - **The key is a list of continuous angles, not bits.** There is no key-length security argument; leakage is measured empirically against random guessing, not proven.
 - **The naive test is an ideal-simulator best case.** TVD < 0.10 stands in for "the histogram looks right", and we run it noiselessly, the most favourable case for it. An honest compile on the FakeBrisbane noise model already lands 0.05-0.29 TVD from the ideal histogram (1 - noisy-sim fidelity above), so a user reading real hardware output could not demand tighter, and the occasional naive catch of the masked Trojan on QAOA and VQE would vanish in that noise.
 - **The fidelity audit trusts calibration data.** ESP ignores crosstalk, coherent errors and idle time, the 0.90 threshold is a heuristic, and the audit needs a local compile as a baseline. It checks that the returned circuit is not measurably worse than that baseline; it does not prove the compile is good. A better third-party compiler simply scores above 1.0.
-- **Small, simulated, self-built.** Demos use 3-4 active qubits on fake backends; we have not measured QCEC on large circuits or run on real hardware. The attacks are our own stand-ins modelled on the literature, not captured from real malicious compilers.
+- **Small, simulated, self-built.** Demos use 3-4 active qubits on fake backends, and we have not run on real hardware. In the scaling benchmark (QAOA on random 3-regular graphs) QCEC proves equivalence up to 10 qubits and times out at 14 and 20, so beyond about 10 qubits an honest compile is a false REJECT. The attacks are our own stand-ins modelled on the literature, not captured from real malicious compilers.
 
 ## Round 2 roadmap
 
@@ -221,7 +238,7 @@ What remains after the fixes is listed under limitations: lone-CX skeletons, the
 - **Verify scheduled circuits**: accept scheduling and dynamical decoupling instead of rejecting them, with idle time counted in the fidelity audit.
 - **Qiskit transpiler-plugin packaging**: wrap lock, unlock and verify around any third-party transpiler plugin or Qiskit Function call.
 - **Real IBM hardware runs**: compare the ESP audit's prediction with measured fidelity for honest vs sabotaged compiles.
-- **Cost at scale**: measure QCEC and ESP-audit cost on 10-30 qubit compiled circuits (padding grows O(n²)).
+- **QCEC past 10 qubits**: our scaling benchmark times out at 14 qubits; try other QCEC configurations (the ZX checker is off for stability, finding 7) and longer timeouts.
 - **QSSP-aligned scoring**: map the scorecard onto the Quantum Software Security Posture (QSSP) score proposed by Rahman et al. (gap 4).
 
 ## Quickstart
@@ -271,7 +288,7 @@ print(report["trust"])  # e.g. {'confidentiality': 100, 'integrity': 100, 'quali
 | `.impeccable/`, `DESIGN.md`, `PRODUCT.md` | The UI design record: product brief and decisions (`PRODUCT.md`), design tokens and rules (`DESIGN.md`), and the Impeccable workflow's comps, reviews and captures (`.impeccable/`) |
 | `demo.py` | The terminal demo |
 | `test_trustpass.py` | 9 checks, including regressions for the red-team findings |
-| `bench/` | Measurements behind the README: threshold sweep, README capture (`pip install -r bench/requirements.txt`) |
+| `bench/` | Measurements behind the README: threshold sweep, scaling, README capture (`pip install -r bench/requirements.txt`) |
 
 ## How we built this (AI use)
 
