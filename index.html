@@ -118,6 +118,18 @@
       </div>
     </article>
 
+    <article class="unit hardware" id="hw" hidden>
+      <header class="unit-head"><h2>Measured on real IBM hardware</h2></header>
+      <div class="rating">
+        <table class="hw">
+          <thead><tr><th scope="col">Device</th><th scope="col">Circuit</th><th scope="col">Verdict<br><small>honest / saboteur</small></th>
+            <th scope="col">Fidelity<br><small>honest</small></th><th scope="col">Fidelity<br><small>saboteur</small></th></tr></thead>
+          <tbody id="hw-rows"></tbody>
+        </table>
+        <p class="hw-note">Fidelity is 1 − TVD between the device's measured histogram and the ideal output. Each verdict was decided before the job ran, from QCEC and the fidelity audit on the device's live calibration.</p>
+      </div>
+    </article>
+
     <article class="unit inspect">
       <header class="unit-head"><h2>Inspect the circuit</h2>
         <div class="softkeys" role="tablist" aria-label="Circuit view">
