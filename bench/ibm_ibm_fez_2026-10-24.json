@@ -1,0 +1,61 @@
+{
+  "device": "ibm_fez",
+  "job_id": "dbe5hp7pc3tc739l5al0",
+  "submitted_utc": "2026-10-24T07:06:11+00:00",
+  "finished_utc": "2026-10-24T07:06:21+00:00",
+  "circuit": "Grover search (marked item)",
+  "secret": "101",
+  "shots": 4000,
+  "decoys": 0,
+  "transpiler_seed": 7,
+  "ideal_counts": {
+    "101": 3777,
+    "110": 34,
+    "111": 44,
+    "000": 34,
+    "011": 31,
+    "001": 29,
+    "010": 25,
+    "100": 26
+  },
+  "runs": {
+    "honest": {
+      "qcec": "equivalent_up_to_global_phase",
+      "audit": "ok",
+      "esp": 0.8676,
+      "esp_ratio": 1.0,
+      "verdict": "ACCEPT",
+      "counts": {
+        "110": 103,
+        "101": 3088,
+        "011": 124,
+        "000": 116,
+        "111": 147,
+        "100": 155,
+        "010": 112,
+        "001": 155
+      },
+      "one_minus_tvd": 0.8277,
+      "p_secret": 0.772
+    },
+    "saboteur": {
+      "qcec": "equivalent_up_to_global_phase",
+      "audit": "low_fidelity",
+      "esp": 0.7209,
+      "esp_ratio": 0.831,
+      "verdict": "REJECT",
+      "counts": {
+        "010": 180,
+        "100": 294,
+        "101": 2753,
+        "001": 164,
+        "011": 181,
+        "111": 173,
+        "110": 146,
+        "000": 109
+      },
+      "one_minus_tvd": 0.744,
+      "p_secret": 0.6883
+    }
+  }
+}
