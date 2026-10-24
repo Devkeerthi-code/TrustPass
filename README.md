@@ -156,16 +156,35 @@ Other QCEC configurations do not fix this yet. `bench/qcec_configs.py` ran the 1
 
 None gave a proof, so `verify.py` is unchanged. We did not try QCEC's hybrid Schrödinger-Feynman checker, which only checks approximate equivalence.
 
-## Real hardware run
+## Real hardware runs
 
-One run of `python demo.py --ibm` on 2026-10-24: Grover-3 (marked item `101`), one fresh lock, compiled honestly and by the saboteur for the least busy device, **ibm_fez** (156 qubits), transpiler seed 7, 4,000 shots each, job `dbe5hp7pc3tc739l5al0`. Both compiles were verified with the device's own target before submission; 1-TVD is against the ideal simulated histogram. Raw counts are in [bench/ibm_ibm_fez_2026-10-24.json](bench/ibm_ibm_fez_2026-10-24.json).
+Every row was verified before it ran: QCEC plus the ESP audit against the device's live calibration, with the honest compile of the same fresh lock as the baseline (transpiler seed 7). Run 1 is the original `python demo.py --ibm` run (4,000 shots, 1-TVD against a 4,000-shot ideal sample, no noisy-sim prediction). Runs 2 and 3 are `python bench/ibm_runs.py B` and `A` on 2026-10-24 (2,000 shots per circuit, 1-TVD against the exact ideal distribution, prediction from `AerSimulator.from_backend` on the same device). Measured ratio = measured 1-TVD / the honest compile's measured 1-TVD for the same lock and device, the hardware counterpart of the ESP ratio. Naive test = TVD < 0.10 between the measured histogram and the ideal output. Jobs: `dbe5hp7pc3tc739l5al0` (run 1), `dbefmkom94ac738rnks0` (run 2), `dbefmkvsstms73fbvl4g` (run 3); 13 s of QPU time for runs 2-3. A Grover honest vs saboteur job on ibm_marrakesh (`dbefmkvgdj9s73flmk80`) was still queued when this was written. Raw counts are in `bench/ibm_*.json`, this table in `bench/hardware.csv` (`python bench/compare.py`).
 
-| | QCEC | ESP (ratio to honest) | Verdict | Measured 1-TVD | Measured P(101) |
-|---|---|---|---|---|---|
-| Honest | `equivalent_up_to_global_phase` | 0.868 (1.00) | ACCEPT | 0.828 | 0.772 |
-| Saboteur | `equivalent_up_to_global_phase` | 0.721 (0.83) | REJECT | 0.744 | 0.688 |
+| Run | Device | Circuit | Compiler | Verdict | ESP ratio | Predicted 1-TVD | Measured 1-TVD | Measured ratio | Naive test on hardware |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | ibm_fez | Grover | honest | ACCEPT | 1.000 | – | 0.828 | 1.000 | fail |
+| 1 | ibm_fez | Grover | saboteur | REJECT | 0.831 | – | 0.744 | 0.899 | fail |
+| 2 | ibm_kingston | Grover | honest | ACCEPT | 1.000 | 0.896 | 0.851 | 1.000 | fail |
+| 2 | ibm_kingston | Grover | saboteur | REJECT | 0.894 | 0.820 | 0.724 | 0.851 | fail |
+| 3 | ibm_fez | Grover | honest | ACCEPT | 1.000 | 0.865 | 0.834 | 1.000 | fail |
+| 3 | ibm_fez | Grover | trojan-overt | REJECT | 1.000 | 0.092 | 0.095 | 0.114 | fail |
+| 3 | ibm_fez | Grover | trojan-masked | REJECT | 1.000 | 0.852 | 0.812 | 0.973 | fail |
+| 3 | ibm_fez | Grover | trojan-dormant | REJECT | 0.998 | 0.864 | 0.827 | 0.991 | fail |
+| 3 | ibm_fez | Grover | saboteur | REJECT | 0.005 | 0.192 | 0.182 | 0.218 | fail |
+| 3 | ibm_fez | QAOA | honest | ACCEPT | 1.000 | 0.952 | 0.925 | 1.000 | pass |
+| 3 | ibm_fez | QAOA | trojan-overt | REJECT | 1.000 | 0.369 | 0.432 | 0.467 | fail |
+| 3 | ibm_fez | QAOA | trojan-masked | REJECT | 1.000 | 0.851 | 0.833 | 0.900 | fail |
+| 3 | ibm_fez | QAOA | trojan-dormant | REJECT | 0.997 | 0.952 | 0.902 | 0.975 | pass |
+| 3 | ibm_fez | QAOA | saboteur | REJECT | 0.193 | 0.717 | 0.697 | 0.753 | fail |
+| 3 | ibm_fez | VQE | honest | ACCEPT | 1.000 | 0.972 | 0.873 | 1.000 | fail |
+| 3 | ibm_fez | VQE | trojan-overt | REJECT | 1.000 | 0.634 | 0.639 | 0.732 | fail |
+| 3 | ibm_fez | VQE | trojan-masked | REJECT | 1.000 | 0.935 | 0.844 | 0.967 | fail |
+| 3 | ibm_fez | VQE | trojan-dormant | REJECT | 0.997 | 0.974 | 0.883 | 1.012 | fail |
+| 3 | ibm_fez | VQE | saboteur | REJECT | 0.108 | 0.673 | 0.664 | 0.761 | fail |
 
-The audit rejected the saboteur before it ran, and on the device the sabotaged compile did measurably worse, though by less than ESP predicted (measured 1-TVD ratio 0.90 against an ESP ratio of 0.83). This is one run of one circuit on one device, with no repeats, so it shows the check pointing the right way once, not how reliable it is.
+![Left: ESP ratio before running vs measured fidelity ratio. Right: noisy-simulator 1-TVD vs measured 1-TVD. One point per circuit, colored by compiler](bench/compare.png)
+
+The audit pointed the right way but not to scale: every saboteur it rejected measured worse on the device than its honest compile (measured ratio 0.22-0.90), yet ESP overstates large losses, partly because even a ruined circuit's histogram keeps some overlap with the ideal (ibm_fez saboteurs in run 3: ESP ratio 0.005-0.19, measured 0.22-0.76), while the noisy simulator on the same calibration came within -0.100 to +0.063 of the measured 1-TVD on all 17 circuits (median gap 0.037, below the prediction on 14). On hardware the histogram test could not tell attacks from noise: the dormant Trojan passed it on QAOA (1-TVD 0.902) and failed it on Grover and VQE, the masked Trojan failed it on all three circuits, but the honest compile also failed it in 4 of 5 runs (it passed only on QAOA), while QCEC returned `not_equivalent` for all nine Trojans before anything ran. Limits: this is one session on one day with one job per device and no repeats, 2,000 shots per circuit, and calibration drifts between runs: the same Grover saboteur on ibm_fez scored ESP ratio 0.83 in run 1 and 0.005 in run 3, eleven and a half hours later.
 
 ## Scorecard per demo
 
@@ -252,8 +271,8 @@ What remains after the fixes is listed under limitations: lone-CX skeletons, the
 - **The threat model assumes compiler ≠ executor, and that the compiler never sees results.** If one party both compiles and runs the circuit, it sees the unlocked circuit: TrustPass still checks integrity and fidelity, but no longer gives confidentiality. An attacker who sees input/output of the unlocked circuit is out of scope, and our own measurements show why: Grover's output *is* its secret (one shot of Grover-3 reveals the marked item with probability 0.945), and for a 2-qubit, 1-edge QAOA (18 key angles), fitting every key angle by least squares to the exact output distributions of 6 random product-state inputs reproduced held-out inputs exactly and read back (γ, β) = (0.79, 0.39) for the true (0.80, 0.40) on a 0.049 grid. With 1-4 inputs the fit did not generalise (held-out TVD 0.27-0.46).
 - **The key is a list of continuous angles, not bits.** There is no key-length security argument; leakage is measured empirically against random guessing, not proven.
 - **The naive test is an ideal-simulator best case.** TVD < 0.10 stands in for "the histogram looks right", and we run it noiselessly, the most favourable case for it. An honest compile on the FakeBrisbane noise model already lands 0.05-0.29 TVD from the ideal histogram (1 - noisy-sim fidelity above), so a user reading real hardware output could not demand tighter, and the occasional naive catch of the masked Trojan on QAOA and VQE would vanish in that noise.
-- **The fidelity audit trusts calibration data.** ESP ignores crosstalk, coherent errors and (unless the compile is scheduled) idle time, the 0.90 threshold is a heuristic, and the audit needs a local compile as a baseline. It checks that the returned circuit is not measurably worse than that baseline; it does not prove the compile is good. A better third-party compiler simply scores above 1.0.
-- **Small, simulated, self-built.** Demos use 3-4 active qubits on fake backends; our only real-hardware result is the single Grover run on ibm_fez above. In the scaling benchmark (QAOA on random 3-regular graphs) QCEC proves equivalence up to 10 qubits and times out at 14 and 20, so beyond about 10 qubits an honest compile is a false REJECT. The attacks are our own stand-ins modelled on the literature, not captured from real malicious compilers.
+- **The fidelity audit trusts calibration data.** ESP ignores crosstalk, coherent errors and (unless the compile is scheduled) idle time, the 0.90 threshold is a heuristic, and the audit needs a local compile as a baseline. It checks that the returned circuit is not measurably worse than that baseline; it does not prove the compile is good. A better third-party compiler simply scores above 1.0. It can miss a mild saboteur: `bench/live_targets.py` ran the detection matrix against the live calibration of ibm_fez, ibm_kingston and ibm_marrakesh (2026-10-24, no jobs, one fresh lock per circuit), and on ibm_kingston the saboteur's qubits were barely worse than the honest layout's (ESP ratio 0.921 on QAOA, 0.912 on VQE), so it was accepted; the other 43 of 45 verdicts were as expected.
+- **Small, simulated, self-built.** Demos use 3-4 active qubits on fake backends; our real-hardware results are the three runs on ibm_fez and ibm_kingston above, from one day. In the scaling benchmark (QAOA on random 3-regular graphs) QCEC proves equivalence up to 10 qubits and times out at 14 and 20, so beyond about 10 qubits an honest compile is a false REJECT. The attacks are our own stand-ins modelled on the literature, not captured from real malicious compilers.
 
 ## Round 2 roadmap
 
@@ -262,7 +281,7 @@ What remains after the fixes is listed under limitations: lone-CX skeletons, the
 - **Cheaper padding**: pad only pairs a plausible compiler output could use, and measure what that gives back to the attacker.
 - **Dynamical decoupling**: test DD-padded compiles against the idle model, and compare that model with measured fidelity.
 - **Qiskit transpiler-plugin packaging**: wrap lock, unlock and verify around any third-party transpiler plugin or Qiskit Function call.
-- **Real IBM hardware runs**: compare the ESP audit's prediction with measured fidelity for honest vs sabotaged compiles.
+- **Repeated hardware runs**: the same circuits on several days and devices, so calibration drift and shot noise can be separated from the audit's own error.
 - **QCEC past 10 qubits**: our scaling benchmark times out at 14 qubits; try other QCEC configurations (the ZX checker is off for stability, finding 7) and longer timeouts.
 - **QSSP-aligned scoring**: map the scorecard onto the Quantum Software Security Posture (QSSP) score proposed by Rahman et al. (gap 4).
 
@@ -286,7 +305,7 @@ python test_trustpass.py                                     # 10 checks, ~10 s 
 
 `--decoys` adds extra padding rounds on top of the uniform pair counts (default 0). `--seed` only fixes the transpiler (default 7); the lock always draws fresh OS randomness, so key angles, CX counts and depth can differ slightly between runs.
 
-`python demo.py --ibm` runs an honest vs sabotaged compile on real IBM hardware with an IBM Quantum account you have saved yourself; our one result is under [Real hardware run](#real-hardware-run).
+`python demo.py --ibm` runs an honest vs sabotaged compile on real IBM hardware with an IBM Quantum account you have saved yourself; our results are under [Real hardware runs](#real-hardware-runs). `python bench/ibm_runs.py` runs the larger hardware benchmark (it asks before every submit and stops under 4 minutes of QPU time).
 
 From Python:
 
@@ -313,7 +332,7 @@ print(report["trust"])  # e.g. {'confidentiality': 100, 'integrity': 100, 'quali
 | `.impeccable/`, `DESIGN.md`, `PRODUCT.md` | The UI design record: product brief and decisions (`PRODUCT.md`), design tokens and rules (`DESIGN.md`), and the Impeccable workflow's comps, reviews and captures (`.impeccable/`) |
 | `demo.py` | The terminal demo |
 | `test_trustpass.py` | 10 checks, including regressions for the red-team findings |
-| `bench/` | Measurements behind the README: threshold sweep, scaling, README capture (`pip install -r bench/requirements.txt`) |
+| `bench/` | Measurements behind the README: threshold sweep, scaling, live-calibration matrix, real hardware runs and their comparison, README capture (`pip install -r bench/requirements.txt`) |
 
 ## How we built this (AI use)
 

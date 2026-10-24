@@ -98,8 +98,9 @@ Slide-by-slide text for the organisers' Canva template: 10 slides, the limit. Th
 
 - **Saboteur:** truly equivalent, on qubits with 6.0% readout error (median 2.0%). ESP **0.389** vs honest 0.710; noisy-sim right answer 66% → 31%.
 - 90 matrices (3 circuits × 2 devices × 15 locks): all correct.
+- **Real ibm_fez, same 15 compiles:** all verdicts as above; saboteur measured 1-TVD 0.18-0.70 vs honest 0.83-0.93.
 
-*Speaker note:* The table is Grover on FakeBrisbane, a 127-qubit IBM device model. The left column is what people do today; it catches only the visible Trojan (on QAOA and VQE it sometimes also catches the masked one, because that Trojan's distance straddles the 0.10 tolerance). The proof catches every Trojan. The saboteur really is equivalent, so QCEC passes it, and only the audit catches it: its ESP ratio is 0.55, below the 0.90 threshold. On the noisy simulator the marked item 101 comes out 66% of the time from an honest compile and 31% from the saboteur's. The noisy simulation is evidence only; the verdict uses ESP. The 90 matrices cover Grover, QAOA and VQE on FakeBrisbane and FakeTorino, each with a fresh random lock.
+*Speaker note:* The table is Grover on FakeBrisbane, a 127-qubit IBM device model. The left column is what people do today; it catches only the visible Trojan (on QAOA and VQE it sometimes also catches the masked one, because that Trojan's distance straddles the 0.10 tolerance). The proof catches every Trojan. The saboteur really is equivalent, so QCEC passes it, and only the audit catches it: its ESP ratio is 0.55, below the 0.90 threshold. On the noisy simulator the marked item 101 comes out 66% of the time from an honest compile and 31% from the saboteur's. The noisy simulation is evidence only; the verdict uses ESP. The 90 matrices cover Grover, QAOA and VQE on FakeBrisbane and FakeTorino, each with a fresh random lock. The last bullet is one job on the real ibm_fez (2026-10-24, job dbefmkvsstms73fbvl4g, 2,000 shots per circuit): all five compilers for each of the three circuits, verified before they ran. On the device the 0.10 histogram test failed the honest compile on Grover and VQE too, so there it cannot tell an attack from noise.
 
 ---
 
@@ -152,18 +153,18 @@ Slide-by-slide text for the organisers' Canva template: 10 slides, the limit. Th
 
 ## Slide 10: Limits, roadmap and impact
 
-**Next: real IBM hardware, bigger circuits, a drop-in plugin**
+**Next: repeated hardware runs, bigger circuits, a drop-in plugin**
 
 | Limit today | Round 2 |
 |---|---|
-| One real run (Grover, ibm_fez): saboteur rejected, measured 1-TVD 0.744 vs honest 0.828; otherwise simulated; ESP trusts calibration data | More hardware runs: circuits, devices, repeats |
+| Three hardware runs on one day (ibm_fez, ibm_kingston): every rejected saboteur measured worse; ESP trusts calibration data and let a mild saboteur through twice on ibm_kingston's live calibration | Repeats across days and devices |
 | QCEC proves up to 10 qubits, times out at 14; padding grows as n² | QCEC past 10 qubits, cheaper padding |
 | Own stand-in compilers | Qiskit transpiler plugin |
 | Scheduled compiles: idle time only estimated from T1/T2 | Check the idle model on hardware |
 
 - **Impact:** pharma (VQE weights) and finance (QAOA angles) keep trained parameters secret; vendors get a checkable receipt.
 
-*Speaker note:* `demo.py --ibm` submits an honest and a sabotaged compile to the least busy real IBM device with your own IBM Quantum account. Our one run (Grover, ibm_fez, 2026-10-24, job dbe5hp7pc3tc739l5al0): the audit rejected the saboteur (ESP ratio 0.83) and on the device it measured 1-TVD 0.744 and P(101) 0.688 against the honest compile's 0.828 and 0.772. One run, one circuit, one device. Padding gives every qubit pair the busiest pair's CX count: 6 pairs at 4 qubits, 8,001 at 127. In our scaling benchmark lock, compile and audit stay under half a second at 20 qubits; QCEC is the limit, proving QAOA up to 10 qubits and timing out at 14. Honest ALAP-scheduled compiles now pass, with idle time estimated from T1/T2 only; weaker scheduled compiles (levels 1-2) are often rejected because idle now counts. The QAOA graph is hidden statistically, not exactly, and an attacker who sees input/output pairs of the unlocked circuit is out of scope; an oracle-guided attack suite is also on the Round 2 list. In India, the National Quantum Mission (₹6,003.65 crore, 2023-24 to 2030-31) aims at intermediate-scale quantum computers with 50-1,000 physical qubits; anyone who compiles circuits for them through a third party faces the same question. The receipt for vendors is an equivalence proof plus an ESP ratio of at least 0.90.
+*Speaker note:* `demo.py --ibm` and `bench/ibm_runs.py` submit verified compiles to real IBM devices with your own IBM Quantum account. On 2026-10-24 we ran 19 circuits in three jobs on ibm_fez and ibm_kingston (jobs dbe5hp7pc3tc739l5al0, dbefmkom94ac738rnks0, dbefmkvsstms73fbvl4g). Every saboteur the audit rejected measured worse on the device than its honest compile (measured fidelity ratio 0.22-0.90); ESP overstated the large losses, while the noisy simulator came within 0.10 of every measured 1-TVD. QCEC caught all nine Trojans before they ran. Against live calibration without running anything, ibm_kingston let the saboteur through on QAOA and VQE (ESP ratio 0.921 and 0.912). One day, no repeats. Padding gives every qubit pair the busiest pair's CX count: 6 pairs at 4 qubits, 8,001 at 127. In our scaling benchmark lock, compile and audit stay under half a second at 20 qubits; QCEC is the limit, proving QAOA up to 10 qubits and timing out at 14. Honest ALAP-scheduled compiles now pass, with idle time estimated from T1/T2 only; weaker scheduled compiles (levels 1-2) are often rejected because idle now counts. The QAOA graph is hidden statistically, not exactly, and an attacker who sees input/output pairs of the unlocked circuit is out of scope; an oracle-guided attack suite is also on the Round 2 list. In India, the National Quantum Mission (₹6,003.65 crore, 2023-24 to 2030-31) aims at intermediate-scale quantum computers with 50-1,000 physical qubits; anyone who compiles circuits for them through a third party faces the same question. The receipt for vendors is an equivalence proof plus an ESP ratio of at least 0.90.
 
 ---
 
