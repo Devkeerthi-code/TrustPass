@@ -325,5 +325,6 @@ print(report["trust"])  # e.g. {'confidentiality': 100, 'integrity': 100, 'quali
 ## Team
 
 | Name | Role |
-|------|------|
-| _TBD_ | _TBD_ |
+| Dev Keerthi P | Ideation & Backend |
+| Abijith Kumar Sinha | Full Stack |
+| Saniya Ali Kokkanti | Frontend & Presentation|
