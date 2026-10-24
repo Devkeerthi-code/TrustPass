@@ -176,18 +176,23 @@ class Handler(SimpleHTTPRequestHandler):
         url = urlparse(self.path)
         if not url.path.startswith("/api/"):
             return super().do_GET()
+        route = {"/api/meta": lambda: META,
+                 "/api/run": lambda: run_json(cid, mode, be, decoys, seed),
+                 "/api/matrix": lambda: matrix_json(cid, be, decoys, seed)}.get(url.path)
+        if route is None:
+            return self.send(404, {"error": f"unknown endpoint {url.path}"})
         q = {k: v[0] for k, v in parse_qs(url.query).items()}
         try:
             cid, mode, be = q.get("circuit", "grover"), q.get("mode", "honest"), q.get("backend", BACKENDS[0])
             decoys, seed = int(q.get("decoys", 0)), int(q.get("seed", 7))
             if cid not in CIRCUITS or mode not in COMPILERS or be not in BACKENDS or not 0 <= decoys <= 3:
                 raise ValueError("unknown circuit, mode, backend or decoys")
-            body = {"/api/meta": lambda: META,
-                    "/api/run": lambda: run_json(cid, mode, be, decoys, seed),
-                    "/api/matrix": lambda: matrix_json(cid, be, decoys, seed)}[url.path]()
-            self.send(200, body)
-        except (KeyError, ValueError) as e:
-            self.send(400, {"error": str(e)})
+        except ValueError as e:
+            return self.send(400, {"error": str(e)})
+        try:
+            self.send(200, route())
+        except Exception as e:  # never drop the connection: the UI shows the error instead
+            self.send(500, {"error": f"{type(e).__name__}: {e}"})
 
     def send(self, code, body):
         data = json.dumps(body).encode()
