@@ -60,6 +60,11 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   font: 700 calc(24 * var(--u)) / calc(40 * var(--u)) "Inria Sans", sans-serif; text-transform: uppercase; letter-spacing: 0.005em; color: #1b1f24; }
 .prov { position: absolute; right: calc(66 * var(--u)); top: calc(14 * var(--u)); margin: 0;
   font: 400 calc(20 * var(--u)) / 1.6 "Inria Sans", sans-serif; letter-spacing: 0.02em; color: #24282d; font-variant-numeric: lining-nums tabular-nums; }
+/* static host only: legend-size notes under the model line and the provenance */
+.hint, .snap { position: absolute; top: calc(47 * var(--u)); margin: 0;
+  font: 700 calc(14 * var(--u)) / 1.2 "Inria Sans", sans-serif; text-transform: uppercase; letter-spacing: 0.03em; color: #3a3e43; }
+.hint { left: calc(349 * var(--u)); }
+.snap { right: calc(66 * var(--u)); }
 
 /* pipeline: five backlit keys on one rail; .chase moves the light through them */
 .pipeline { left: calc(35 * var(--u)); top: calc(72 * var(--u)); width: calc(1465 * var(--u)); height: calc(64 * var(--u));
@@ -248,7 +253,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   .panel { aspect-ratio: auto; display: flex; flex-direction: column; gap: calc(22 * var(--u)); padding: calc(64 * var(--u)) calc(20 * var(--u)) calc(30 * var(--u)); }
   .panel .mod { position: relative; left: auto; top: auto; width: auto; height: auto; }
   .head { order: 0; height: auto; }
-  .wordmark, .model, .prov { position: static; }
+  .wordmark, .model, .prov, .hint, .snap { position: static; }
   .model { border-left: 0; padding-left: 0; height: auto; line-height: 1.3; font-size: calc(20 * var(--u)); }
   .prov { font-size: calc(17 * var(--u)); }
   .pipeline { order: 1; flex-wrap: wrap; justify-content: flex-start; gap: calc(8 * var(--u)); }

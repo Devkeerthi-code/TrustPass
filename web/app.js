@@ -39,6 +39,7 @@ function source() {
       } catch {}
     }
     state.snapshot = await (await fetch("web/snapshot.json")).json();
+    $("#hint").hidden = $("#snap").hidden = false;  // say so whenever the numbers are precomputed
     return state.snapshot;
   })());
 }
