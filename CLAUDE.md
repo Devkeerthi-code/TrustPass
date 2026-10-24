@@ -5,7 +5,7 @@ untrusted compiler sees it, unlock what comes back, then check it is the same ci
 equivalence) and does not run measurably worse than a free local compile (fidelity audit on IBM fake
 backends). Q-HACK INDIA 2026 entry, Quantum Security & Cryptography track.
 
-- Repo: Devkeerthi-code/TrustPass (remote name `copy`). Default branch `main`.
+- Repo: Devkeerthi-code/TrustPass (remote `origin`; the old upstream is `original`). Default branch `main`.
 - Site: `index.html` + `web/` (+ `assets/`), served by GitHub Pages from `main`. On Pages the UI reads
   `web/snapshot.json`; regenerate it with `python server.py --export` after any pipeline change.
 - Live UI: `python server.py` -> http://localhost:8600 (JSON API under `/api/`).
