@@ -243,6 +243,15 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .rating dt { font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; font-size: calc(16 * var(--u)); padding-top: calc(3 * var(--u)); }
 .rating dd { margin: 0; max-width: 75ch; }
 .rating a { color: var(--ink); text-underline-offset: 0.2em; overflow-wrap: anywhere; }
+.unit.hardware { grid-column: 1 / -1; }
+.hw { width: 100%; border-collapse: collapse; font-size: max(13px, calc(19 * var(--u))); font-variant-numeric: lining-nums tabular-nums; }
+.hw th { text-align: left; vertical-align: bottom; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; font-size: max(11px, calc(16 * var(--u)));
+  padding: 0 calc(16 * var(--u)) calc(10 * var(--u)) 0; border-bottom: calc(1.5 * var(--u)) solid var(--rule); }
+.hw th small { font-size: inherit; font-weight: 400; text-transform: none; letter-spacing: 0; }
+.hw td { padding: calc(10 * var(--u)) calc(16 * var(--u)) calc(10 * var(--u)) 0; border-bottom: calc(1 * var(--u)) solid #bdbbb6; }
+.hw .good { color: var(--pass); font-weight: 700; }
+.hw .bad { color: var(--fail); font-weight: 700; }
+.hw-note { margin: calc(14 * var(--u)) 0 0; max-width: 75ch; font-size: max(13px, calc(17 * var(--u))); line-height: 1.45; }
 
 /* ---------- phones: the modules restack, --u follows the screen ---------- */
 @media (max-width: 760px) {
