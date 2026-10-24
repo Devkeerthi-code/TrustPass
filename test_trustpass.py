@@ -1,5 +1,6 @@
 """TrustPass checks. Run: python test_trustpass.py (or pytest). ~10 s."""
-from qiskit.circuit import CircuitInstruction, Delay, ParameterExpression
+from qiskit import transpile
+from qiskit.circuit import CircuitInstruction, Delay, ParameterExpression, Reset
 from qiskit.circuit.library import CXGate, ECRGate, RZGate
 from qiskit.quantum_info import Operator
 from qiskit_ibm_runtime.fake_provider import FakeBrisbane, FakeTorino
@@ -75,7 +76,7 @@ def test_detection_matrix_cz():  # Heron, native 2q gate = cz
 
 def test_verifier_fails_closed():
     # Red-team regressions: a dropped (or swapped-in) measurement passed QCEC, and a single
-    # delay crashed the verifier. Honest must still pass, every time (QCEC used to race).
+    # delay or reset crashed the verifier. Honest must still pass, every time (QCEC used to race).
     be, qc = FakeBrisbane(), grover()
     locked = lock(qc)
     final = unlock(honest(locked.circuit, be), locked.key)
@@ -91,8 +92,14 @@ def test_verifier_fails_closed():
     delayed.data.insert(1, CircuitInstruction(Delay(100_000), [final.qubits[0]]))
     phased = final.copy()  # relative-phase Trojan: rz on an output qubit right before its measurement
     phased.data.insert(measures[0], CircuitInstruction(RZGate(0.35), final.data[measures[0]].qubits))
-    for bad in (dropped, swapped, delayed, phased):
+    reset = final.copy()
+    reset.data.insert(measures[0], CircuitInstruction(Reset(), final.data[measures[0]].qubits))
+    for bad in (dropped, swapped, phased, reset):
         assert not check_function(qc, bad)["passed"]
+    # Delays are logically identity, so QCEC now checks the circuit without them; this 100,000 dt delay
+    # stretches the schedule and is REJECTed by the fidelity audit's idle-time charge instead.
+    assert check_function(qc, delayed)["passed"]
+    assert audit_fidelity(delayed, be, final)["verdict"] == "low_fidelity"
     # Self-cancelling pair on an uncoupled pair: equivalent, but ESP scored the ops as error-free.
     cmap = be.target.build_coupling_map()
     a, b = next((a, b) for a in range(be.num_qubits) for b in range(a)
@@ -103,6 +110,18 @@ def test_verifier_fails_closed():
             padded.data.insert(0, CircuitInstruction(gate, [final.qubits[a], final.qubits[b]]))
         assert check_function(qc, padded)["passed"]  # so only the fidelity audit can catch it
         assert audit_fidelity(padded, be, final)["verdict"] == "not_native"
+
+
+def test_scheduled_compile_accepted():
+    # An honest ALAP-scheduled compile (delays on every idle stretch) is verified, not falsely rejected.
+    be, qc = FakeBrisbane(), grover()
+    locked = lock(qc)
+    baseline = unlock(honest(locked.circuit, be), locked.key)
+    scheduled = unlock(transpile(locked.circuit, be, optimization_level=3, seed_transpiler=7,
+                                 scheduling_method="alap"), locked.key)
+    assert any(inst.operation.name == "delay" for inst in scheduled.data)
+    assert check_function(qc, scheduled)["passed"]
+    assert audit_fidelity(scheduled, be, baseline)["passed"]
 
 
 def test_view_never_depends_on_the_secret():

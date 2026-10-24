@@ -146,7 +146,7 @@
           <dt>Lock</dt><dd>Every single-qubit angle becomes a key symbol held on your machine. Decoy CX pairs give every qubit pair the same CX count at random positions. No name, metadata or global phase leaves.</dd>
           <dt>Verify</dt><dd>Formal equivalence for every input (MQT QCEC) plus an output-map check catches Trojans. Estimated success probability from the device's calibration, against a free honest compile, catches sabotage that stays equivalent.</dd>
           <dt>Cost</dt><dd id="cost-line">Locking adds two-qubit gates after compilation.</dd>
-          <dt>Out of scope</dt><dd>An attacker who sees your execution results (Grover's output is its secret). Scheduled compiles containing delays are rejected, not verified. The QAOA graph is hidden statistically, not exactly.</dd>
+          <dt>Out of scope</dt><dd>An attacker who sees your execution results (Grover's output is its secret). Scheduled compiles are verified with delays removed, and their idle time is only estimated from T1/T2. The QAOA graph is hidden statistically, not exactly.</dd>
           <dt>Red-teamed</dt><dd>Two rounds of independent attackers and a final review of the verifier found 15 issues; each was re-verified, then fixed, measured or documented (see the README).</dd>
           <dt>Built on</dt><dd>Qiskit 2.5 · Qiskit Aer · MQT QCEC · IBM fake backends with real calibration data.</dd>
           <dt>Source code</dt><dd><a href="https://github.com/Devkeerthi-code/TrustPass">github.com/Devkeerthi-code/TrustPass</a></dd>

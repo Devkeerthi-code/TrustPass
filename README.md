@@ -11,7 +11,7 @@ Q-HACK INDIA 2026 (IBM Qiskit Fall Fest), Quantum Security & Cryptography track.
 ```bash
 pip install -r requirements.txt   # Python 3.12; full setup under Quickstart below
 python demo.py --matrix           # the detection matrix: which check catches which attack
-python test_trustpass.py          # 9 checks
+python test_trustpass.py          # 10 checks
 python server.py                  # the live instrument UI: http://localhost:8600
 ```
 
@@ -83,8 +83,8 @@ flowchart LR
 3. **Unlock.** Bind the key into the compiled circuit, locally.
 4. **Verify** (`verify.py`). Three checks:
    - *naive test*: what users do today. Ideal-simulator histogram on |0...0⟩, pass if TVD < 0.10.
-   - *equivalence*: first, every classical bit must be measured from the same logical qubit as in the original (through the compiler's final layout); then MQT QCEC proves the returned circuit implements the same unitary (up to global phase) for every input. Fails closed: anything QCEC cannot handle (delay, reset, feed-forward) is a REJECT.
-   - *fidelity audit*: estimated success probability (ESP, the product of 1 - error over every gate and measurement, from the backend's calibration data) versus a free local honest compile of the same locked circuit. It rejects any compile measurably worse (ratio < 0.90) than a free local Qiskit compile, malicious or merely weak. It also fails closed: any gate the device cannot run on those qubits (an unknown gate, or a two-qubit gate on an uncoupled pair) is a REJECT whatever the ratio. False rejects: 0 of 360 honest compiles (3 demos × FakeBrisbane and FakeTorino × optimization levels 1-3 × transpiler seeds 0-19, each against the pipeline's level-3, seed-7 baseline), ESP ratio 0.948-1.002.
+   - *equivalence*: first, every classical bit must be measured from the same logical qubit as in the original (through the compiler's final layout); then MQT QCEC proves the returned circuit implements the same unitary (up to global phase) for every input. Delays are logically the identity, so QCEC checks a copy with them removed (the fidelity audit charges their idle time). Fails closed: anything else QCEC cannot handle (reset, feed-forward) is a REJECT.
+   - *fidelity audit*: estimated success probability (ESP, the product of 1 - error over every gate and measurement, from the backend's calibration data) versus a free local honest compile of the same locked circuit. It rejects any compile measurably worse (ratio < 0.90) than a free local Qiskit compile, malicious or merely weak. It also fails closed: any gate the device cannot run on those qubits (an unknown gate, or a two-qubit gate on an uncoupled pair) is a REJECT whatever the ratio. If the returned circuit contains delays (a scheduled compile), idle time counts too: both it and the baseline are ALAP-scheduled locally (which adds nothing to a compile that is already ALAP-scheduled), and each scores ESP × ∏ exp(-t / min(T1, T2)) over every delay on a qubit the circuit uses, t the delay's duration and T1, T2 that qubit's calibrated times. Leading delays, where a qubit still sits in |0⟩, are charged too, so this is pessimistic on both sides alike. False rejects: 0 of 360 honest compiles (3 demos × FakeBrisbane and FakeTorino × optimization levels 1-3 × transpiler seeds 0-19, each against the pipeline's level-3, seed-7 baseline), ESP ratio 0.948-1.002.
 5. **Score** (`score.py`). Confidentiality, integrity and quality pillars (0-100) and one verdict: ACCEPT only if both the equivalence check and the fidelity audit pass. Confidentiality is capped at 0 if the locked circuit carries metadata or its original name, and at 50 if qubit pairs carry different CX counts.
 
 ## The detection matrix
@@ -183,7 +183,7 @@ Before submitting, we attacked our own prototype as the untrusted compiler would
 | 3 | Critical | The pipeline locked with `seed=7`, which is in this public repo, so decoy placement could be replayed. | Replayed the RNG, subtracted the predicted decoys: exact QAOA graph recovered in 100% of random graphs. | The lock always uses OS entropy; `seed` only fixes the transpiler. | `test_pipeline_never_seeds_the_lock` |
 | 4 | High | Each QAOA edge and each decoy was a CX-block-CX sandwich, and decoys sat on random pairs, so sandwich counts per qubit pair exposed the graph. | Parsed sandwiches and picked the most likely edge set: exact graph recovered 0.35-0.65 of the time, versus 0.016 by chance. | Decoys pad every qubit pair to the same CX count, are spliced in and locked like real gates, and every CX gets a random direction. | `test_locked_circuit_reveals_only_a_uniform_skeleton` (pair count spread 0); the scorecard also caps confidentiality at 50 |
 | 5 | High | QCEC treats unmeasured qubits as don't-care, so a compiled circuit with an output measurement deleted still passed as equivalent. | Deleted one measurement from an honest compile: QCEC said `equivalent_up_to_global_phase`. | Compare the classical-bit → logical-qubit output map (through the final layout) before QCEC. | `test_verifier_fails_closed` (dropped and re-routed measurement) |
-| 6 | Medium | A single `delay` or `reset` from the compiler crashed QCEC, so the pipeline raised instead of returning a verdict (denial of service). | Inserted one delay, then one reset, before measurement. | Fail closed: any exception in the check is REJECT `unverifiable:<exception>`. | `test_verifier_fails_closed` (delay) |
+| 6 | Medium | A single `delay` or `reset` from the compiler crashed QCEC, so the pipeline raised instead of returning a verdict (denial of service). | Inserted one delay, then one reset, before measurement. | Fail closed: any exception in the check is REJECT `unverifiable:<exception>`. Since then, delays (logically the identity) are removed before QCEC and charged as idle time by the fidelity audit, so the inserted delay is still a REJECT, now `low_fidelity`; a reset is still `unverifiable`. | `test_verifier_fails_closed` (delay, reset); `test_scheduled_compile_accepted` |
 | 7 | Medium | QCEC's checkers raced, so the same honest compile sometimes came back `no_information` (a false REJECT). | Ran the check repeatedly on one honest compile. | ZX checker off (`run_zx_checker=False`); the verdict is now stable. | `test_verifier_fails_closed` (5 honest passes in a row) |
 
 **Round 2**, attacking the fixed code:
@@ -208,7 +208,7 @@ The verifier red team in round 2 did not finish; round 1's verifier attacks (dro
 
 The relative-phase part is defence in depth: QCEC never returned `equivalent_up_to_phase` in our runs, and every relative-phase Trojan we tried (rz(0.35), Z, S, rz(π), rz(0.001) before a measurement) was already rejected as `not_equivalent`, so that test guards against regressions and does not show a hole existed. The padding hole was real and is closed.
 
-What remains after the fixes is listed under limitations: lone-CX skeletons, the false REJECT of scheduled compiles, and the oracle-guided attacker we declare out of scope.
+What remains after the fixes is listed under limitations: lone-CX skeletons, the idle-time model for scheduled compiles, and the oracle-guided attacker we declare out of scope.
 
 ## Honest limitations
 
@@ -223,11 +223,11 @@ What remains after the fixes is listed under limitations: lone-CX skeletons, the
   The fidelity audit compares against a locked baseline, so it does not see this cost; it is the price of confidentiality.
 - **Padding grows as O(n²).** Every one of the n(n-1)/2 qubit pairs gets as many CX as the busiest pair: 3 pairs at 3 qubits, 6 at 4, 190 at 20, 8,001 at 127. Our demos are dense or tiny, so it is cheap here (0-3 decoy pairs). A sparse 20-qubit circuit whose busiest pair carries 2 CX gets at least 380 CX after locking, and on heavy-hex hardware the far-apart pairs then need SWAPs. If a pair's gap to the busiest pair is odd, `lock()` refuses the circuit rather than leave a visible gap (none of our demos hits this).
 - **The CX skeleton is flattened, not hidden.** The compiler still sees the qubit count, the total CX count (which reveals the busiest pair's count, e.g. QAOA's layer count) and the CX blocks. For QAOA the order of the blocks is a uniform shuffle (finding 9), so the graph is hidden statistically, not exactly. Decoys hide the graph only when every real interaction is itself a CX-block-CX pair (QAOA's `rzz`); for lone-CX circuits an attacker can peel the decoys off and read the real skeleton (finding 12).
-- **Scheduled compiles are rejected.** The verifier fails closed, and QCEC cannot handle `delay`, so an honest compile with scheduling or dynamical decoupling is a false REJECT: Qiskit's own `scheduling_method="alap"` adds 132-166 delays to our demos and gets `unverifiable:NotImplementedError` on all three. Ask the compiler for an unscheduled circuit and schedule it locally.
+- **Scheduled compiles are judged by a simple idle model.** An honest ALAP-scheduled compile is now verified instead of rejected: with the pipeline's settings (optimization level 3, transpiler seed 7) Qiskit's `scheduling_method="alap"` adds 132-169 delays to our demos, passes QCEC and scores an ESP ratio of 1.00 on all 3 demos × FakeBrisbane and FakeTorino. Counting idle time also makes weaker honest compiles look worse: of 90 ALAP compiles at optimization levels 1-3 × transpiler seeds 0-4 (one lock per demo per backend) all 90 passed QCEC and 23 were rejected by the audit (ratios below 0.90, down to 0.72; 22 of them at levels 1-2), where unscheduled they would pass. The idle term is an estimate from T1/T2 alone, with no crosstalk or dynamical decoupling modelled, and we have not tested dynamical-decoupling compiles. Reset, feed-forward and anything else QCEC cannot reason about are still a REJECT.
 - **The threat model assumes compiler ≠ executor, and that the compiler never sees results.** If one party both compiles and runs the circuit, it sees the unlocked circuit: TrustPass still checks integrity and fidelity, but no longer gives confidentiality. An attacker who sees input/output of the unlocked circuit is out of scope, and our own measurements show why: Grover's output *is* its secret (one shot of Grover-3 reveals the marked item with probability 0.945), and for a 2-qubit, 1-edge QAOA (18 key angles), fitting every key angle by least squares to the exact output distributions of 6 random product-state inputs reproduced held-out inputs exactly and read back (γ, β) = (0.79, 0.39) for the true (0.80, 0.40) on a 0.049 grid. With 1-4 inputs the fit did not generalise (held-out TVD 0.27-0.46).
 - **The key is a list of continuous angles, not bits.** There is no key-length security argument; leakage is measured empirically against random guessing, not proven.
 - **The naive test is an ideal-simulator best case.** TVD < 0.10 stands in for "the histogram looks right", and we run it noiselessly, the most favourable case for it. An honest compile on the FakeBrisbane noise model already lands 0.05-0.29 TVD from the ideal histogram (1 - noisy-sim fidelity above), so a user reading real hardware output could not demand tighter, and the occasional naive catch of the masked Trojan on QAOA and VQE would vanish in that noise.
-- **The fidelity audit trusts calibration data.** ESP ignores crosstalk, coherent errors and idle time, the 0.90 threshold is a heuristic, and the audit needs a local compile as a baseline. It checks that the returned circuit is not measurably worse than that baseline; it does not prove the compile is good. A better third-party compiler simply scores above 1.0.
+- **The fidelity audit trusts calibration data.** ESP ignores crosstalk, coherent errors and (unless the compile is scheduled) idle time, the 0.90 threshold is a heuristic, and the audit needs a local compile as a baseline. It checks that the returned circuit is not measurably worse than that baseline; it does not prove the compile is good. A better third-party compiler simply scores above 1.0.
 - **Small, simulated, self-built.** Demos use 3-4 active qubits on fake backends, and we have not run on real hardware. In the scaling benchmark (QAOA on random 3-regular graphs) QCEC proves equivalence up to 10 qubits and times out at 14 and 20, so beyond about 10 qubits an honest compile is a false REJECT. The attacks are our own stand-ins modelled on the literature, not captured from real malicious compilers.
 
 ## Round 2 roadmap
@@ -235,7 +235,7 @@ What remains after the fixes is listed under limitations: lone-CX skeletons, the
 - **Oracle-guided attack suite**: run the Zhang & Liu style attack (and angle-fitting attacks) against larger locked circuits and report key recovery.
 - **General decoy placement**: extend the uniform-boundary placement beyond commuting `rzz` runs with commutation analysis, add a 3-CX identity gadget for odd gaps, and make decoys that survive peeling on lone-CX circuits.
 - **Cheaper padding**: pad only pairs a plausible compiler output could use, and measure what that gives back to the attacker.
-- **Verify scheduled circuits**: accept scheduling and dynamical decoupling instead of rejecting them, with idle time counted in the fidelity audit.
+- **Dynamical decoupling**: test DD-padded compiles against the idle model, and compare that model with measured fidelity.
 - **Qiskit transpiler-plugin packaging**: wrap lock, unlock and verify around any third-party transpiler plugin or Qiskit Function call.
 - **Real IBM hardware runs**: compare the ESP audit's prediction with measured fidelity for honest vs sabotaged compiles.
 - **QCEC past 10 qubits**: our scaling benchmark times out at 14 qubits; try other QCEC configurations (the ZX checker is off for stability, finding 7) and longer timeouts.
@@ -256,7 +256,7 @@ python demo.py                                               # the whole story i
 python demo.py --matrix                                      # only the detection matrix, ~10 s
 python demo.py --circuit QAOA --backend FakeTorino --matrix  # another demo on the CZ-basis backend
 python demo.py --decoys 1 --seed 3                           # 1 extra decoy round, transpiler seed 3
-python test_trustpass.py                                     # 9 checks, ~10 s (pytest works too)
+python test_trustpass.py                                     # 10 checks, ~10 s (pytest works too)
 ```
 
 `--decoys` adds extra padding rounds on top of the uniform pair counts (default 0). `--seed` only fixes the transpiler (default 7); the lock always draws fresh OS randomness, so key angles, CX counts and depth can differ slightly between runs.
@@ -287,7 +287,7 @@ print(report["trust"])  # e.g. {'confidentiality': 100, 'integrity': 100, 'quali
 | `assets/plates/` | Panel hardware images (knobs, lever, lamps, screws), each with its generation prompt embedded |
 | `.impeccable/`, `DESIGN.md`, `PRODUCT.md` | The UI design record: product brief and decisions (`PRODUCT.md`), design tokens and rules (`DESIGN.md`), and the Impeccable workflow's comps, reviews and captures (`.impeccable/`) |
 | `demo.py` | The terminal demo |
-| `test_trustpass.py` | 9 checks, including regressions for the red-team findings |
+| `test_trustpass.py` | 10 checks, including regressions for the red-team findings |
 | `bench/` | Measurements behind the README: threshold sweep, scaling, README capture (`pip install -r bench/requirements.txt`) |
 
 ## How we built this (AI use)
