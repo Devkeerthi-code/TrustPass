@@ -1,5 +1,7 @@
 # TrustPass
 
+[![tests](https://github.com/Devkeerthi-code/TrustPass/actions/workflows/tests.yml/badge.svg)](https://github.com/Devkeerthi-code/TrustPass/actions/workflows/tests.yml)
+
 **Zero-trust compilation for quantum circuits: lock the circuit before an untrusted compiler sees it, then check that what comes back is the same circuit and does not run measurably worse than a free local compile.**
 
 Q-HACK INDIA 2026 (IBM Qiskit Fall Fest), Quantum Security & Cryptography track. Round 1 prototype.
