@@ -1,4 +1,6 @@
 """TrustPass checks. Run: python test_trustpass.py (or pytest). ~10 s."""
+import copy
+
 from qiskit import transpile
 from qiskit.circuit import CircuitInstruction, Delay, ParameterExpression, Reset
 from qiskit.circuit.library import CXGate, ECRGate, RZGate
@@ -7,11 +9,11 @@ from qiskit_ibm_runtime.fake_provider import FakeBrisbane, FakeTorino
 
 import pipeline
 from circuits import DEMOS, VARIANTS, grover
-from compilers import honest
+from compilers import honest, worst_region
 from lock import lock, random_key, unlock
 from pipeline import detection_matrix
 from score import confidentiality, secret_blind
-from verify import audit_fidelity, check_function
+from verify import audit_fidelity, check_function, recheck
 
 # mode -> (naive_test, equivalence, fidelity_audit, verdict): the pitch table
 EXPECTED = {
@@ -147,6 +149,27 @@ def test_lock_refuses_odd_gaps():
     except ValueError:
         return
     assert False, "lock padded an odd gap instead of refusing"
+
+
+def test_recheck_catches_calibration_drift():
+    # Time of check vs time of use: the compile passes the audit, then its qubits degrade before the job runs.
+    backend, qc = FakeBrisbane(), grover()
+    locked = lock(qc)
+    baseline = unlock(honest(locked.circuit, backend), locked.key)
+    good = worst_region(backend, qc.num_qubits, percentile=0.02)  # a good region (ratio ~1.07), not the baseline's
+    final = unlock(transpile(locked.circuit, backend, optimization_level=3, seed_transpiler=7,
+                             initial_layout=good), locked.key)
+    checked = audit_fidelity(final, backend, baseline)
+    assert checked["passed"] and set(checked["qubits"]).isdisjoint(audit_fidelity(baseline, backend, baseline)["qubits"]), checked
+    later = copy.deepcopy(backend)
+    used = set(checked["qubits"])
+    for name in later.target.operation_names:  # raise every error rate that touches the used qubits
+        for qargs, props in later.target[name].items():
+            if qargs and used & set(qargs) and props is not None and props.error is not None:
+                props.error = min(0.5, 4 * props.error)
+    assert audit_fidelity(final, backend, baseline)["passed"]  # the original calibration is untouched
+    again = recheck(final, baseline, later)
+    assert not again["passed"] and again["verdict"] == "low_fidelity", again
 
 
 def test_pipeline_never_seeds_the_lock():
