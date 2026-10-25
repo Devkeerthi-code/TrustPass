@@ -9,6 +9,7 @@ from mqt import qcec
 from qiskit.transpiler import PassManager
 from qiskit.transpiler.passes import ALAPScheduleAnalysis, PadDelay
 from qiskit_aer import AerSimulator
+from qiskit_ibm_runtime import IBMBackend
 
 NAIVE_TOL = 0.10        # "looks right" in a histogram; checked on an ideal simulator (best case for this test)
 FIDELITY_RATIO = 0.90   # flag if the returned circuit is >10% less likely to succeed than a free baseline
@@ -147,6 +148,18 @@ def audit_fidelity(compiled, backend, reference, threshold=FIDELITY_RATIO):
             "ratio": round(ratio, 3), "qubits": used,
             "readout_err_used": round(float(ro[used].mean()), 4),
             "readout_err_device_median": round(float(np.median(ro)), 4)}
+
+
+def recheck(final, baseline, backend):
+    """Time-of-use check: the fidelity audit again, on the backend's current calibration.
+
+    Verification and execution can be hours apart and calibration drifts, so call this right
+    before submitting. It is relative to the check-time baseline: drift that hits the baseline's
+    qubits as hard as the returned circuit's leaves the ratio where it was.
+    """
+    if isinstance(backend, IBMBackend):  # a real device: fetch its newest calibration first
+        backend.refresh()
+    return audit_fidelity(final, backend, baseline)
 
 
 @lru_cache(maxsize=4)

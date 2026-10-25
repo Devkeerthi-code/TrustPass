@@ -9,7 +9,8 @@ Prints the account's remaining QPU time first and stops under 4 minutes. One fre
 per circuit, shared by its compilers; transpiler seed 7; 2000 shots. Before running, every circuit is
 verified against the device's live target (QCEC + ESP audit against the honest compile of the same
 lock) and simulated on AerSimulator.from_backend(device) (predicted 1-TVD). Before each submit the
-plan is printed and the script asks for y. After the job: measured 1-TVD against the exact ideal
+plan is printed and the script asks for y; then every circuit that passed the audit is re-audited on
+the newest calibration (verify.recheck), and nothing is submitted if one now fails. After the job: measured 1-TVD against the exact ideal
 distribution, and the naive |0> test on the measured histogram (TVD < 0.10). The JSON is written
 with the job ID as soon as the job is submitted, then completed with the counts.
 Needs a saved IBM Quantum account.
@@ -28,7 +29,7 @@ from qiskit_ibm_runtime import QiskitRuntimeService, SamplerV2
 from circuits import DEMOS
 from compilers import COMPILERS
 from lock import lock, unlock
-from verify import NAIVE_TOL, audit_fidelity, check_function, noisy_counts, tvd
+from verify import NAIVE_TOL, audit_fidelity, check_function, noisy_counts, recheck, tvd
 
 SHOTS, SEED, MIN_SECONDS = 2000, 7, 240
 JOBS = {"A": [("ibm_fez", list(DEMOS), list(COMPILERS))],
@@ -55,7 +56,7 @@ def ideal(circuit):
 
 def prepare(backend, names, modes):
     """Lock, compile, unlock and verify every circuit before anything runs."""
-    entries, finals = [], []
+    entries, finals, baselines = [], [], []
     for name in names:
         qc = DEMOS[name]()
         locked = lock(qc)  # fresh lock per circuit, shared by its compilers
@@ -71,23 +72,29 @@ def prepare(backend, names, modes):
                             "predicted_one_minus_tvd": round(1 - tvd(ref, noisy_counts(final, backend, shots=SHOTS)), 4),
                             "ideal": ref})
             finals.append(final)
+            baselines.append(compiled["honest"])
             e = entries[-1]
             print(f"   {name.split(' ')[0]:<7}{mode:<16}{e['verdict']:<8}QCEC {e['qcec']:<31}"
                   f"ESP {e['esp']:.3f} (ratio {e['esp_ratio']:.3f})  predicted 1-TVD {e['predicted_one_minus_tvd']:.3f}")
-    return entries, finals
+    return entries, finals, baselines
 
 
 def submit(service, label, device, names, modes):
     backend = service.backend(device)
     calibrated = backend.properties().last_update_date.astimezone(timezone.utc).isoformat(timespec="seconds")
     print(f"\nJob {label}: {device} ({backend.num_qubits} qubits), calibration {calibrated}")
-    entries, finals = prepare(backend, names, modes)
+    entries, finals, baselines = prepare(backend, names, modes)
     if remaining(service) < MIN_SECONDS:
         sys.exit("Under 4 minutes of QPU time left: not submitting.")
     print(f"Submit to {device}: {len(finals)} circuits x {SHOTS} shots ({backend.status().pending_jobs} jobs queued)?")
     if input("[y/N] ").strip().lower() != "y":
         print("Not submitted.")
         return None
+    for e, final, base in zip(entries, finals, baselines):  # time of use: the calibration may have moved
+        again = recheck(final, base, backend)
+        if e["audit"] == "ok" and not again["passed"]:
+            sys.exit(f"Not submitting: {e['circuit']} {e['mode']} now fails the fidelity audit ({again['verdict']},"
+                     f" ESP ratio {e['esp_ratio']:.3f} -> {again['ratio']:.3f}).")
     job = SamplerV2(mode=backend).run(finals, shots=SHOTS)
     out = ROOT / "bench" / f"ibm_{label}_{device}_{now()[:10]}.json"
     out.write_text(json.dumps({"job": label, "device": device, "job_id": job.job_id(), "submitted_utc": now(),

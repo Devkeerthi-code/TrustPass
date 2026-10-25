@@ -11,7 +11,7 @@ Q-HACK INDIA 2026 (IBM Qiskit Fall Fest), Quantum Security & Cryptography track.
 ```bash
 pip install -r requirements.txt   # Python 3.12; full setup under Quickstart below
 python demo.py --matrix           # the detection matrix: which check catches which attack
-python test_trustpass.py          # 10 checks
+python test_trustpass.py          # 11 checks
 python server.py                  # the live instrument UI: http://localhost:8600
 ```
 
@@ -85,7 +85,7 @@ flowchart LR
    - *naive test*: what users do today. Ideal-simulator histogram on |0...0⟩, pass if TVD < 0.10.
    - *equivalence*: first, every classical bit must be measured from the same logical qubit as in the original (through the compiler's final layout); then MQT QCEC proves the returned circuit implements the same unitary (up to global phase) for every input. Delays are logically the identity, so QCEC checks a copy with them removed (the fidelity audit charges their idle time). Fails closed: anything else QCEC cannot handle (reset, feed-forward) is a REJECT.
    - *fidelity audit*: estimated success probability (ESP, the product of 1 - error over every gate and measurement, from the backend's calibration data) versus a free local honest compile of the same locked circuit. It rejects any compile measurably worse (ratio < 0.90) than a free local Qiskit compile, malicious or merely weak. It also fails closed: any gate the device cannot run on those qubits (an unknown gate, or a two-qubit gate on an uncoupled pair) is a REJECT whatever the ratio. If the returned circuit contains delays (a scheduled compile), idle time counts too: both it and the baseline are ALAP-scheduled locally (which adds nothing to a compile that is already ALAP-scheduled), and each scores ESP × ∏ exp(-t / min(T1, T2)) over every delay on a qubit the circuit uses, t the delay's duration and T1, T2 that qubit's calibrated times. Leading delays, where a qubit still sits in |0⟩, are charged too, so this is pessimistic on both sides alike. False rejects: 0 of 360 honest compiles (3 demos × FakeBrisbane and FakeTorino × optimization levels 1-3 × transpiler seeds 0-19, each against the pipeline's level-3, seed-7 baseline), ESP ratio 0.948-1.002.
-5. **Score** (`score.py`). Confidentiality, integrity and quality pillars (0-100) and one verdict: ACCEPT only if both the equivalence check and the fidelity audit pass. Confidentiality is capped at 0 if the locked circuit carries metadata or its original name, and at 50 if qubit pairs carry different CX counts.
+5. **Score** (`score.py`). Confidentiality, integrity and quality pillars (0-100) and one verdict: ACCEPT only if both the equivalence check and the fidelity audit pass. Confidentiality is capped at 0 if the locked circuit carries metadata or its original name, and at 50 if qubit pairs carry different CX counts. Right before a job is submitted to real hardware, `verify.recheck` re-runs the fidelity audit on the device's newest calibration and refuses to submit a circuit that passed at check time but now fails ([Calibration drift](#calibration-drift)).
 
 ## The detection matrix
 
@@ -185,6 +185,21 @@ Every row was verified before it ran: QCEC plus the ESP audit against the device
 ![Left: ESP ratio before running vs measured fidelity ratio. Right: noisy-simulator 1-TVD vs measured 1-TVD. One point per circuit, colored by compiler](bench/compare.png)
 
 The audit pointed the right way but not to scale: every saboteur it rejected measured worse on the device than its honest compile (measured ratio 0.22-0.90), yet ESP overstates large losses, partly because even a ruined circuit's histogram keeps some overlap with the ideal (ibm_fez saboteurs in run 3: ESP ratio 0.005-0.19, measured 0.22-0.76), while the noisy simulator on the same calibration came within -0.100 to +0.063 of the measured 1-TVD on all 17 circuits (median gap 0.037, below the prediction on 14). On hardware the histogram test could not tell attacks from noise: the dormant Trojan passed it on QAOA (1-TVD 0.902) and failed it on Grover and VQE, the masked Trojan failed it on all three circuits, but the honest compile also failed it in 4 of 5 runs (it passed only on QAOA), while QCEC returned `not_equivalent` for all nine Trojans before anything ran. Limits: this is one session on one day with one job per device and no repeats, 2,000 shots per circuit, and calibration drifts between runs: the same Grover saboteur on ibm_fez scored ESP ratio 0.83 in run 1 and 0.005 in run 3, eleven and a half hours later.
+
+### Calibration drift
+
+The audit runs before the job, and the device's calibration moves in between. Right before submission, `verify.recheck` re-runs the audit on the newest calibration: `demo.py --ibm` and `bench/ibm_runs.py` refuse to submit if a circuit that passed at check time now fails, and a test degrades the error rates on the returned circuit's qubits in a copy of FakeBrisbane between check and use and asserts a REJECT. `bench/drift.py` re-audited the exact Grover circuits submitted in runs 1-3 (read back from IBM's job inputs, since the bench files keep no lock key; no new jobs) on the calibration of 2026-10-25 (`bench/drift.csv`; run 1 saved no calibration timestamp, it was submitted at 07:06 UTC on 2026-10-24):
+
+| Run | Device | Calibration then → now (UTC) | Compiler | ESP then → now | ESP ratio then → now | Audit then → now |
+|---|---|---|---|---|---|---|
+| 1 | ibm_fez | not saved → 2026-10-25 13:45 | honest | 0.868 → 0.858 | 1.000 → 1.000 | `ok` → `ok` |
+| 1 | ibm_fez | not saved → 2026-10-25 13:45 | saboteur | 0.721 → 0.765 | 0.831 → 0.892 | `low_fidelity` → `low_fidelity` |
+| 2 | ibm_kingston | 2026-10-24 17:49 → 2026-10-25 13:50 | honest | 0.903 → 0.895 | 1.000 → 1.000 | `ok` → `ok` |
+| 2 | ibm_kingston | 2026-10-24 17:49 → 2026-10-25 13:50 | saboteur | 0.807 → 0.782 | 0.894 → 0.874 | `low_fidelity` → `low_fidelity` |
+| 3 | ibm_fez | 2026-10-24 17:58 → 2026-10-25 13:45 | honest | 0.869 → 0.858 | 1.000 → 1.000 | `ok` → `ok` |
+| 3 | ibm_fez | 2026-10-24 17:58 → 2026-10-25 13:45 | saboteur | 0.005 → 0.004 | 0.005 → 0.005 | `low_fidelity` → `low_fidelity` |
+
+Drift moved the same circuit both ways: run 1's saboteur rose from 0.831 to 0.892, 0.008 short of passing, and run 2's fell from 0.894 to 0.874. The swing between runs is larger because the saboteur chooses its qubits from the calibration of the day: on ibm_fez the Grover saboteur scored 0.83 in run 1 and 0.005 in run 3, eleven and a half hours later. Limit: the re-check is relative to the check-time baseline, so drift that degrades the baseline's qubits as much as the returned circuit's (always the case for the honest compile, which is its own baseline) leaves the ratio unchanged, and it never asks whether a fresh compile would now pick better qubits.
 
 ## Scorecard per demo
 
@@ -300,7 +315,7 @@ python demo.py                                               # the whole story i
 python demo.py --matrix                                      # only the detection matrix, ~10 s
 python demo.py --circuit QAOA --backend FakeTorino --matrix  # another demo on the CZ-basis backend
 python demo.py --decoys 1 --seed 3                           # 1 extra decoy round, transpiler seed 3
-python test_trustpass.py                                     # 10 checks, ~10 s (pytest works too)
+python test_trustpass.py                                     # 11 checks, ~10 s (pytest works too)
 ```
 
 `--decoys` adds extra padding rounds on top of the uniform pair counts (default 0). `--seed` only fixes the transpiler (default 7); the lock always draws fresh OS randomness, so key angles, CX counts and depth can differ slightly between runs.
@@ -323,7 +338,7 @@ print(report["trust"])  # e.g. {'confidentiality': 100, 'integrity': 100, 'quali
 | `circuits.py` | Victim circuits (Grover, QAOA, VQE), each carrying a secret |
 | `lock.py` | `lock`, `unlock`, `random_key` |
 | `compilers.py` | Honest and malicious stand-in compilers |
-| `verify.py` | Naive test, output-map + QCEC equivalence, ESP fidelity audit, noisy-sim evidence |
+| `verify.py` | Naive test, output-map + QCEC equivalence, ESP fidelity audit, run-time re-check, noisy-sim evidence |
 | `score.py` | Confidentiality, overhead and trust scorecard |
 | `pipeline.py` | `run` and `detection_matrix` |
 | `index.html`, `web/` | The instrument UI (hand-built HTML/CSS/JS, self-hosted fonts, `snapshot.json`) |
@@ -331,7 +346,7 @@ print(report["trust"])  # e.g. {'confidentiality': 100, 'integrity': 100, 'quali
 | `assets/plates/` | Panel hardware images (knobs, lever, lamps, screws), each with its generation prompt embedded |
 | `.impeccable/`, `DESIGN.md`, `PRODUCT.md` | The UI design record: product brief and decisions (`PRODUCT.md`), design tokens and rules (`DESIGN.md`), and the Impeccable workflow's comps, reviews and captures (`.impeccable/`) |
 | `demo.py` | The terminal demo |
-| `test_trustpass.py` | 10 checks, including regressions for the red-team findings |
+| `test_trustpass.py` | 11 checks, including regressions for the red-team findings and the calibration-drift re-check |
 | `bench/` | Measurements behind the README: threshold sweep, scaling, live-calibration matrix, real hardware runs and their comparison, README capture (`pip install -r bench/requirements.txt`) |
 
 ## How we built this (AI use)

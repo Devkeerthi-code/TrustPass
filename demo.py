@@ -18,7 +18,7 @@ from compilers import COMPILERS
 from lock import lock, unlock
 from pipeline import detection_matrix, run
 from score import secret_blind, view
-from verify import audit_fidelity, check_function, counts, tvd
+from verify import audit_fidelity, check_function, counts, recheck, tvd
 
 SHOTS = 4000
 NO_ACCOUNT = """To run on real IBM hardware, save your own IBM Quantum account once on this machine:
@@ -99,6 +99,11 @@ def ibm(name, circuit, args):
     print(f"About to submit {len(finals)} circuits x {SHOTS} shots")
     if len(finals) > 2:
         sys.exit("More than 2 circuits: not submitting.")
+    for mode, final in finals.items():  # time of use: the calibration may have moved since the checks
+        again = recheck(final, finals["honest"], backend)
+        if checks[mode]["audit"] == "ok" and not again["passed"]:
+            sys.exit(f"Not submitting: {mode} now fails the fidelity audit ({again['verdict']},"
+                     f" ESP ratio {checks[mode]['esp_ratio']:.3f} -> {again['ratio']:.3f}).")
     submitted = datetime.now(timezone.utc).isoformat(timespec="seconds")
     job = SamplerV2(mode=backend).run(list(finals.values()), shots=SHOTS)
     print(f"Job {job.job_id()} submitted {submitted}, waiting for results...")
