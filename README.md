@@ -203,6 +203,12 @@ The audit runs before the job, and the device's calibration moves in between. Ri
 
 Drift moved the same circuit both ways: run 1's saboteur rose from 0.831 to 0.892, 0.008 short of passing, and run 2's fell from 0.894 to 0.874. The swing between runs is larger because the saboteur chooses its qubits from the calibration of the day: on ibm_fez the Grover saboteur scored 0.83 in run 1 and 0.005 in run 3, eleven and a half hours later. Limit: the re-check is relative to the check-time baseline, so drift that degrades the baseline's qubits as much as the returned circuit's (always the case for the honest compile, which is its own baseline) leaves the ratio unchanged, and it never asks whether a fresh compile would now pick better qubits.
 
+## Signed receipts
+
+`receipt.py` turns a verification into an Ed25519-signed JSON receipt: SHA-256 hashes of the original, locked and returned circuits (QASM 3), the verdict, the QCEC verdict, ESP, ESP ratio and threshold, the backend and its calibration time, the TrustPass commit, a UTC timestamp, and a commitment to the lock key, SHA-256(32-byte random salt ‖ canonical JSON of the key). The salt and key stay in `~/.trustpass/keys`, as does the signing key (`~/.trustpass/signing_key`); only the public key is shared.
+
+What it proves: who signed which circuits with what result, and that changing any field breaks the signature; revealing the key and salt later shows which key the verification used, without having published it. What it does not prove: it does not make the compiler honest by itself (the checks do that), and the signer is the verifier, so a receipt is only as trustworthy as whoever ran the checks.
+
 ## Scorecard per demo
 
 FakeBrisbane, transpiler seed 7, no extra decoys. Each column is 16 runs (8 honest, 8 saboteur), each with a fresh lock: 8 from our first measurement and 8 re-run on 2026-10-07 with the current code. Numbers are min-max over all 16 plus the web demo's snapshot (`web/snapshot.json`, one more lock per demo), except the two rows marked * (see the first note). Confidentiality numbers come from 30 random wrong keys; "random inputs" means 5 Haar-random input states.
@@ -317,7 +323,7 @@ python demo.py                                               # the whole story i
 python demo.py --matrix                                      # only the detection matrix, ~10 s
 python demo.py --circuit QAOA --backend FakeTorino --matrix  # another demo on the CZ-basis backend
 python demo.py --decoys 1 --seed 3                           # 1 extra decoy round, transpiler seed 3
-python test_trustpass.py                                     # 11 checks, ~10 s (pytest works too)
+python test_trustpass.py                                     # 12 checks, ~10 s (pytest works too)
 ```
 
 `--decoys` adds extra padding rounds on top of the uniform pair counts (default 0). `--seed` only fixes the transpiler (default 7); the lock always draws fresh OS randomness, so key angles, CX counts and depth can differ slightly between runs.
@@ -342,13 +348,14 @@ print(report["trust"])  # e.g. {'confidentiality': 100, 'integrity': 100, 'quali
 | `compilers.py` | Honest and malicious stand-in compilers |
 | `verify.py` | Naive test, output-map + QCEC equivalence, ESP fidelity audit, run-time re-check, noisy-sim evidence |
 | `score.py` | Confidentiality, overhead and trust scorecard |
+| `receipt.py` | Ed25519-signed receipts with a commitment to the lock key |
 | `pipeline.py` | `run` and `detection_matrix` |
 | `index.html`, `web/` | The instrument UI (hand-built HTML/CSS/JS, self-hosted fonts, `snapshot.json`) |
 | `server.py` | Serves the UI and a small JSON API over the real pipeline; `--export` writes the snapshot |
 | `assets/plates/` | Panel hardware images (knobs, lever, lamps, screws), each with its generation prompt embedded |
 | `.impeccable/`, `DESIGN.md`, `PRODUCT.md` | The UI design record: product brief and decisions (`PRODUCT.md`), design tokens and rules (`DESIGN.md`), and the Impeccable workflow's comps, reviews and captures (`.impeccable/`) |
 | `demo.py` | The terminal demo |
-| `test_trustpass.py` | 11 checks, including regressions for the red-team findings and the calibration-drift re-check |
+| `test_trustpass.py` | 12 checks, including regressions for the red-team findings and the calibration-drift re-check |
 | `bench/` | Measurements behind the README: threshold sweep, scaling, live-calibration matrix, real hardware runs and their comparison, README capture (`pip install -r bench/requirements.txt`) |
 
 ## How we built this (AI use)
