@@ -13,7 +13,8 @@ Slide-by-slide text for the organisers' Canva template: 10 slides, the limit. Th
 **TrustPass: zero-trust compilation for quantum circuits**
 
 - Send your circuit to a compiler you do not trust. It never sees your gate angles, and nothing it returns runs until it passes our checks.
-- Caught **4 of 4** attacks in all 90 test matrices; the usual histogram check caught 1 or 2.
+- Caught **4 of 4** attacks in all 90 test matrices on simulated IBM device models; the usual histogram check caught 1 or 2.
+- On live ibm_kingston calibration the audit accepted a mild saboteur (ESP ratio 0.921 / 0.912, 8-9% worse: inside the 10% tolerance by design).
 - Q-HACK INDIA 2026 · Quantum Security & Cryptography track
 - Team [name]: [Name], [Name], [Name] · [College]
 - github.com/Devkeerthi-code/TrustPass · Live demo: devkeerthi-code.github.io/TrustPass
