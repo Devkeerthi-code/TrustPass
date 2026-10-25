@@ -1,5 +1,7 @@
 """TrustPass checks. Run: python test_trustpass.py (or pytest). ~10 s."""
 import copy
+import os
+import tempfile
 
 from qiskit import transpile
 from qiskit.circuit import CircuitInstruction, Delay, ParameterExpression, Reset
@@ -13,6 +15,7 @@ from compilers import honest, worst_region
 from lock import lock, random_key, unlock
 from pipeline import detection_matrix
 from score import confidentiality, secret_blind
+import receipt
 from verify import audit_fidelity, check_function, recheck
 
 # mode -> (naive_test, equivalence, fidelity_audit, verdict): the pitch table
@@ -170,6 +173,30 @@ def test_recheck_catches_calibration_drift():
     assert audit_fidelity(final, backend, baseline)["passed"]  # the original calibration is untouched
     again = recheck(final, baseline, later)
     assert not again["passed"] and again["verdict"] == "low_fidelity", again
+
+
+def _tmp_home():
+    """Point ~/.trustpass at a fresh temporary folder (receipts, keys, signing key)."""
+    os.environ["TRUSTPASS_HOME"] = tempfile.mkdtemp(prefix="trustpass-")
+    return os.environ["TRUSTPASS_HOME"]
+
+
+def test_signed_receipt():
+    home, be, qc = _tmp_home(), FakeBrisbane(), grover()
+    locked = lock(qc)
+    returned = honest(locked.circuit, be)
+    _, _, functional, fidelity = pipeline._verify(qc, locked, be, "honest", 7)
+    report = {"functional": functional, "fidelity": fidelity, "trust": {"verdict": "ACCEPT"}}
+    salt = os.urandom(32)
+    pub = receipt.keygen(os.path.join(home, "key.pub"))
+    signed = receipt.sign(receipt.make_receipt(qc, locked, returned, report, be, salt=salt))
+    assert "salt" not in str(signed) and "k000" not in str(signed)  # neither salt nor key is in it
+    assert receipt.verify_receipt(signed, pub)
+    for field, value in (("verdict", "REJECT"), ("backend", "FakeTorino"), ("key_commitment", "0" * 64)):
+        assert not receipt.verify_receipt({**signed, field: value}, pub), field
+    assert receipt.open_commitment(signed, locked.key, salt)
+    assert not receipt.open_commitment(signed, random_key(locked, seed=1), salt)
+    assert not receipt.open_commitment(signed, locked.key, os.urandom(32))
 
 
 def test_pipeline_never_seeds_the_lock():

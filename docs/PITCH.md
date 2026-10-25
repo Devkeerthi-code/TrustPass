@@ -80,6 +80,7 @@ Slide-by-slide text for the organisers' Canva template: 10 slides, the limit. Th
 - **Lock:** every single-qubit angle becomes a key symbol (Grover: **153**, 0 real angles); decoy CX pairs equalise every qubit pair.
 - **Verify:** outputs land on the right qubits, then MQT QCEC proves equivalence for every input.
 - **Audit:** estimated success probability (ESP) ≥ 0.90 of a free local compile.
+- **Receipt:** an Ed25519-signed record of the hashes, verdict and a commitment to the key.
 
 *Speaker note:* Draw three zones, left to right: your machine in green, holding a key icon that never leaves it; the third-party compiler in red; the hardware provider in grey. Arrows: "locked circuit: angles are symbols" from Lock to Compile, "compiled locked circuit" back to Unlock. The key values never leave your machine, and an honest compiler works unchanged because compilers already handle symbolic parameters. ESP is the product of (1 − error) over every gate and measurement, from the device's calibration data; the audit also rejects any gate the device cannot run. ACCEPT only if both checks pass, and you submit the final circuit to the hardware provider yourself, so the compiler never sees results. Calibration drifts between check and run, so right before submitting we re-run the audit on the newest calibration and refuse if it now fails: re-audited a day later, our run-1 saboteur on ibm_fez had moved from ESP ratio 0.831 to 0.892.
 
