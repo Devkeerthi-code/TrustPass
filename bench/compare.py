@@ -4,6 +4,7 @@ Reads bench/ibm_*.json (run 1 from `demo.py --ibm`, the rest from bench/ibm_runs
 queued are skipped). Measured ratio = measured 1-TVD / the honest compile's measured 1-TVD for the
 same lock on the same device, the hardware counterpart of the ESP ratio. Run 1 recorded no noisy-sim
 prediction, and its 1-TVD is against a 4,000-shot ideal sample instead of the exact distribution.
+The [low, high] intervals are 95% bootstraps over the measured counts (bench/confidence.py).
 Writes bench/hardware.csv, bench/compare.png and web/hardware.json, and prints the README table.
     python bench/compare.py
 """
@@ -15,11 +16,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from confidence import intervals
 from verify import NAIVE_TOL
 
 CSV, PNG, WEB = ROOT / "bench" / "hardware.csv", ROOT / "bench" / "compare.png", ROOT / "web" / "hardware.json"
 FIELDS = ["run", "device", "job_id", "submitted_utc", "circuit", "mode", "verdict", "esp_ratio",
           "predicted_one_minus_tvd", "measured_one_minus_tvd", "measured_ratio", "naive_hw_passed"]
+CI = ["measured_ci_low", "measured_ci_high", "ratio_ci_low", "ratio_ci_high"]
 MODES = ("honest", "trojan-overt", "trojan-masked", "trojan-dormant", "saboteur")
 COLORS = dict(zip(MODES, ("#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4")))
 MARKERS = dict(zip(MODES, ("o", "s", "^", "v", "D")))
@@ -29,6 +32,7 @@ def load():
     rows = []
     for path in sorted((ROOT / "bench").glob("ibm_*.json")):
         d = json.loads(path.read_text(encoding="utf-8"))
+        first = len(rows)
         if "runs" in d:  # demo.py --ibm: honest + saboteur, one circuit
             honest = d["runs"]["honest"]["one_minus_tvd"]
             for mode, r in d["runs"].items():
@@ -41,6 +45,10 @@ def load():
         elif all("counts" in e for e in d["circuits"]):
             rows += [{"device": d["device"], "job_id": d["job_id"], "submitted_utc": d["submitted_utc"],
                       **{k: e[k] for k in FIELDS[4:]}} for e in d["circuits"]]
+        else:
+            continue
+        for r, ci in zip(rows[first:], intervals(d)):  # same circuit order as the rows above
+            r.update(zip(CI, ci))
     jobs = sorted({(r["submitted_utc"], r["job_id"]) for r in rows})
     for r in rows:
         r["run"] = jobs.index((r["submitted_utc"], r["job_id"])) + 1
@@ -98,12 +106,14 @@ def web(rows):
 
 def table(rows):
     f = lambda v, n=3: "–" if v is None else f"{v:.{n}f}"
-    print("| Run | Device | Circuit | Compiler | Verdict | ESP ratio | Predicted 1-TVD | Measured 1-TVD"
-          " | Measured ratio | Naive test on hardware |")
+    ci = lambda r, v, lo, hi: f(r[v]) if r["mode"] == "honest" and v == "measured_ratio" else f"{f(r[v])} [{f(r[lo])}, {f(r[hi])}]"
+    print("| Run | Device | Circuit | Compiler | Verdict | ESP ratio | Predicted 1-TVD | Measured 1-TVD [95% CI]"
+          " | Measured ratio [95% CI] | Naive test on hardware |")
     print("|---|---|---|---|---|---|---|---|---|---|")
     for r in rows:
         print(f"| {r['run']} | {r['device']} | {r['circuit']} | {r['mode']} | {r['verdict']} | {f(r['esp_ratio'])}"
-              f" | {f(r['predicted_one_minus_tvd'])} | {f(r['measured_one_minus_tvd'])} | {f(r['measured_ratio'])}"
+              f" | {f(r['predicted_one_minus_tvd'])} | {ci(r, 'measured_one_minus_tvd', *CI[:2])}"
+              f" | {ci(r, 'measured_ratio', *CI[2:])}"
               f" | {'pass' if r['naive_hw_passed'] else 'fail'} |")
 
 
@@ -111,7 +121,7 @@ def main():
     sys.stdout.reconfigure(encoding="utf-8")
     rows = load()
     with CSV.open("w", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=FIELDS)
+        w = csv.DictWriter(fh, fieldnames=FIELDS + CI)
         w.writeheader()
         w.writerows(rows)
     chart(rows)
