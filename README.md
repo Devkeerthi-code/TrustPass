@@ -158,29 +158,31 @@ None gave a proof, so `verify.py` is unchanged. We did not try QCEC's hybrid Sch
 
 ## Real hardware runs
 
-Every row was verified before it ran: QCEC plus the ESP audit against the device's live calibration, with the honest compile of the same fresh lock as the baseline (transpiler seed 7). Run 1 is the original `python demo.py --ibm` run (4,000 shots, 1-TVD against a 4,000-shot ideal sample, no noisy-sim prediction). Runs 2 and 3 are `python bench/ibm_runs.py B` and `A` on 2026-10-24 (2,000 shots per circuit, 1-TVD against the exact ideal distribution, prediction from `AerSimulator.from_backend` on the same device). Measured ratio = measured 1-TVD / the honest compile's measured 1-TVD for the same lock and device, the hardware counterpart of the ESP ratio. Naive test = TVD < 0.10 between the measured histogram and the ideal output. Jobs: `dbe5hp7pc3tc739l5al0` (run 1), `dbefmkom94ac738rnks0` (run 2), `dbefmkvsstms73fbvl4g` (run 3); 13 s of QPU time for runs 2-3. A Grover honest vs saboteur job on ibm_marrakesh (`dbefmkvgdj9s73flmk80`) was still queued when this was written. Raw counts are in `bench/ibm_*.json`, this table in `bench/hardware.csv` (`python bench/compare.py`).
+Every row was verified before it ran: QCEC plus the ESP audit against the device's live calibration, with the honest compile of the same fresh lock as the baseline (transpiler seed 7). Run 1 is the original `python demo.py --ibm` run (4,000 shots, 1-TVD against a 4,000-shot ideal sample, no noisy-sim prediction). Runs 2 and 3 are `python bench/ibm_runs.py B` and `A` on 2026-10-24 (2,000 shots per circuit, 1-TVD against the exact ideal distribution, prediction from `AerSimulator.from_backend` on the same device). Measured ratio = measured 1-TVD / the honest compile's measured 1-TVD for the same lock and device, the hardware counterpart of the ESP ratio. Naive test = TVD < 0.10 between the measured histogram and the ideal output. Jobs: `dbe5hp7pc3tc739l5al0` (run 1), `dbefmkom94ac738rnks0` (run 2), `dbefmkvsstms73fbvl4g` (run 3); 13 s of QPU time for runs 2-3. A Grover honest vs saboteur job on ibm_marrakesh (`dbefmkvgdj9s73flmk80`) was still queued when this was written. Intervals are 95% bootstraps (`bench/confidence.py`: 1,000 resamples of each circuit's measured counts, the ideal reference held fixed); a difference from the honest compile is significant when the ratio interval excludes 1. Raw counts are in `bench/ibm_*.json`, this table in `bench/hardware.csv` (`python bench/compare.py`).
 
-| Run | Device | Circuit | Compiler | Verdict | ESP ratio | Predicted 1-TVD | Measured 1-TVD | Measured ratio | Naive test on hardware |
+| Run | Device | Circuit | Compiler | Verdict | ESP ratio | Predicted 1-TVD | Measured 1-TVD [95% CI] | Measured ratio [95% CI] | Naive test on hardware |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | ibm_fez | Grover | honest | ACCEPT | 1.000 | – | 0.828 | 1.000 | fail |
-| 1 | ibm_fez | Grover | saboteur | REJECT | 0.831 | – | 0.744 | 0.899 | fail |
-| 2 | ibm_kingston | Grover | honest | ACCEPT | 1.000 | 0.896 | 0.851 | 1.000 | fail |
-| 2 | ibm_kingston | Grover | saboteur | REJECT | 0.894 | 0.820 | 0.724 | 0.851 | fail |
-| 3 | ibm_fez | Grover | honest | ACCEPT | 1.000 | 0.865 | 0.834 | 1.000 | fail |
-| 3 | ibm_fez | Grover | trojan-overt | REJECT | 1.000 | 0.092 | 0.095 | 0.114 | fail |
-| 3 | ibm_fez | Grover | trojan-masked | REJECT | 1.000 | 0.852 | 0.812 | 0.973 | fail |
-| 3 | ibm_fez | Grover | trojan-dormant | REJECT | 0.998 | 0.864 | 0.827 | 0.991 | fail |
-| 3 | ibm_fez | Grover | saboteur | REJECT | 0.005 | 0.192 | 0.182 | 0.218 | fail |
-| 3 | ibm_fez | QAOA | honest | ACCEPT | 1.000 | 0.952 | 0.925 | 1.000 | pass |
-| 3 | ibm_fez | QAOA | trojan-overt | REJECT | 1.000 | 0.369 | 0.432 | 0.467 | fail |
-| 3 | ibm_fez | QAOA | trojan-masked | REJECT | 1.000 | 0.851 | 0.833 | 0.900 | fail |
-| 3 | ibm_fez | QAOA | trojan-dormant | REJECT | 0.997 | 0.952 | 0.902 | 0.975 | pass |
-| 3 | ibm_fez | QAOA | saboteur | REJECT | 0.193 | 0.717 | 0.697 | 0.753 | fail |
-| 3 | ibm_fez | VQE | honest | ACCEPT | 1.000 | 0.972 | 0.873 | 1.000 | fail |
-| 3 | ibm_fez | VQE | trojan-overt | REJECT | 1.000 | 0.634 | 0.639 | 0.732 | fail |
-| 3 | ibm_fez | VQE | trojan-masked | REJECT | 1.000 | 0.935 | 0.844 | 0.967 | fail |
-| 3 | ibm_fez | VQE | trojan-dormant | REJECT | 0.997 | 0.974 | 0.883 | 1.012 | fail |
-| 3 | ibm_fez | VQE | saboteur | REJECT | 0.108 | 0.673 | 0.664 | 0.761 | fail |
+| 1 | ibm_fez | Grover | honest | ACCEPT | 1.000 | – | 0.828 [0.815, 0.841] | 1.000 | fail |
+| 1 | ibm_fez | Grover | saboteur | REJECT | 0.831 | – | 0.744 [0.729, 0.758] | 0.899 [0.877, 0.921] | fail |
+| 2 | ibm_kingston | Grover | honest | ACCEPT | 1.000 | 0.896 | 0.851 [0.833, 0.869] | 1.000 | fail |
+| 2 | ibm_kingston | Grover | saboteur | REJECT | 0.894 | 0.820 | 0.724 [0.704, 0.744] | 0.851 [0.822, 0.880] | fail |
+| 3 | ibm_fez | Grover | honest | ACCEPT | 1.000 | 0.865 | 0.834 [0.816, 0.852] | 1.000 | fail |
+| 3 | ibm_fez | Grover | trojan-overt | REJECT | 1.000 | 0.092 | 0.095 [0.087, 0.103] | 0.114 [0.104, 0.124] | fail |
+| 3 | ibm_fez | Grover | trojan-masked | REJECT | 1.000 | 0.852 | 0.812 [0.793, 0.829] | 0.973 [0.944, 1.004] | fail |
+| 3 | ibm_fez | Grover | trojan-dormant | REJECT | 0.998 | 0.864 | 0.827 [0.808, 0.845] | 0.991 [0.963, 1.020] | fail |
+| 3 | ibm_fez | Grover | saboteur | REJECT | 0.005 | 0.192 | 0.182 [0.168, 0.197] | 0.218 [0.201, 0.237] | fail |
+| 3 | ibm_fez | QAOA | honest | ACCEPT | 1.000 | 0.952 | 0.925 [0.900, 0.937] | 1.000 | pass |
+| 3 | ibm_fez | QAOA | trojan-overt | REJECT | 1.000 | 0.369 | 0.432 [0.413, 0.451] | 0.467 [0.449, 0.493] | fail |
+| 3 | ibm_fez | QAOA | trojan-masked | REJECT | 1.000 | 0.851 | 0.833 [0.810, 0.852] | 0.900 [0.875, 0.932] | fail |
+| 3 | ibm_fez | QAOA | trojan-dormant | REJECT | 0.997 | 0.952 | 0.902 [0.877, 0.914] | 0.975 [0.947, 1.002] | pass |
+| 3 | ibm_fez | QAOA | saboteur | REJECT | 0.193 | 0.717 | 0.697 [0.673, 0.710] | 0.753 [0.728, 0.778] | fail |
+| 3 | ibm_fez | VQE | honest | ACCEPT | 1.000 | 0.972 | 0.873 [0.849, 0.888] | 1.000 | fail |
+| 3 | ibm_fez | VQE | trojan-overt | REJECT | 1.000 | 0.634 | 0.639 [0.617, 0.659] | 0.732 [0.708, 0.763] | fail |
+| 3 | ibm_fez | VQE | trojan-masked | REJECT | 1.000 | 0.935 | 0.844 [0.823, 0.860] | 0.967 [0.938, 1.001] | fail |
+| 3 | ibm_fez | VQE | trojan-dormant | REJECT | 0.997 | 0.974 | 0.883 [0.860, 0.899] | 1.012 [0.981, 1.046] | fail |
+| 3 | ibm_fez | VQE | saboteur | REJECT | 0.108 | 0.673 | 0.664 [0.642, 0.684] | 0.761 [0.735, 0.794] | fail |
+
+Every honest-vs-saboteur difference is significant (all five saboteur ratio intervals exclude 1, the closest being run 1's [0.877, 0.921]); of the Trojans whose histograms stay close to honest, only the masked one on QAOA differs significantly from its honest compile, and the dormant and other masked Trojans' intervals include 1.
 
 ![Left: ESP ratio before running vs measured fidelity ratio. Right: noisy-simulator 1-TVD vs measured 1-TVD. One point per circuit, colored by compiler](bench/compare.png)
 
