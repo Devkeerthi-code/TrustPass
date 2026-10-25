@@ -15,3 +15,5 @@ __pycache__/
 .impeccable/sheet/check*.png
 # Signing key and lock keys live in ~/.trustpass, never in the repo; ignore a stray copy anyway
 .trustpass/
+*.egg-info/
+build/

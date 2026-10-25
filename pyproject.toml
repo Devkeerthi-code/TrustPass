@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trustpass"
+version = "0.1.0"
+description = "Zero-trust compilation for quantum circuits: lock, unlock, verify (QCEC + fidelity audit), signed receipts"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+dynamic = ["dependencies"]
+
+[project.scripts]
+trustpass = "cli:main"
+
+[tool.setuptools]
+py-modules = ["circuits", "cli", "compilers", "lock", "pipeline", "receipt", "score", "server", "verify"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
