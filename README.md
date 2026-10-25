@@ -21,6 +21,8 @@ python server.py                  # the live instrument UI: http://localhost:860
 
 The interface is a bench instrument: put a circuit on the panel, turn **SOURCE** to pick the untrusted compiler, and read three channels. Every number on it comes from a real run of the pipeline below. Run it locally with `python server.py` (live runs), or open the static snapshot (`index.html` + `web/snapshot.json`, precomputed by the same pipeline) on any static host.
 
+**Plant a Trojan.** Below the panel you can insert one gate of your own (X, Z, S, RZ(0.35) or CX, on any data qubit, at the start, in the middle or right before measurement) into the honest compile of the panel's lock, and the same three checks run on it (`/api/plant`). The static site reads `web/plant.json` instead: every combination for the 3 demos on FakeBrisbane, 165 in all, 12 of them a CX on a qubit with no coupled data-qubit neighbour, which is refused. In the other 153, QCEC returned `not_equivalent` and the verdict was REJECT every time, while the histogram test passed 86 of them and the fidelity audit all 153 (one extra gate barely moves ESP), so catching these is QCEC's job.
+
 ## The problem
 
 The compiler is increasingly someone else's code, and the compiled circuit comes back to you before it runs:
@@ -318,12 +320,12 @@ python -m venv .venv
 pip install -r requirements.txt
 
 python server.py                                             # the instrument UI, live runs: http://localhost:8600
-python server.py --export                                    # regenerate web/snapshot.json (30 runs + 6 matrices, ~4 min)
+python server.py --export                                    # regenerate web/snapshot.json (30 runs + 6 matrices, ~4 min) and web/plant.json (~30 s)
 python demo.py                                               # the whole story in the terminal (Grover on FakeBrisbane), ~25 s
 python demo.py --matrix                                      # only the detection matrix, ~10 s
 python demo.py --circuit QAOA --backend FakeTorino --matrix  # another demo on the CZ-basis backend
 python demo.py --decoys 1 --seed 3                           # 1 extra decoy round, transpiler seed 3
-python test_trustpass.py                                     # 13 checks, ~15 s (pytest works too)
+python test_trustpass.py                                     # 14 checks, ~20 s (pytest works too)
 ```
 
 `--decoys` adds extra padding rounds on top of the uniform pair counts (default 0). `--seed` only fixes the transpiler (default 7); the lock always draws fresh OS randomness, so key angles, CX counts and depth can differ slightly between runs.
@@ -363,11 +365,11 @@ print(report["trust"])  # e.g. {'confidentiality': 100, 'integrity': 100, 'quali
 | `cli.py`, `pyproject.toml` | The `trustpass` command: lock, verify, receipt verify, keygen |
 | `pipeline.py` | `run` and `detection_matrix` |
 | `index.html`, `web/` | The instrument UI (hand-built HTML/CSS/JS, self-hosted fonts, `snapshot.json`) |
-| `server.py` | Serves the UI and a small JSON API over the real pipeline; `--export` writes the snapshot |
+| `server.py` | Serves the UI and a small JSON API over the real pipeline (including `/api/plant`); `--export` writes the snapshot and `web/plant.json` |
 | `assets/plates/` | Panel hardware images (knobs, lever, lamps, screws), each with its generation prompt embedded |
 | `.impeccable/`, `DESIGN.md`, `PRODUCT.md` | The UI design record: product brief and decisions (`PRODUCT.md`), design tokens and rules (`DESIGN.md`), and the Impeccable workflow's comps, reviews and captures (`.impeccable/`) |
 | `demo.py` | The terminal demo |
-| `test_trustpass.py` | 13 checks, including regressions for the red-team findings and the calibration-drift re-check |
+| `test_trustpass.py` | 14 checks, including regressions for the red-team findings and the calibration-drift re-check |
 | `bench/` | Measurements behind the README: threshold sweep, scaling, live-calibration matrix, real hardware runs and their comparison, README capture (`pip install -r bench/requirements.txt`) |
 
 ## How we built this (AI use)

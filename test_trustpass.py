@@ -220,6 +220,31 @@ def test_cli_round_trip():
     assert cli.main(["verify", path("locked.qasm"), path("returned.qasm"), "--backend", "FakeBrisbane"]) == 2  # no key
 
 
+def test_plant_endpoint():
+    # The live demo's "Plant a Trojan": a small rz on a data qubit passes the naive test, never QCEC.
+    import json
+    import threading
+    import urllib.error
+    import urllib.request
+    from http.server import ThreadingHTTPServer
+    import server
+    httpd = ThreadingHTTPServer(("127.0.0.1", 0), server.Handler)
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
+    url = f"http://127.0.0.1:{httpd.server_address[1]}/api/plant?circuit=grover&backend=FakeBrisbane&pos=middle"
+    try:
+        r = json.load(urllib.request.urlopen(url + "&gate=rz&qubit=0", timeout=120))
+        assert r["verdict"] == "REJECT" and not r["checks"]["equivalence"]["passed"], r
+        assert r["planted"]["gate"] == "rz" and r["checks"]["fidelity"]["passed"], r
+        for bad in ("&gate=bad&qubit=0", "&gate=h&qubit=0", "&gate=rz&qubit=9", "&gate=rz&qubit=-1"):
+            try:
+                urllib.request.urlopen(url + bad, timeout=120)
+                assert False, bad
+            except urllib.error.HTTPError as e:
+                assert e.code == 400, (bad, e.code)
+    finally:
+        httpd.shutdown()
+
+
 def test_pipeline_never_seeds_the_lock():
     # Red-team round 1: a public seed let the compiler replay the decoys.
     seen = []
