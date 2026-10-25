@@ -120,6 +120,40 @@ def saboteur(circ, backend, seed=7, pad_pairs=2, percentile=0.9):
     return tampered
 
 
+PLANT_GATES = ("x", "z", "s", "rz", "cx")
+PLANT_POSITIONS = ("start", "middle", "end")
+
+
+def plant(compiled, backend, gate, qubit, pos):
+    """Your own Trojan: one gate on data qubit `qubit` of a compile, at the start, middle or end.
+
+    start/middle use the qubit's initial placement, end its final one (right before measurement).
+    cx targets the first other data qubit coupled to it. rz uses MASK_ANGLE. Bad input -> ValueError.
+    Returns the tampered circuit and the physical qubits it touched.
+    """
+    if gate not in PLANT_GATES or pos not in PLANT_POSITIONS:
+        raise ValueError(f"gate must be one of {PLANT_GATES} and pos one of {PLANT_POSITIONS}")
+    data = compiled.layout.final_index_layout() if pos == "end" else _data_qubits(compiled)
+    if not 0 <= qubit < len(data):
+        raise ValueError(f"qubit must be 0-{len(data) - 1}")
+    qubits = [data[qubit]]
+    if gate == "cx":
+        cmap = backend.target.build_coupling_map()
+        partner = next((b for b in data if b != data[qubit] and cmap.graph.has_edge(data[qubit], b)), None)
+        if partner is None:
+            raise ValueError(f"data qubit {qubit} has no coupled data-qubit neighbour for cx")
+        qubits.append(partner)
+    gadget = QuantumCircuit(len(qubits))
+    getattr(gadget, gate)(*([MASK_ANGLE] if gate == "rz" else []), *range(len(qubits)))
+    g = _on_physical(gadget, qubits, backend)
+    at = {"start": 0, "middle": len(compiled.data) // 2,
+          "end": next(i for i, inst in enumerate(compiled.data) if inst.operation.name == "measure")}[pos]
+    out = compiled.copy()
+    for k, inst in enumerate(g.data):
+        out.data.insert(at + k, inst.replace(qubits=[out.qubits[g.find_bit(q).index] for q in inst.qubits]))
+    return out, qubits
+
+
 COMPILERS = {
     "honest": honest,
     "trojan-overt": trojan_overt,

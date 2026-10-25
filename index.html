@@ -118,6 +118,25 @@
       </div>
     </article>
 
+    <article class="unit plant">
+      <header class="unit-head"><h2>Plant a Trojan</h2></header>
+      <div class="unit-body">
+        <form class="rating plant-form" id="plant-form">
+          <p class="plant-lead">Add one gate of your own to the honest compile of this circuit, then run all three checks on it.</p>
+          <div class="plant-ctl">
+            <label>Gate<select id="pl-gate"><option value="x">X</option><option value="z">Z</option><option value="s">S</option>
+              <option value="rz" selected>RZ(0.35)</option><option value="cx">CX</option></select></label>
+            <label>Qubit<select id="pl-qubit"></select></label>
+            <label>Position<select id="pl-pos"><option value="start">Start</option><option value="middle" selected>Middle</option>
+              <option value="end">End</option></select></label>
+            <button type="submit" disabled>Plant + verify</button>
+          </div>
+          <p class="plate-note" id="pl-note"></p>
+        </form>
+        <dl class="specs" id="pl-specs" aria-live="polite"><dt>Result</dt><dd>Plant a gate to see what each check says.</dd></dl>
+      </div>
+    </article>
+
     <article class="unit hardware" id="hw" hidden>
       <header class="unit-head"><h2>Measured on real IBM hardware</h2></header>
       <div class="rating">

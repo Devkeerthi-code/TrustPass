@@ -368,6 +368,7 @@ function renderBench(r) {
     ["Wrong key", `output error ${conf.wrong_key_tvd_random_inputs} vs ${conf.know_nothing_tvd} for a random state`],
     ["Cost", `2q gates ${ov["2q_plain"]} → ${ov["2q_locked"]} · depth ${ov.depth_plain} → ${ov.depth_locked}`],
   ]);
+  plantReset(r);
   $("#cost-line").textContent = `Locking adds two-qubit gates after compilation: ${r.circuit.name.split(" ")[0]} goes from ${ov["2q_plain"]} to ${ov["2q_locked"]} on ${r.backend.name}, and depth from ${ov.depth_plain} to ${ov.depth_locked}.`;
 }
 const spec = (rows) => rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
@@ -441,5 +442,60 @@ fetch("web/hardware.json").then((r) => (r.ok ? r.json() : null)).then((hw) => {
     + `<td>${v(r.honest.verdict)} / ${v(r.saboteur.verdict)}</td><td>${fmt(r.honest.measured)}</td><td>${fmt(r.saboteur.measured)}</td></tr>`).join("");
   $("#hw").hidden = false;
 }).catch(() => {});
+
+// ---------- plant your own Trojan: /api/plant, or web/plant.json (FakeBrisbane) on a static host ----------
+const GATE_LABEL = { x: "X", z: "Z", s: "S", rz: "RZ(0.35)", cx: "CX" };
+const POS_LABEL = { start: "at the start", middle: "in the middle", end: "right before measurement" };
+let plantSnap = null, plantShown = "";
+function plantReset(r) {
+  const sel = $("#pl-qubit"), n = r.circuit.qubits;
+  $("#plant-form button").disabled = false;  // disabled until the first run says how many qubits there are
+  if (sel.options.length !== n) sel.innerHTML = Array.from({ length: n }, (_, i) => `<option value="${i}">q${i}</option>`).join("");
+  if (plantShown && plantShown !== `${r.circuit.id}|${r.backend.name}`) {  // the circuit or backend changed under the result
+    plantShown = "";
+    $("#pl-specs").innerHTML = spec([["Result", "Plant a gate to see what each check says."]]);
+    $("#pl-note").textContent = "";
+  }
+}
+async function getPlant(gate, qubit, pos) {
+  const snap = await source();
+  if (snap) {
+    plantSnap ??= await (await fetch("web/plant.json")).json();
+    const r = plantSnap.runs[`${state.circuit}|${gate}|${qubit}|${pos}`];
+    if (!r || r.error) throw new Error(r ? r.error : "not precomputed");
+    return { ...r, backend: { name: plantSnap.backend } };
+  }
+  const r = await fetch(`/api/plant?circuit=${state.circuit}&backend=${state.backend}&gate=${gate}&qubit=${qubit}&pos=${pos}`);
+  const body = await r.json();
+  if (!r.ok) throw new Error(body.error || r.statusText);
+  return body;
+}
+$("#plant-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = e.target.querySelector("button"), [gate, qubit, pos] = ["#pl-gate", "#pl-qubit", "#pl-pos"].map((s) => $(s).value);
+  btn.disabled = true;
+  $("#pl-note").textContent = "Measuring…";
+  try {
+    const p = await getPlant(gate, qubit, pos), c = p.checks;
+    const st = (ok) => ` · <b class="${ok ? "good" : "bad"}">${ok ? "PASS" : "FAIL"}</b>`;
+    $("#pl-specs").innerHTML = spec([
+      ["Planted", `${GATE_LABEL[gate]} on q${qubit} (physical ${p.planted.physical.join(", ")}) ${POS_LABEL[pos]}`],
+      ["CH1 Naive", `TVD ${fmt(c.naive.tvd)} (needs < ${c.naive.tol})${st(c.naive.passed)}`],
+      ["CH2 QCEC", `${c.equivalence.verdict.replace(/_/g, " ")}${st(c.equivalence.passed)}`],
+      ["CH3 Audit", `ESP ratio ${fmt(c.fidelity.ratio, 2)} (needs ≥ ${c.fidelity.threshold})${st(c.fidelity.passed)}`],
+      ["Verdict", `<span class="big ${p.verdict === "ACCEPT" ? "good" : "bad"}">${p.verdict}</span>`],
+      ["Why", ""],
+    ]);
+    $("#pl-specs dd:last-of-type").textContent = p.reason;
+    plantShown = `${state.circuit}|${state.backend}`;
+    $("#pl-note").textContent = state.snapshot ? `Precomputed run of the real pipeline on ${p.backend.name}; run server.py to plant live.` : "";
+  } catch (err) {
+    plantShown = "";
+    $("#pl-specs").innerHTML = spec([["Result", "No run: nothing was planted."]]);
+    $("#pl-note").textContent = `Could not plant: ${err.message}.`;
+  } finally {
+    btn.disabled = false;
+  }
+});
 
 acquire();

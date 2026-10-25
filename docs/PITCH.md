@@ -172,4 +172,6 @@ Slide-by-slide text for the organisers' Canva template: 10 slides, the limit. Th
 
 ## Demo video script
 
+Live demo flow: after the detection matrix, a judge plants their own Trojan (gate, qubit, position) below the panel; in all 153 precomputed plants on FakeBrisbane (`web/plant.json`) QCEC said `not_equivalent` and the verdict was REJECT, while the histogram test passed 86.
+
 The video script lives in [VIDEO_SCRIPT.md](VIDEO_SCRIPT.md). It runs about 2:45 against a 3-minute limit, uses the team's own voices, and includes the architecture walkthrough and a terminal run that the rules require.

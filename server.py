@@ -1,7 +1,8 @@
 """TrustPass web UI: serves the site (index.html + web/ + assets/) and a small JSON API over the real pipeline.
 
   python server.py            -> http://localhost:8600
-  python server.py --export   -> web/snapshot.json (every configuration, for a static host)
+  python server.py --export   -> web/snapshot.json (every configuration, for a static host) and web/plant.json
+  python server.py --export-plant   -> only web/plant.json (every planted Trojan on FakeBrisbane)
 """
 import json
 import sys
@@ -15,11 +16,11 @@ import numpy as np
 from qiskit_ibm_runtime import fake_provider
 
 from circuits import DEMOS, VARIANTS
-from compilers import COMPILERS
-from lock import lock
+from compilers import COMPILERS, MASK_ANGLE, PLANT_GATES, PLANT_POSITIONS, honest, plant
+from lock import lock, unlock
 from pipeline import detection_matrix, run
 from score import confidentiality, secret_blind, view
-from verify import FIDELITY_RATIO, NAIVE_TOL
+from verify import FIDELITY_RATIO, NAIVE_TOL, audit_fidelity, check_function, naive_check
 
 ROOT = Path(__file__).parent
 WEB = ROOT / "web"
@@ -164,6 +165,26 @@ def matrix_json(cid, backend_name, decoys=0, seed=7):
         return detection_matrix(circuit, backend(backend_name), decoys, seed, locked=locked)
 
 
+def plant_json(cid, backend_name, gate, qubit, pos, decoys=0, seed=7):
+    """One gate planted into the honest compile of the panel's lock, then the same three checks as /api/run."""
+    circuit, locked, _, _ = prepared(cid, decoys)
+    be = backend(backend_name)
+    with HEAVY:
+        compiled = honest(locked.circuit, be, seed=seed)
+        tampered, physical = plant(compiled, be, gate, qubit, pos)  # ValueError on bad input -> 400
+        final, baseline = unlock(tampered, locked.key), unlock(compiled, locked.key)
+        r = {"naive": naive_check(circuit, final), "functional": check_function(circuit, final),
+             "fidelity": audit_fidelity(final, be, baseline)}
+    r["trust"] = {"verdict": "ACCEPT" if r["functional"]["passed"] and r["fidelity"]["passed"] else "REJECT"}
+    return {"circuit": {"id": cid, "name": CIRCUITS[cid], "qubits": circuit.num_qubits},
+            "backend": {"name": backend_name},
+            "planted": {"gate": gate, "qubit": qubit, "pos": pos, "physical": physical,
+                        "angle": MASK_ANGLE if gate == "rz" else None},
+            "verdict": r["trust"]["verdict"], "reason": reason(r),
+            "checks": {"naive": {**r["naive"], "tol": NAIVE_TOL}, "equivalence": r["functional"],
+                       "fidelity": {**r["fidelity"], "threshold": FIDELITY_RATIO}}}
+
+
 META = {"circuits": {k: {"name": v, "kind": DEMOS[v]().metadata["kind"]} for k, v in CIRCUITS.items()},
         "modes": list(COMPILERS), "backends": list(BACKENDS)}
 
@@ -178,7 +199,8 @@ class Handler(SimpleHTTPRequestHandler):
             return super().do_GET()
         route = {"/api/meta": lambda: META,
                  "/api/run": lambda: run_json(cid, mode, be, decoys, seed),
-                 "/api/matrix": lambda: matrix_json(cid, be, decoys, seed)}.get(url.path)
+                 "/api/matrix": lambda: matrix_json(cid, be, decoys, seed),
+                 "/api/plant": lambda: plant_json(cid, be, q["gate"], int(q["qubit"]), q["pos"], decoys, seed)}.get(url.path)
         if route is None:
             return self.send(404, {"error": f"unknown endpoint {url.path}"})
         q = {k: v[0] for k, v in parse_qs(url.query).items()}
@@ -187,12 +209,17 @@ class Handler(SimpleHTTPRequestHandler):
             decoys, seed = int(q.get("decoys", 0)), int(q.get("seed", 7))
             if cid not in CIRCUITS or mode not in COMPILERS or be not in BACKENDS or not 0 <= decoys <= 3:
                 raise ValueError("unknown circuit, mode, backend or decoys")
+            if url.path == "/api/plant" and (q.get("gate") not in PLANT_GATES or q.get("pos") not in PLANT_POSITIONS
+                                             or not q.get("qubit", "").isdigit()):
+                raise ValueError(f"gate must be one of {', '.join(PLANT_GATES)}, pos one of"
+                                 f" {', '.join(PLANT_POSITIONS)}, qubit a data-qubit index")
         except ValueError as e:
             return self.send(400, {"error": str(e)})
         try:
             self.send(200, route())
         except Exception as e:  # never drop the connection: the UI shows the error instead
-            self.send(500, {"error": f"{type(e).__name__}: {e}"})
+            bad = isinstance(e, ValueError) and url.path == "/api/plant"  # qubit out of range, or cx with no partner
+            self.send(400 if bad else 500, {"error": str(e) if bad else f"{type(e).__name__}: {e}"})
 
     def send(self, code, body):
         data = json.dumps(body).encode()
@@ -218,11 +245,32 @@ def export():
                 print(f"{cid} {be} {mode}", flush=True)
     (WEB / "snapshot.json").write_text(json.dumps(snap))
     print(f"wrote {WEB / 'snapshot.json'}")
+    export_plant()
+
+
+def export_plant(be="FakeBrisbane"):
+    """Every planted Trojan the UI offers, for a static host (FakeBrisbane only, at the default decoys/seed)."""
+    out = {"generated": datetime.now(timezone.utc).isoformat(timespec="seconds"), "backend": be, "runs": {}}
+    for cid in CIRCUITS:
+        for gate in PLANT_GATES:
+            for qubit in range(prepared(cid, 0)[0].num_qubits):
+                for pos in PLANT_POSITIONS:
+                    try:
+                        r = plant_json(cid, be, gate, qubit, pos)
+                        r = {k: r[k] for k in ("planted", "verdict", "reason", "checks")}
+                    except ValueError as e:
+                        r = {"error": str(e)}
+                    out["runs"][f"{cid}|{gate}|{qubit}|{pos}"] = r
+        print(f"plant {cid}", flush=True)
+    (WEB / "plant.json").write_text(json.dumps(out, separators=(",", ":")))
+    print(f"wrote {WEB / 'plant.json'}")
 
 
 if __name__ == "__main__":
     if "--export" in sys.argv:
         export()
+    elif "--export-plant" in sys.argv:
+        export_plant()
     else:
         port = 8600
         print(f"TrustPass UI on http://localhost:{port}")
