@@ -56,3 +56,8 @@ Everything else runs on IBM fake backends with real calibration data, and the at
 
 **15. How is this different from split compilation and E-LoQ?**
 Split compilation sends parts of the circuit to several compilers, or to one compiler at different times, so no single compile sees all of it; in TrustPass one compiler sees the whole locked circuit, the key keeps the angles secret, and the returned circuit is verified [README, Research gaps, row 9]. E-LoQ evaluates locking for concealment only, and nothing checks the circuit that comes back [README, Research gaps, row 1]. What we add is uniform per-pair CX counts, the secret-blind view test, and an audit against a free local compile that catches sabotage that stays equivalent [README, How TrustPass works].
+
+## Live calibration
+
+**16. Did the audit ever accept a saboteur?**
+Yes, on live calibration. Our 4-of-4 results are on simulated IBM device models (90 matrices on FakeBrisbane and FakeTorino) [README, The detection matrix]. Against the live calibration of ibm_kingston on 2026-10-24, with no job run, the audit accepted the saboteur on QAOA (ESP ratio 0.921) and VQE (0.912): its qubits were only about 8-9% worse than the honest layout's, inside the 10% tolerance by design, while the other 43 of 45 verdicts across ibm_fez, ibm_kingston and ibm_marrakesh were as expected [README, Honest limitations; `bench/live_targets.py`]. The audit flags compiles measurably worse than a free local compile; a saboteur that costs less than the tolerance gets through, and tightening it costs honest compiles: at a threshold of 0.95, 71 of 450 would be false rejects [README, Why 0.90 and 0.10].

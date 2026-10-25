@@ -243,6 +243,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .rating dt { font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; font-size: calc(16 * var(--u)); padding-top: calc(3 * var(--u)); }
 .rating dd { margin: 0; max-width: 75ch; }
 .rating a { color: var(--ink); text-underline-offset: 0.2em; overflow-wrap: anywhere; }
+.plate-note { margin: calc(18 * var(--u)) 0 0; font-size: max(12px, calc(15 * var(--u))); color: #4a4e53; }
 .unit.hardware { grid-column: 1 / -1; }
 .hw { width: 100%; border-collapse: collapse; font-size: max(13px, calc(19 * var(--u))); font-variant-numeric: lining-nums tabular-nums; }
 .hw th { text-align: left; vertical-align: bottom; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; font-size: max(11px, calc(16 * var(--u)));
