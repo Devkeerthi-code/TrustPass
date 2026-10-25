@@ -323,12 +323,23 @@ python demo.py                                               # the whole story i
 python demo.py --matrix                                      # only the detection matrix, ~10 s
 python demo.py --circuit QAOA --backend FakeTorino --matrix  # another demo on the CZ-basis backend
 python demo.py --decoys 1 --seed 3                           # 1 extra decoy round, transpiler seed 3
-python test_trustpass.py                                     # 12 checks, ~10 s (pytest works too)
+python test_trustpass.py                                     # 13 checks, ~15 s (pytest works too)
 ```
 
 `--decoys` adds extra padding rounds on top of the uniform pair counts (default 0). `--seed` only fixes the transpiler (default 7); the lock always draws fresh OS randomness, so key angles, CX counts and depth can differ slightly between runs.
 
 `python demo.py --ibm` runs an honest vs sabotaged compile on real IBM hardware with an IBM Quantum account you have saved yourself; our results are under [Real hardware runs](#real-hardware-runs). `python bench/ibm_runs.py` runs the larger hardware benchmark (it asks before every submit and stops under 4 minutes of QPU time).
+
+As one command (`pip install -e .` installs `trustpass`; keys and the signing key live in `~/.trustpass`, never in the repo):
+
+```bash
+trustpass lock in.qasm -o locked.qasm                                # OS-entropy lock, key saved locally
+trustpass verify in.qasm returned.qasm --backend FakeBrisbane        # QCEC + fidelity audit; exit 0 ACCEPT, 1 REJECT
+trustpass receipt verify receipt.json --pubkey ~/.trustpass/signing_key.pub   # VALID / INVALID
+trustpass keygen -o key.pub                                          # export your public key to share
+```
+
+`returned.qasm` is whatever the third-party compiler sent back for `locked.qasm` (QASM 2 or 3). `--backend` also takes `ibm_fez`, `ibm_kingston` and `ibm_marrakesh`, which read the live calibration with your saved IBM account and never submit a job.
 
 From Python:
 
@@ -349,13 +360,14 @@ print(report["trust"])  # e.g. {'confidentiality': 100, 'integrity': 100, 'quali
 | `verify.py` | Naive test, output-map + QCEC equivalence, ESP fidelity audit, run-time re-check, noisy-sim evidence |
 | `score.py` | Confidentiality, overhead and trust scorecard |
 | `receipt.py` | Ed25519-signed receipts with a commitment to the lock key |
+| `cli.py`, `pyproject.toml` | The `trustpass` command: lock, verify, receipt verify, keygen |
 | `pipeline.py` | `run` and `detection_matrix` |
 | `index.html`, `web/` | The instrument UI (hand-built HTML/CSS/JS, self-hosted fonts, `snapshot.json`) |
 | `server.py` | Serves the UI and a small JSON API over the real pipeline; `--export` writes the snapshot |
 | `assets/plates/` | Panel hardware images (knobs, lever, lamps, screws), each with its generation prompt embedded |
 | `.impeccable/`, `DESIGN.md`, `PRODUCT.md` | The UI design record: product brief and decisions (`PRODUCT.md`), design tokens and rules (`DESIGN.md`), and the Impeccable workflow's comps, reviews and captures (`.impeccable/`) |
 | `demo.py` | The terminal demo |
-| `test_trustpass.py` | 12 checks, including regressions for the red-team findings and the calibration-drift re-check |
+| `test_trustpass.py` | 13 checks, including regressions for the red-team findings and the calibration-drift re-check |
 | `bench/` | Measurements behind the README: threshold sweep, scaling, live-calibration matrix, real hardware runs and their comparison, README capture (`pip install -r bench/requirements.txt`) |
 
 ## How we built this (AI use)

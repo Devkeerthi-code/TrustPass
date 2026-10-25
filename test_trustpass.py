@@ -3,7 +3,7 @@ import copy
 import os
 import tempfile
 
-from qiskit import transpile
+from qiskit import qasm3, transpile
 from qiskit.circuit import CircuitInstruction, Delay, ParameterExpression, Reset
 from qiskit.circuit.library import CXGate, ECRGate, RZGate
 from qiskit.quantum_info import Operator
@@ -11,10 +11,11 @@ from qiskit_ibm_runtime.fake_provider import FakeBrisbane, FakeTorino
 
 import pipeline
 from circuits import DEMOS, VARIANTS, grover
-from compilers import honest, worst_region
+from compilers import honest, saboteur, worst_region
 from lock import lock, random_key, unlock
 from pipeline import detection_matrix
 from score import confidentiality, secret_blind
+import cli
 import receipt
 from verify import audit_fidelity, check_function, recheck
 
@@ -197,6 +198,26 @@ def test_signed_receipt():
     assert receipt.open_commitment(signed, locked.key, salt)
     assert not receipt.open_commitment(signed, random_key(locked, seed=1), salt)
     assert not receipt.open_commitment(signed, locked.key, os.urandom(32))
+
+
+def test_cli_round_trip():
+    # trustpass lock -> a compile done elsewhere (plain Qiskit) -> trustpass verify, through files.
+    home = _tmp_home()
+    path = lambda name: os.path.join(home, name)
+    with open(path("in.qasm"), "w") as f:
+        f.write(qasm3.dumps(grover()))
+    assert cli.main(["lock", path("in.qasm"), "-o", path("locked.qasm")]) == 0
+    with open(path("locked.qasm")) as f:
+        sent = qasm3.loads(f.read())
+    be = FakeBrisbane()
+    for compiled, code in ((transpile(sent, be, optimization_level=3, seed_transpiler=7), 0),  # ACCEPT
+                           (saboteur(sent, be), 1)):                                        # REJECT
+        with open(path("returned.qasm"), "w") as f:
+            f.write(qasm3.dumps(compiled))
+        assert cli.main(["verify", path("in.qasm"), path("returned.qasm"), "--backend", "FakeBrisbane",
+                         "--receipt", path("receipt.json")]) == code
+        assert cli.main(["receipt", "verify", path("receipt.json"), "--pubkey", path("signing_key.pub")]) == 0
+    assert cli.main(["verify", path("locked.qasm"), path("returned.qasm"), "--backend", "FakeBrisbane"]) == 2  # no key
 
 
 def test_pipeline_never_seeds_the_lock():
