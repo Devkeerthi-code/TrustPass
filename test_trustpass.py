@@ -245,6 +245,82 @@ def test_plant_endpoint():
         httpd.shutdown()
 
 
+def test_ibm_endpoints_are_guarded():
+    # Real-hardware runs from the panel: off without --allow-ibm, strict parameters, one job in
+    # flight, a per-run cap, and exactly 2 circuits per job. No IBM access: submit is mocked.
+    import threading
+    import urllib.error
+    import urllib.request
+    from http.server import ThreadingHTTPServer
+    import server
+    httpd = ThreadingHTTPServer(("127.0.0.1", 0), server.Handler)
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{httpd.server_address[1]}/api/ibm/"
+
+    def code(path):
+        try:
+            return urllib.request.urlopen(base + path, timeout=60).status
+        except urllib.error.HTTPError as e:
+            return e.code
+
+    ok = "submit?circuit=grover&mode=saboteur&backend=ibm_fez"
+    entered, release = threading.Event(), threading.Event()
+
+    def slow_submit(args):
+        entered.set()
+        release.wait(30)
+        return {"job_id": "fake"}
+
+    class Sampler:
+        sent = []
+
+        def __init__(self, mode):
+            pass
+
+        def run(self, circuits, shots):
+            Sampler.sent.append((len(circuits), shots))
+
+    real = server.ibm_submit, server.job_open, server.SamplerV2
+    try:
+        for path in ("status?backend=ibm_fez", ok, "job?id=abc"):
+            assert code(path) == 403, path
+        server.IBM["allowed"] = True
+        for bad in ("status?backend=ibm_marrakesh", "status?backend=ibm_fez&x=1", "job?id=../server", "job?id=nosuchjob",
+                    "submit?circuit=grover&mode=saboteur&backend=ibm_marrakesh",
+                    "submit?circuit=shor&mode=honest&backend=ibm_fez", "submit?circuit=grover&mode=evil&backend=ibm_fez",
+                    "submit?circuit=grover&mode=honest&backend=ibm_fez&gate=x",  # gate/qubit/pos only with plant
+                    "submit?circuit=grover&mode=plant&backend=ibm_fez&gate=h&qubit=0&pos=end",
+                    "submit?circuit=grover&mode=plant&backend=ibm_fez&gate=x&qubit=3&pos=end",
+                    "submit?circuit=grover&mode=plant&backend=ibm_fez&gate=x&qubit=-1&pos=end"):
+            assert code(bad) == 400, bad
+        server.ibm_submit = slow_submit
+        first = threading.Thread(target=code, args=(ok,))
+        first.start()
+        assert entered.wait(30)
+        assert code(ok) == 409  # still being prepared
+        release.set()
+        first.join(30)
+        assert server.IBM["job"] == "fake" and server.IBM["submits"] == 1, server.IBM
+        server.job_open = lambda: "fake"  # IBM says it is still queued
+        assert code(ok) == 409
+        server.IBM.update(job=None, submits=server.IBM_MAX_SUBMITS)
+        assert code(ok) == 429
+        server.SamplerV2 = Sampler
+        for n in (1, 3):
+            try:
+                server.ibm_sample(None, [None] * n)
+                assert False, n
+            except ValueError:
+                pass
+        server.ibm_sample(None, [None, None])
+        assert Sampler.sent == [(2, 2000)], Sampler.sent
+    finally:
+        release.set()
+        server.ibm_submit, server.job_open, server.SamplerV2 = real
+        server.IBM.update(allowed=False, busy=False, job=None, submits=0)
+        httpd.shutdown()
+
+
 def test_pipeline_never_seeds_the_lock():
     # Red-team round 1: a public seed let the compiler replay the decoys.
     seen = []
