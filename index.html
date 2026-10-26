@@ -137,6 +137,24 @@
       </div>
     </article>
 
+    <article class="unit ibm" id="ibm" hidden>
+      <header class="unit-head"><h2>Run on real IBM hardware</h2>
+        <div class="softkeys" role="radiogroup" aria-label="IBM device">
+          <button type="button" role="radio" data-dev="ibm_fez" aria-checked="true">Fez</button>
+          <button type="button" role="radio" data-dev="ibm_kingston" aria-checked="false">Kingston</button>
+        </div>
+      </header>
+      <div class="unit-body">
+        <form class="rating plant-form" id="ibm-form">
+          <p class="plant-lead">Sends <b id="ibm-what">this circuit</b> to a real IBM device, next to an honest compile of the same lock as the baseline. TrustPass gives its verdict before the job runs.</p>
+          <p class="plant-lead" id="ibm-dev" aria-live="polite">Reading the device…</p>
+          <div class="plant-ctl"><button type="submit" disabled>Submit to IBM</button></div>
+          <p class="plate-note" id="ibm-note" aria-live="polite"></p>
+        </form>
+        <dl class="specs" id="ibm-specs" aria-live="polite"><dt>Result</dt><dd>No job submitted from this panel yet.</dd></dl>
+      </div>
+    </article>
+
     <article class="unit hardware" id="hw" hidden>
       <header class="unit-head"><h2>Measured on real IBM hardware</h2></header>
       <div class="rating">

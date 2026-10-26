@@ -244,7 +244,9 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .rating dd { margin: 0; max-width: 75ch; }
 .rating a { color: var(--ink); text-underline-offset: 0.2em; overflow-wrap: anywhere; }
 .plate-note { margin: calc(18 * var(--u)) 0 0; font-size: max(12px, calc(15 * var(--u))); color: #4a4e53; }
-.unit.hardware, .unit.plant { grid-column: 1 / -1; }
+.unit.hardware, .unit.plant, .unit.ibm { grid-column: 1 / -1; }
+.softkeys button[aria-checked="true"] { background: linear-gradient(#fcd884, #f4c25a); border-color: #a07b22; }
+.unit.ibm .plate-note a { color: var(--ink); text-underline-offset: 0.2em; }
 .plant-lead { margin: 0 0 calc(18 * var(--u)); max-width: 75ch; font-size: max(13px, calc(19 * var(--u))); line-height: 1.45; }
 .plant-ctl { display: flex; flex-wrap: wrap; align-items: end; gap: calc(16 * var(--u)); }
 .plant-ctl label { display: grid; gap: calc(6 * var(--u)); font: 700 max(12px, calc(16 * var(--u))) / 1.2 "Inria Sans", sans-serif; text-transform: uppercase; letter-spacing: 0.03em; }
