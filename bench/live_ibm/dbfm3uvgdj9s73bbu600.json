@@ -1,0 +1,122 @@
+{
+  "job_id": "dbfm3uvgdj9s73bbu600",
+  "device": "ibm_fez",
+  "submitted_utc": "2026-10-26T14:21:47+00:00",
+  "calibration_utc": "2026-10-26T13:03:40+00:00",
+  "queue_at_submit": 4,
+  "remaining_seconds_at_submit": 583,
+  "shots": 2000,
+  "transpiler_seed": 7,
+  "naive_tol": 0.1,
+  "fidelity_threshold": 0.9,
+  "params": {
+    "circuit": "grover",
+    "mode": "saboteur",
+    "backend": "ibm_fez"
+  },
+  "planted_physical": null,
+  "circuits": [
+    "judge",
+    "baseline"
+  ],
+  "secret": "101",
+  "verdict": "REJECT",
+  "reason": "Equivalent, but sabotaged: placed on qubits with 2.9% readout error vs 1.1% device median.",
+  "checks": {
+    "naive": {
+      "passed": true,
+      "tvd": 0.0
+    },
+    "equivalence": {
+      "passed": true,
+      "verdict": "equivalent_up_to_global_phase",
+      "seconds": 0.098
+    },
+    "fidelity": {
+      "passed": false,
+      "verdict": "low_fidelity",
+      "esp": 0.7608,
+      "esp_baseline": 0.8619,
+      "ratio": 0.883,
+      "qubits": [
+        131,
+        138,
+        151
+      ],
+      "readout_err_used": 0.0294,
+      "readout_err_device_median": 0.0105
+    },
+    "recheck": {
+      "passed": false,
+      "verdict": "low_fidelity",
+      "esp": 0.7608,
+      "esp_baseline": 0.8619,
+      "ratio": 0.883,
+      "qubits": [
+        131,
+        138,
+        151
+      ],
+      "readout_err_used": 0.0294,
+      "readout_err_device_median": 0.0105
+    }
+  },
+  "predicted_one_minus_tvd": {
+    "judge": 0.7737,
+    "baseline": 0.8627
+  },
+  "ideal": {
+    "000": 0.007812,
+    "001": 0.007812,
+    "010": 0.007812,
+    "011": 0.007812,
+    "100": 0.007812,
+    "101": 0.945312,
+    "110": 0.007812,
+    "111": 0.007812
+  },
+  "url": "https://quantum.cloud.ibm.com/workloads",
+  "queue_seconds": 1,
+  "results": {
+    "judge": {
+      "counts": {
+        "101": 1360,
+        "100": 136,
+        "010": 78,
+        "011": 96,
+        "110": 72,
+        "001": 94,
+        "111": 93,
+        "000": 71
+      },
+      "one_minus_tvd": 0.7347,
+      "naive_tvd": 0.2653,
+      "naive_passed": false,
+      "p_secret": 0.68
+    },
+    "baseline": {
+      "counts": {
+        "101": 1579,
+        "000": 64,
+        "111": 67,
+        "011": 50,
+        "110": 36,
+        "001": 79,
+        "100": 83,
+        "010": 42
+      },
+      "one_minus_tvd": 0.8442,
+      "naive_tvd": 0.1558,
+      "naive_passed": false,
+      "p_secret": 0.7895
+    },
+    "measured_ratio": 0.87
+  },
+  "timestamps": {
+    "created": "2026-10-26T14:21:47.283118Z",
+    "finished": "2026-10-26T14:21:53.50172Z",
+    "running": "2026-10-26T14:21:48.722255Z"
+  },
+  "qpu_seconds": 3,
+  "finished_utc": "2026-10-26T14:21:59+00:00"
+}
