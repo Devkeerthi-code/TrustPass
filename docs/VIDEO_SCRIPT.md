@@ -44,6 +44,8 @@ Live runs vary a little each time, because the lock is freshly random. **If a nu
 
 Live demo only (not in the video): scroll to **Plant a Trojan**, let a judge pick gate, qubit and position, press **PLANT + VERIFY**, and point at CH2 FAIL and REJECT.
 
+Live demo with `server.py --allow-ibm`: press **SUBMIT TO IBM** early (queue time is unpredictable) and come back to its result at the end; if it is still queued or fails, show the recorded **Measured on real IBM hardware** table instead.
+
 That's about 440 spoken words, roughly 2:45 at 160 words a minute. Rehearse with a timer: 3:00 is a hard limit. If you run long, shorten the 0:12–0:38 problem line first.
 
 ---

@@ -325,12 +325,16 @@ python demo.py                                               # the whole story i
 python demo.py --matrix                                      # only the detection matrix, ~10 s
 python demo.py --circuit QAOA --backend FakeTorino --matrix  # another demo on the CZ-basis backend
 python demo.py --decoys 1 --seed 3                           # 1 extra decoy round, transpiler seed 3
-python test_trustpass.py                                     # 14 checks, ~20 s (pytest works too)
+python test_trustpass.py                                     # 15 checks, ~20 s (pytest works too)
 ```
 
 `--decoys` adds extra padding rounds on top of the uniform pair counts (default 0). `--seed` only fixes the transpiler (default 7); the lock always draws fresh OS randomness, so key angles, CX counts and depth can differ slightly between runs.
 
 `python demo.py --ibm` runs an honest vs sabotaged compile on real IBM hardware with an IBM Quantum account you have saved yourself; our results are under [Real hardware runs](#real-hardware-runs). `python bench/ibm_runs.py` runs the larger hardware benchmark (it asks before every submit and stops under 4 minutes of QPU time).
+
+### Run on IBM hardware from the panel
+
+`python server.py --allow-ibm` (with an IBM Quantum account saved on that machine) adds a **Run on real IBM hardware** unit below the panel; without the flag the endpoints answer 403 and the unit stays hidden, as it does on GitHub Pages. Pick ibm_fez or ibm_kingston; the unit shows the device's queue, the account's remaining QPU time and the calibration time, and asks once before submitting. It sends the panel's circuit and SOURCE choice (or the Trojan you planted): one fresh lock, the chosen compile and an honest compile of the same lock as the baseline, QCEC plus the fidelity audit on the device's live target, `verify.recheck` right before submitting, then one SamplerV2 job of exactly 2 circuits × 2,000 shots. The verdict is shown before the job runs; when it finishes, the unit shows measured 1-TVD for both circuits, their ratio and the naive test on the real histogram. Guards: one job in flight at a time, no submit under 2 minutes of QPU time, at most 6 submits per server run, ibm_marrakesh refused (offline until 2026-12-09); the server listens on 127.0.0.1 only. Every job is saved to `bench/live_ibm/<job_id>.json`. Queue time is unpredictable: our first panel job (Grover + saboteur on ibm_fez, `dbfm3uvgdj9s73bbu600`, 2026-10-26) waited about a second and used 3 s of QPU time, while our 2026-10-24 ibm_marrakesh job was still queued when the hardware table above was written.
 
 As one command (`pip install -e .` installs `trustpass`; keys and the signing key live in `~/.trustpass`, never in the repo):
 
@@ -365,7 +369,7 @@ print(report["trust"])  # e.g. {'confidentiality': 100, 'integrity': 100, 'quali
 | `cli.py`, `pyproject.toml` | The `trustpass` command: lock, verify, receipt verify, keygen |
 | `pipeline.py` | `run` and `detection_matrix` |
 | `index.html`, `web/` | The instrument UI (hand-built HTML/CSS/JS, self-hosted fonts, `snapshot.json`) |
-| `server.py` | Serves the UI and a small JSON API over the real pipeline (including `/api/plant`); `--export` writes the snapshot and `web/plant.json` |
+| `server.py` | Serves the UI and a small JSON API over the real pipeline (including `/api/plant`, and `/api/ibm/*` with `--allow-ibm`); `--export` writes the snapshot and `web/plant.json` |
 | `assets/plates/` | Panel hardware images (knobs, lever, lamps, screws), each with its generation prompt embedded |
 | `.impeccable/`, `DESIGN.md`, `PRODUCT.md` | The UI design record: product brief and decisions (`PRODUCT.md`), design tokens and rules (`DESIGN.md`), and the Impeccable workflow's comps, reviews and captures (`.impeccable/`) |
 | `demo.py` | The terminal demo |
