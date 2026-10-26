@@ -456,6 +456,8 @@ function plantReset(r) {
     $("#pl-specs").innerHTML = spec([["Result", "Plant a gate to see what each check says."]]);
     $("#pl-note").textContent = "";
   }
+  if (!plantShown) ibm.planted = null;
+  ibmSync();
 }
 async function getPlant(gate, qubit, pos) {
   const snap = await source();
@@ -488,14 +490,142 @@ $("#plant-form").addEventListener("submit", async (e) => {
     ]);
     $("#pl-specs dd:last-of-type").textContent = p.reason;
     plantShown = `${state.circuit}|${state.backend}`;
+    ibm.planted = state.snapshot ? null : { gate, qubit, pos };
     $("#pl-note").textContent = state.snapshot ? `Precomputed run of the real pipeline on ${p.backend.name}; run server.py to plant live.` : "";
   } catch (err) {
     plantShown = "";
+    ibm.planted = null;
     $("#pl-specs").innerHTML = spec([["Result", "No run: nothing was planted."]]);
     $("#pl-note").textContent = `Could not plant: ${err.message}.`;
   } finally {
     btn.disabled = false;
+    ibmSync();
   }
 });
+
+// ---------- run on real IBM hardware: only on a live server started with --allow-ibm (403 hides it) ----------
+const ibm = { dev: "ibm_fez", status: null, job: null, what: "", timer: 0, planted: null };
+const QUEUED_LONG = 10 * 60;  // s: after this, say the queue is slow and point at the recorded runs
+const mins = (s) => `${Math.floor(s / 60)} min ${Math.floor(s % 60)} s`;
+function ibmWhat() {
+  const c = CIRCUITS.find((x) => x[0] === state.circuit)[1], p = ibm.planted;
+  return p ? { label: `${c} with your planted ${GATE_LABEL[p.gate]} on q${p.qubit} ${POS_LABEL[p.pos]}`,
+               query: `circuit=${state.circuit}&mode=plant&gate=${p.gate}&qubit=${p.qubit}&pos=${p.pos}` }
+    : { label: `${c} from the ${MODES.find((m) => m[0] === state.mode)[1]} compiler`, query: `circuit=${state.circuit}&mode=${state.mode}` };
+}
+function ibmSync() { $("#ibm-what").textContent = ibmWhat().label; }
+function ibmNote(text, fallback) {
+  const n = $("#ibm-note");
+  n.textContent = text;
+  if (fallback) {
+    const a = document.createElement("a");
+    a.href = "#hw";
+    a.textContent = "Fallback: see our recorded hardware runs.";
+    n.append(" ", a);
+  }
+}
+async function ibmStatus() {
+  const r = await fetch(`/api/ibm/status?backend=${ibm.dev}`, { cache: "no-store" });
+  if (r.status === 403) return false;
+  const s = await r.json(), btn = $("#ibm-form button");
+  if (!r.ok) {
+    btn.disabled = true;
+    $("#ibm-dev").textContent = `Could not read ${ibm.dev}: ${s.error}`;
+    return true;
+  }
+  ibm.status = s;
+  const low = s.remaining_seconds != null && s.remaining_seconds < s.min_seconds;
+  $("#ibm-dev").textContent = `${s.device} · ${s.operational ? "online" : `offline (${s.status_msg})`} · ${s.pending_jobs} jobs in its queue · `
+    + `${s.remaining_seconds == null ? "QPU time not capped" : `${mins(s.remaining_seconds)} QPU time left`} · calibrated ${s.calibration_utc.replace("T", " ").replace("+00:00", " UTC")}`;
+  btn.disabled = low || !s.operational || s.submits_left <= 0 || s.in_flight || !!ibm.job;
+  if (ibm.job) return true;  // the job's own notes stay up
+  if (low) ibmNote(`Quota low: under ${s.min_seconds / 60} minutes of QPU time left, so nothing can be submitted.`, true);
+  else if (!s.operational) ibmNote(`${s.device} is not taking jobs right now.`, true);
+  else if (s.submits_left <= 0) ibmNote("This server run has used all its submits; restart server.py --allow-ibm for more.", true);
+  else if (s.in_flight) ibmNote("A job from this server is still in flight; one at a time.");
+  else ibmNote(`Sends one job: 2 circuits × 2000 shots. ${s.submits_left} submits left in this server run.`);
+  return true;
+}
+function ibmShow(j) {
+  const fd = j.checks.fidelity, pr = j.predicted_one_minus_tvd, res = j.results, ok = j.verdict === "ACCEPT";
+  const st = (pass) => ` · <b class="${pass ? "good" : "bad"}">${pass ? "PASS" : "FAIL"}</b>`;
+  const waited = (Date.now() - Date.parse(j.submitted_utc)) / 1000;
+  const rows = [
+    ["Sent", ""],
+    ["Verdict", `<span class="big ${ok ? "good" : "bad"}">${ok ? "ACCEPT" : "REJECT"}</span> decided before the job ran`],
+    ["Predicted", `ESP ratio ${fmt(fd.ratio, 2)} (needs ≥ ${j.fidelity_threshold}) · noisy copy 1 − TVD ${fmt(pr.judge)} vs ${fmt(pr.baseline)} honest`],
+    ["Job", ""],
+    ["Status", j.status === "done" ? `done${j.qpu_seconds != null ? ` · ${fmt(j.qpu_seconds, 0)} s QPU` : ""}${j.queue_seconds != null ? ` · queued ${mins(j.queue_seconds)}` : ""}`
+      : j.status === "error" ? '<b class="bad">failed</b>' : `${j.status} · ${mins(Math.max(0, waited))} since submit`],
+  ];
+  if (res) {
+    rows.push(["Measured", `1 − TVD ${fmt(res.judge.one_minus_tvd)} sent vs ${fmt(res.baseline.one_minus_tvd)} honest baseline (ratio ${fmt(res.measured_ratio, 2)})`],
+      ["Naive test", `on the real histogram: TVD ${fmt(res.judge.naive_tvd)} (needs < ${j.naive_tol})${st(res.judge.naive_passed)}`]);
+    if (res.judge.p_secret != null) rows.push(["P(secret)", `${fmt(res.judge.p_secret)} sent vs ${fmt(res.baseline.p_secret)} honest baseline`]);
+  }
+  rows.push(["Why", ""]);
+  $("#ibm-specs").innerHTML = spec(rows);
+  const dd = $("#ibm-specs").querySelectorAll("dd");
+  dd[0].textContent = `${ibm.what} on ${j.device}, plus an honest compile of the same lock`;
+  const a = document.createElement("a");
+  a.href = j.url.startsWith("https://quantum.cloud.ibm.com/") ? j.url : "https://quantum.cloud.ibm.com/workloads";
+  a.target = "_blank";
+  a.rel = "noopener";
+  a.textContent = "open on IBM Quantum ↗";
+  dd[3].append(`${j.job_id} · `, a);
+  dd[dd.length - 1].textContent = j.reason;
+  if (j.status === "error") ibmNote(`IBM reports the job failed: ${j.error || "no reason given"}.`, true);
+  else if (j.status === "queued" && waited > QUEUED_LONG)
+    ibmNote(`Queued for ${mins(waited)}: IBM's queue time is unpredictable. The verdict above stands; results appear here when the job runs.`, true);
+}
+async function ibmPoll() {
+  try {
+    const r = await fetch(`/api/ibm/job?id=${ibm.job.job_id}`, { cache: "no-store" });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || r.statusText);
+    ibmShow(j);
+    if (j.status === "done" || j.status === "error") {
+      clearInterval(ibm.timer);
+      ibm.job = null;
+      await ibmStatus();
+      if (j.status === "done") ibmNote(`Done. Saved to bench/live_ibm/${j.job_id}.json.`);
+      else ibmNote(`IBM reports the job failed: ${j.error || "no reason given"}.`, true);
+    }
+  } catch (err) {
+    ibmNote(`Could not read the job: ${err.message}. Trying again in 10 s.`, true);
+  }
+}
+document.querySelectorAll("#ibm [data-dev]").forEach((b) => b.addEventListener("click", () => {
+  ibm.dev = b.dataset.dev;
+  document.querySelectorAll("#ibm [data-dev]").forEach((x) => x.setAttribute("aria-checked", x === b));
+  $("#ibm-dev").textContent = "Reading the device…";
+  ibmStatus().catch((err) => { $("#ibm-dev").textContent = `Could not read ${ibm.dev}: ${err.message}`; });
+}));
+$("#ibm-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = e.target.querySelector("button"), what = ibmWhat(), dev = ibm.dev, s = ibm.status;
+  if (!s || s.device !== dev || btn.disabled) return;
+  if (!confirm(`Submit 2 circuits × 2000 shots to ${dev}?\n\n${what.label}, plus an honest baseline.\n`
+    + `${s.pending_jobs} jobs in its queue · ${s.remaining_seconds == null ? "QPU time not capped" : `${mins(s.remaining_seconds)} QPU time left`}.`)) return;
+  const tab = window.open("about:blank", "_blank");  // opened inside the click, so no popup blocker
+  btn.disabled = true;
+  ibmNote("Locking, compiling and verifying on the device's live calibration, then submitting…");
+  try {
+    const r = await fetch(`/api/ibm/submit?${what.query}&backend=${dev}`, { cache: "no-store" });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || r.statusText);
+    ibm.job = j;
+    ibm.what = what.label;
+    if (tab) { tab.opener = null; tab.location = j.url; }
+    ibmShow({ ...j, status: "queued" });
+    ibmNote(`Submitted. Checking the job every 10 s. ${j.submits_left} submits left in this server run.`);
+    ibm.timer = setInterval(ibmPoll, 10000);
+  } catch (err) {
+    tab?.close();
+    await ibmStatus().catch(() => { btn.disabled = false; });
+    ibmNote(`Not submitted: ${err.message}.`, true);
+  }
+});
+source().then((snap) => (snap ? false : ibmStatus())).then((on) => { $("#ibm").hidden = !on; }).catch(() => {});
 
 acquire();
