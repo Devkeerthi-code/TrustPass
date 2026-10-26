@@ -13,14 +13,16 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 import numpy as np
-from qiskit_ibm_runtime import fake_provider
+from qiskit.quantum_info import Statevector
+from qiskit_aer import AerSimulator
+from qiskit_ibm_runtime import SamplerV2, fake_provider
 
 from circuits import DEMOS, VARIANTS
 from compilers import COMPILERS, MASK_ANGLE, PLANT_GATES, PLANT_POSITIONS, honest, plant
 from lock import lock, unlock
 from pipeline import detection_matrix, run
 from score import confidentiality, secret_blind, view
-from verify import FIDELITY_RATIO, NAIVE_TOL, audit_fidelity, check_function, naive_check
+from verify import FIDELITY_RATIO, NAIVE_TOL, audit_fidelity, check_function, naive_check, recheck, tvd
 
 ROOT = Path(__file__).parent
 WEB = ROOT / "web"
@@ -185,7 +187,218 @@ def plant_json(cid, backend_name, gate, qubit, pos, decoys=0, seed=7):
                        "fidelity": {**r["fidelity"], "threshold": FIDELITY_RATIO}}}
 
 
-META = {"circuits": {k: {"name": v, "kind": DEMOS[v]().metadata["kind"]} for k, v in CIRCUITS.items()},
+def plant_args(q):
+    """gate, qubit, pos of a planted Trojan from a query, or ValueError (plant() checks the qubit range)."""
+    if q.get("gate") not in PLANT_GATES or q.get("pos") not in PLANT_POSITIONS or not q.get("qubit", "").isdigit():
+        raise ValueError(f"gate must be one of {', '.join(PLANT_GATES)}, pos one of"
+                         f" {', '.join(PLANT_POSITIONS)}, qubit a data-qubit index")
+    return q["gate"], int(q["qubit"]), q["pos"]
+
+
+# ---------- real IBM hardware: only with --allow-ibm, one job in flight, a hard budget ----------
+IBM_DEVICES = ("ibm_fez", "ibm_kingston")  # ibm_marrakesh is offline until 2026-12-09
+IBM_MODES = (*COMPILERS, "plant")
+IBM_SHOTS, IBM_MAX_SUBMITS, IBM_MIN_SECONDS = 2000, 6, 120
+IBM_WORKLOADS = "https://quantum.cloud.ibm.com/workloads"  # qiskit-ibm-runtime exposes no per-job URL
+LIVE_IBM = ROOT / "bench" / "live_ibm"
+IBM = {"allowed": False, "busy": False, "job": None, "submits": 0}
+IBM_STATE = threading.Lock()
+
+
+def ibm_service():
+    from qiskit_ibm_runtime import QiskitRuntimeService
+    return cached("ibm-service", QiskitRuntimeService)  # the saved account; the token is never read here
+
+
+def ibm_device(q):
+    name = q.get("backend", "")
+    if name == "ibm_marrakesh":
+        raise ValueError("ibm_marrakesh is offline until 2026-12-09")
+    if name not in IBM_DEVICES:
+        raise ValueError(f"backend must be one of {', '.join(IBM_DEVICES)}")
+    return name
+
+
+def submit_args(q):
+    """Strict: circuit, mode, backend, and gate/qubit/pos only (and always) for mode=plant."""
+    planted = q.get("mode") == "plant"
+    allowed = {"circuit", "mode", "backend"} | ({"gate", "qubit", "pos"} if planted else set())
+    if set(q) - allowed or q.get("circuit") not in CIRCUITS or q.get("mode") not in IBM_MODES:
+        raise ValueError(f"needs circuit ({', '.join(CIRCUITS)}), mode ({', '.join(IBM_MODES)}) and backend;"
+                         " gate, qubit and pos only with mode=plant")
+    args = {"circuit": q["circuit"], "mode": q["mode"], "backend": ibm_device(q)}
+    if planted:
+        args["gate"], args["qubit"], args["pos"] = plant_args(q)
+        if args["qubit"] >= DEMOS[CIRCUITS[args["circuit"]]]().num_qubits:
+            raise ValueError("qubit is not a data qubit of this circuit")
+    return args
+
+
+def calibrated(be):
+    return be.properties(refresh=True).last_update_date.astimezone(timezone.utc).isoformat(timespec="seconds")
+
+
+def ibm_status(name):
+    service = ibm_service()
+    be = cached(("ibm", name), lambda: service.backend(name))
+    st, usage = be.status(), service.usage()
+    return {"device": name, "operational": bool(st.operational), "status_msg": st.status_msg,
+            "pending_jobs": st.pending_jobs, "remaining_seconds": usage.get("usage_remaining_seconds"),
+            "min_seconds": IBM_MIN_SECONDS, "calibration_utc": calibrated(be),
+            "submits_left": IBM_MAX_SUBMITS - IBM["submits"],
+            "in_flight": bool(IBM["busy"] or (IBM["job"] and job_open()))}
+
+
+def ideal(circ):
+    """Exact output distribution of the original circuit (no sampling noise in the reference)."""
+    probs = Statevector(circ.remove_final_measurements(inplace=False)).probabilities_dict()
+    return {k: round(float(v), 6) for k, v in probs.items() if v > 1e-9}
+
+
+def ibm_sample(be, circuits):
+    """The only place a job is submitted: one SamplerV2 job of exactly 2 circuits x IBM_SHOTS."""
+    if len(circuits) != 2:
+        raise ValueError(f"refusing to submit {len(circuits)} circuits: exactly 2 per job")
+    return SamplerV2(mode=be).run(circuits, shots=IBM_SHOTS)
+
+
+class Refused(Exception):
+    """A guard said no (409): nothing was submitted."""
+
+
+def ibm_submit(args, seed=7):
+    """One fresh lock; the judge's compile and an honest baseline of it; verify on the live target;
+    re-audit on the newest calibration; then one 2-circuit job. Returns without waiting for it."""
+    service = ibm_service()
+    be = cached(("ibm", args["backend"]), lambda: service.backend(args["backend"]))
+    left = service.usage().get("usage_remaining_seconds")
+    if left is not None and left < IBM_MIN_SECONDS:
+        raise Refused(f"quota low: {left:.0f} s of QPU time left (needs {IBM_MIN_SECONDS})")
+    circuit = DEMOS[CIRCUITS[args["circuit"]]]()
+    with HEAVY:
+        be.refresh()  # the device's live target
+        locked = lock(circuit)  # fresh, OS entropy
+        compiled = honest(locked.circuit, be, seed=seed)
+        baseline, physical = unlock(compiled, locked.key), None
+        if args["mode"] == "plant":
+            tampered, physical = plant(compiled, be, args["gate"], args["qubit"], args["pos"])
+            final = unlock(tampered, locked.key)
+        else:
+            final = unlock(COMPILERS[args["mode"]](locked.circuit, be, seed=seed), locked.key)
+        r = {"naive": naive_check(circuit, final), "functional": check_function(circuit, final),
+             "fidelity": audit_fidelity(final, be, baseline)}
+        r["trust"] = {"verdict": "ACCEPT" if r["functional"]["passed"] and r["fidelity"]["passed"] else "REJECT"}
+        ref, sim = ideal(circuit), AerSimulator.from_backend(be)  # today's noise model, not a cached one
+        predicted = {k: round(1 - tvd(ref, sim.run(c, shots=IBM_SHOTS, seed_simulator=1).result().get_counts()), 4)
+                     for k, c in (("judge", final), ("baseline", baseline))}
+        cal = calibrated(be)
+        again = recheck(final, baseline, be)  # time of use: the calibration may have moved
+    if r["fidelity"]["passed"] and not again["passed"]:
+        raise Refused(f"calibration moved: the fidelity audit now fails (ESP ratio {r['fidelity']['ratio']}"
+                      f" -> {again['ratio']}); nothing was submitted")
+    queued = be.status().pending_jobs
+    job = ibm_sample(be, [final, baseline])
+    jid = job.job_id()
+    record = {"job_id": jid, "device": args["backend"], "submitted_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+              "calibration_utc": cal, "queue_at_submit": queued, "remaining_seconds_at_submit": left,
+              "shots": IBM_SHOTS, "transpiler_seed": seed, "naive_tol": NAIVE_TOL, "fidelity_threshold": FIDELITY_RATIO,
+              "params": args, "planted_physical": physical, "circuits": ["judge", "baseline"],
+              "secret": circuit.metadata["secret"], "verdict": r["trust"]["verdict"], "reason": reason(r),
+              "checks": {"naive": r["naive"], "equivalence": r["functional"], "fidelity": r["fidelity"],
+                         "recheck": again},
+              "predicted_one_minus_tvd": predicted, "ideal": ref, "url": IBM_WORKLOADS}
+    LIVE_IBM.mkdir(parents=True, exist_ok=True)
+    (LIVE_IBM / f"{jid}.json").write_text(json.dumps(record, indent=2), encoding="utf-8")
+    return record
+
+
+STATUS = {"INITIALIZING": "queued", "QUEUED": "queued", "RUNNING": "running", "DONE": "done",
+          "ERROR": "error", "CANCELLED": "error"}
+
+
+def ibm_job(jid):
+    """Status of a job this panel submitted; when done, the measured results (saved with the record)."""
+    path = LIVE_IBM / f"{jid}.json"
+    if not (jid.isalnum() and path.is_file()):
+        raise ValueError("unknown job id (only jobs submitted from this panel)")
+    rec = json.loads(path.read_text(encoding="utf-8"))
+    if "results" in rec:
+        return {**rec, "status": "done"}
+    job = ibm_service().job(jid)
+    status = STATUS.get(job.status(), "queued")
+    if status == "error":
+        rec.update(status="error", error=job.error_message())
+    if status == "done":
+        out = {}
+        for name, res in zip(rec["circuits"], job.result()):
+            got = res.join_data().get_counts()
+            d = tvd(rec["ideal"], got)
+            out[name] = {"counts": got, "one_minus_tvd": round(1 - d, 4), "naive_tvd": round(d, 4),
+                         "naive_passed": d < NAIVE_TOL,
+                         "p_secret": round(got.get(rec["secret"], 0) / rec["shots"], 4)
+                         if isinstance(rec["secret"], str) else None}
+        out["measured_ratio"] = round(out["judge"]["one_minus_tvd"] / out["baseline"]["one_minus_tvd"], 3)
+        stamps = job.metrics().get("timestamps", {})
+        if stamps.get("created") and stamps.get("running"):
+            t = lambda s: datetime.fromisoformat(s.replace("Z", "+00:00"))
+            rec["queue_seconds"] = round((t(stamps["running"]) - t(stamps["created"])).total_seconds())
+        rec.update(results=out, timestamps=stamps, qpu_seconds=job.usage(),
+                   finished_utc=datetime.now(timezone.utc).isoformat(timespec="seconds"))
+    if status in ("done", "error"):
+        path.write_text(json.dumps(rec, indent=2), encoding="utf-8")
+        with IBM_STATE:
+            if IBM["job"] == jid:
+                IBM["job"] = None
+    return {**rec, "status": status}
+
+
+def job_open():
+    """Is the last submitted job still queued or running? (Asks IBM; a finished one is cleared.)"""
+    jid = IBM["job"]
+    if jid and STATUS.get(ibm_service().job(jid).status(), "queued") in ("done", "error"):
+        with IBM_STATE:
+            if IBM["job"] == jid:
+                IBM["job"] = None
+        return None
+    return jid
+
+
+def ibm_route(path, q):
+    """(status code, body) for /api/ibm/*."""
+    if not IBM["allowed"]:
+        return 403, {"error": "real-hardware runs are off: start the server with --allow-ibm"}
+    if path == "/api/ibm/status":
+        if set(q) - {"backend"}:
+            raise ValueError("status takes only backend")
+        return 200, ibm_status(ibm_device(q))
+    if path == "/api/ibm/job":
+        if set(q) != {"id"}:
+            raise ValueError("job takes only id")
+        return 200, ibm_job(q["id"])
+    if path != "/api/ibm/submit":
+        return 404, {"error": f"unknown endpoint {path}"}
+    args = submit_args(q)
+    with IBM_STATE:  # claim the single slot before any IBM call
+        if IBM["submits"] >= IBM_MAX_SUBMITS:
+            return 429, {"error": f"this server run already submitted {IBM_MAX_SUBMITS} jobs; restart it to submit more"}
+        if IBM["busy"]:
+            return 409, {"error": "a submission is already being prepared"}
+        IBM["busy"] = True
+    try:
+        if IBM["job"] and job_open():
+            return 409, {"error": f"job {IBM['job']} is still in flight; wait for it to finish"}
+        try:
+            rec = ibm_submit(args)
+        except Refused as e:
+            return 409, {"error": str(e)}
+        with IBM_STATE:
+            IBM["job"], IBM["submits"] = rec["job_id"], IBM["submits"] + 1
+        return 200, {**rec, "submits_left": IBM_MAX_SUBMITS - IBM["submits"]}
+    finally:
+        IBM["busy"] = False
+
+
+META = {"circuits":{k: {"name": v, "kind": DEMOS[v]().metadata["kind"]} for k, v in CIRCUITS.items()},
         "modes": list(COMPILERS), "backends": list(BACKENDS)}
 
 
@@ -197,6 +410,14 @@ class Handler(SimpleHTTPRequestHandler):
         url = urlparse(self.path)
         if not url.path.startswith("/api/"):
             return super().do_GET()
+        if url.path.startswith("/api/ibm/"):
+            q = {k: v[0] for k, v in parse_qs(url.query, keep_blank_values=True).items()}
+            try:
+                return self.send(*ibm_route(url.path, q))
+            except ValueError as e:  # bad parameters, or a planted gate that does not fit the compile
+                return self.send(400, {"error": str(e)})
+            except Exception as e:
+                return self.send(500, {"error": f"{type(e).__name__}: {e}"})
         route = {"/api/meta": lambda: META,
                  "/api/run": lambda: run_json(cid, mode, be, decoys, seed),
                  "/api/matrix": lambda: matrix_json(cid, be, decoys, seed),
@@ -209,10 +430,8 @@ class Handler(SimpleHTTPRequestHandler):
             decoys, seed = int(q.get("decoys", 0)), int(q.get("seed", 7))
             if cid not in CIRCUITS or mode not in COMPILERS or be not in BACKENDS or not 0 <= decoys <= 3:
                 raise ValueError("unknown circuit, mode, backend or decoys")
-            if url.path == "/api/plant" and (q.get("gate") not in PLANT_GATES or q.get("pos") not in PLANT_POSITIONS
-                                             or not q.get("qubit", "").isdigit()):
-                raise ValueError(f"gate must be one of {', '.join(PLANT_GATES)}, pos one of"
-                                 f" {', '.join(PLANT_POSITIONS)}, qubit a data-qubit index")
+            if url.path == "/api/plant":
+                plant_args(q)
         except ValueError as e:
             return self.send(400, {"error": str(e)})
         try:
@@ -273,5 +492,7 @@ if __name__ == "__main__":
         export_plant()
     else:
         port = 8600
-        print(f"TrustPass UI on http://localhost:{port}")
+        IBM["allowed"] = "--allow-ibm" in sys.argv
+        print(f"TrustPass UI on http://localhost:{port}"
+              + (f" · real IBM hardware ON ({', '.join(IBM_DEVICES)}, at most {IBM_MAX_SUBMITS} jobs)" if IBM["allowed"] else ""))
         ThreadingHTTPServer(("127.0.0.1", port), Handler).serve_forever()
