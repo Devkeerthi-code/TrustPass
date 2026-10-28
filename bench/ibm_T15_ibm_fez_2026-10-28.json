@@ -32,7 +32,22 @@
         "101": 0.945312,
         "110": 0.007812,
         "111": 0.007812
-      }
+      },
+      "counts": {
+        "101": 1574,
+        "011": 59,
+        "100": 96,
+        "001": 65,
+        "110": 55,
+        "000": 56,
+        "111": 47,
+        "010": 48
+      },
+      "measured_one_minus_tvd": 0.8417,
+      "naive_hw_tvd": 0.1583,
+      "naive_hw_passed": false,
+      "p_secret": 0.787,
+      "measured_ratio": 1.0
     },
     {
       "circuit": "Grover search (marked item)",
@@ -58,7 +73,22 @@
         "101": 0.945312,
         "110": 0.007812,
         "111": 0.007812
-      }
+      },
+      "counts": {
+        "101": 1255,
+        "001": 137,
+        "000": 130,
+        "100": 142,
+        "111": 85,
+        "110": 75,
+        "011": 91,
+        "010": 85
+      },
+      "measured_one_minus_tvd": 0.6822,
+      "naive_hw_tvd": 0.3178,
+      "naive_hw_passed": false,
+      "p_secret": 0.6275,
+      "measured_ratio": 0.811
     },
     {
       "circuit": "Grover search (marked item)",
@@ -84,7 +114,24 @@
         "101": 0.945312,
         "110": 0.007812,
         "111": 0.007812
-      }
+      },
+      "counts": {
+        "110": 47,
+        "100": 1614,
+        "011": 57,
+        "101": 90,
+        "111": 52,
+        "001": 51,
+        "000": 52,
+        "010": 37
+      },
+      "measured_one_minus_tvd": 0.0997,
+      "naive_hw_tvd": 0.9003,
+      "naive_hw_passed": false,
+      "p_secret": 0.045,
+      "measured_ratio": 0.118
     }
-  ]
+  ],
+  "finished_utc": "2026-10-28T20:22:43+00:00",
+  "qpu_seconds": 4
 }
