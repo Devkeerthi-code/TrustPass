@@ -6,6 +6,9 @@
                                      circuits (seeds 21-23 all 15, seed 24 QAOA x 5 compilers), ibm_fez 47
                                      (seeds 11-13 all 15, seed 14 VQE honest + saboteur), ibm_kingston 2
                                      (seed 31 QAOA honest + saboteur); --no-wait submits without fetching
+  python bench/ibm_runs.py T         tops S up to 50 circuits per device: ibm_fez 3 (seed 15 Grover honest,
+                                     saboteur, trojan-overt), ibm_kingston 48 (seeds 32-34 all 15, seed 35
+                                     Grover honest, saboteur, trojan-overt)
   python bench/ibm_runs.py fetch F   collect the results of the job saved in bench JSON F
 
 Prints the account's remaining QPU time first and stops under 3 minutes. One fresh lock (OS entropy)
@@ -42,7 +45,10 @@ JOBS = {"A": [("ibm_fez", list(DEMOS), list(COMPILERS), SEED)],
               ("ibm_marrakesh", [QAOA], list(COMPILERS), 24),
               *(("ibm_fez", list(DEMOS), list(COMPILERS), s) for s in (11, 12, 13)),
               ("ibm_fez", [VQE], ["honest", "saboteur"], 14),
-              ("ibm_kingston", [QAOA], ["honest", "saboteur"], 31)]}
+              ("ibm_kingston", [QAOA], ["honest", "saboteur"], 31)],
+        "T": [("ibm_fez", [GROVER], ["honest", "saboteur", "trojan-overt"], 15),
+              *(("ibm_kingston", list(DEMOS), list(COMPILERS), s) for s in (32, 33, 34)),
+              ("ibm_kingston", [GROVER], ["honest", "saboteur", "trojan-overt"], 35)]}
 
 
 def now():
@@ -105,7 +111,7 @@ def submit(service, label, device, names, modes, seed):
             sys.exit(f"Not submitting: {e['circuit']} {e['mode']} now fails the fidelity audit ({again['verdict']},"
                      f" ESP ratio {e['esp_ratio']:.3f} -> {again['ratio']:.3f}).")
     job = SamplerV2(mode=backend).run(finals, shots=SHOTS)
-    out = ROOT / "bench" / f"ibm_{label}{seed if label == 'S' else ''}_{device}_{now()[:10]}.json"
+    out = ROOT / "bench" / f"ibm_{label}{seed if label in 'ST' else ''}_{device}_{now()[:10]}.json"
     out.write_text(json.dumps({"job": label, "device": device, "job_id": job.job_id(), "submitted_utc": now(),
                                "calibration_utc": calibrated, "shots": SHOTS, "transpiler_seed": seed,
                                "naive_tol": NAIVE_TOL, "circuits": entries}, indent=2), encoding="utf-8")
