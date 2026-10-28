@@ -1,6 +1,6 @@
 """95% bootstrap intervals for the hardware results: how much of each difference is shot noise?
 
-For every circuit in the completed ibm_fez and ibm_kingston bench JSON files (bench/ibm_*.json and the
+For every circuit in the completed bench JSON files (bench/ibm_*.json and the
 panel's bench/live_ibm/*.json), resample its measured
 counts 1,000 times (multinomial, same shot count) and recompute 1-TVD against the same ideal
 reference; the measured ratio resamples the circuit and its honest compile independently (the
@@ -68,7 +68,7 @@ def jobs():
 
 def files():
     for d in jobs():
-        if d["device"] in ("ibm_fez", "ibm_kingston") and done(d):
+        if done(d):
             yield d
 
 

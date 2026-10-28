@@ -2,10 +2,14 @@
 
   python bench/ibm_runs.py A         ibm_fez: all 5 compilers x Grover, QAOA, VQE, one SamplerV2 job
   python bench/ibm_runs.py B         Grover honest + saboteur on ibm_kingston, one job
+  python bench/ibm_runs.py S         seed sweep, one job per (device, transpiler seed): ibm_marrakesh 50
+                                     circuits (seeds 21-23 all 15, seed 24 QAOA x 5 compilers), ibm_fez 47
+                                     (seeds 11-13 all 15, seed 14 VQE honest + saboteur), ibm_kingston 2
+                                     (seed 31 QAOA honest + saboteur); --no-wait submits without fetching
   python bench/ibm_runs.py fetch F   collect the results of the job saved in bench JSON F
 
-Prints the account's remaining QPU time first and stops under 4 minutes. One fresh lock (OS entropy)
-per circuit, shared by its compilers; transpiler seed 7; 2000 shots. Before running, every circuit is
+Prints the account's remaining QPU time first and stops under 3 minutes. One fresh lock (OS entropy)
+per circuit, shared by its compilers; transpiler seed 7 (S: as listed); 2000 shots. Before running, every circuit is
 verified against the device's live target (QCEC + ESP audit against the honest compile of the same
 lock) and simulated on AerSimulator.from_backend(device) (predicted 1-TVD). Before each submit the
 plan is printed and the script asks for y; then every circuit that passed the audit is re-audited on
@@ -30,9 +34,15 @@ from compilers import COMPILERS
 from lock import lock, unlock
 from verify import NAIVE_TOL, audit_fidelity, check_function, noisy_counts, recheck, tvd
 
-SHOTS, SEED, MIN_SECONDS = 2000, 7, 240
-JOBS = {"A": [("ibm_fez", list(DEMOS), list(COMPILERS))],
-        "B": [("ibm_kingston", [next(iter(DEMOS))], ["honest", "saboteur"])]}
+SHOTS, SEED, MIN_SECONDS = 2000, 7, 180
+GROVER, QAOA, VQE = DEMOS
+JOBS = {"A": [("ibm_fez", list(DEMOS), list(COMPILERS), SEED)],
+        "B": [("ibm_kingston", [GROVER], ["honest", "saboteur"], SEED)],
+        "S": [*(("ibm_marrakesh", list(DEMOS), list(COMPILERS), s) for s in (21, 22, 23)),
+              ("ibm_marrakesh", [QAOA], list(COMPILERS), 24),
+              *(("ibm_fez", list(DEMOS), list(COMPILERS), s) for s in (11, 12, 13)),
+              ("ibm_fez", [VQE], ["honest", "saboteur"], 14),
+              ("ibm_kingston", [QAOA], ["honest", "saboteur"], 31)]}
 
 
 def now():
@@ -53,13 +63,13 @@ def ideal(circuit):
     return {k: round(float(v), 6) for k, v in probs.items() if v > 1e-9}
 
 
-def prepare(backend, names, modes):
+def prepare(backend, names, modes, seed):
     """Lock, compile, unlock and verify every circuit before anything runs."""
     entries, finals, baselines = [], [], []
     for name in names:
         qc = DEMOS[name]()
         locked = lock(qc)  # fresh lock per circuit, shared by its compilers
-        compiled = {m: unlock(COMPILERS[m](locked.circuit, backend, seed=SEED), locked.key) for m in modes}
+        compiled = {m: unlock(COMPILERS[m](locked.circuit, backend, seed=seed), locked.key) for m in modes}
         ref = ideal(qc)
         for mode, final in compiled.items():
             functional = check_function(qc, final)
@@ -78,13 +88,13 @@ def prepare(backend, names, modes):
     return entries, finals, baselines
 
 
-def submit(service, label, device, names, modes):
+def submit(service, label, device, names, modes, seed):
     backend = service.backend(device)
     calibrated = backend.properties().last_update_date.astimezone(timezone.utc).isoformat(timespec="seconds")
-    print(f"\nJob {label}: {device} ({backend.num_qubits} qubits), calibration {calibrated}")
-    entries, finals, baselines = prepare(backend, names, modes)
+    print(f"\nJob {label}: {device} ({backend.num_qubits} qubits), transpiler seed {seed}, calibration {calibrated}")
+    entries, finals, baselines = prepare(backend, names, modes, seed)
     if remaining(service) < MIN_SECONDS:
-        sys.exit("Under 4 minutes of QPU time left: not submitting.")
+        sys.exit("Under 3 minutes of QPU time left: not submitting.")
     print(f"Submit to {device}: {len(finals)} circuits x {SHOTS} shots ({backend.status().pending_jobs} jobs queued)?")
     if input("[y/N] ").strip().lower() != "y":
         print("Not submitted.")
@@ -95,9 +105,9 @@ def submit(service, label, device, names, modes):
             sys.exit(f"Not submitting: {e['circuit']} {e['mode']} now fails the fidelity audit ({again['verdict']},"
                      f" ESP ratio {e['esp_ratio']:.3f} -> {again['ratio']:.3f}).")
     job = SamplerV2(mode=backend).run(finals, shots=SHOTS)
-    out = ROOT / "bench" / f"ibm_{label}_{device}_{now()[:10]}.json"
+    out = ROOT / "bench" / f"ibm_{label}{seed if label == 'S' else ''}_{device}_{now()[:10]}.json"
     out.write_text(json.dumps({"job": label, "device": device, "job_id": job.job_id(), "submitted_utc": now(),
-                               "calibration_utc": calibrated, "shots": SHOTS, "transpiler_seed": SEED,
+                               "calibration_utc": calibrated, "shots": SHOTS, "transpiler_seed": seed,
                                "naive_tol": NAIVE_TOL, "circuits": entries}, indent=2), encoding="utf-8")
     print(f"Job {job.job_id()} submitted, saved {out.relative_to(ROOT)}; waiting for results...")
     return out
@@ -134,18 +144,18 @@ def fetch(service, path):
 def main():
     sys.stdout.reconfigure(encoding="utf-8", line_buffering=True)
     args = sys.argv[1:]
-    if not args or args[0] not in ("A", "B", "fetch"):
+    if not args or args[0] not in (*JOBS, "fetch"):
         sys.exit(__doc__)
     service = QiskitRuntimeService()
     if remaining(service) < MIN_SECONDS:
-        sys.exit("Under 4 minutes of QPU time left: stopping.")
+        sys.exit("Under 3 minutes of QPU time left: stopping.")
     if args[0] == "fetch":
         return fetch(service, Path(args[1]))
     only = args[args.index("--device") + 1] if "--device" in args else None
-    for device, names, modes in JOBS[args[0]]:
+    for device, names, modes, seed in JOBS[args[0]]:
         if only in (None, device):
-            out = submit(service, args[0], device, names, modes)
-            if out:
+            out = submit(service, args[0], device, names, modes, seed)
+            if out and "--no-wait" not in args:
                 fetch(service, out)
     remaining(service)
 
