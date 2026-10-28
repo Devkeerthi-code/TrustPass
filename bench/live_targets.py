@@ -21,7 +21,7 @@ from circuits import DEMOS
 from lock import lock
 from pipeline import detection_matrix, run
 
-DEVICES = ("ibm_fez", "ibm_kingston", "ibm_marrakesh")
+DEVICES = ("ibm_fez", "ibm_kingston")
 CSV = ROOT / "bench" / "live_targets.csv"
 FIELDS = ["device", "calibration_utc", "fetched_utc", "circuit", "mode",
           "naive_test", "naive_tvd", "equivalence", "fidelity_audit", "esp_ratio", "verdict"]
