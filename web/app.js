@@ -437,7 +437,7 @@ function log(r) {
 // ---------- measured on real IBM hardware (web/hardware.json, written by bench/compare.py) ----------
 fetch("web/hardware.json").then((r) => (r.ok ? r.json() : null)).then((hw) => {
   if (!hw?.runs?.length) return;
-  const v = (w) => `<span class="${w === "ACCEPT" ? "good" : "bad"}">${w}</span>`;
+  const v = (w) => (w ? `<span class="${w === "ACCEPT" ? "good" : "bad"}">${w}</span>` : "–");  // a panel job's baseline has no verdict
   $("#hw-rows").innerHTML = hw.runs.map((r) => `<tr><td>${r.device}</td><td>${r.circuit}</td>`
     + `<td>${v(r.honest.verdict)} / ${v(r.saboteur.verdict)}</td><td>${fmt(r.honest.measured)}</td><td>${fmt(r.saboteur.measured)}</td></tr>`).join("");
   $("#hw").hidden = false;

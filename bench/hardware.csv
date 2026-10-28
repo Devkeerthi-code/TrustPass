@@ -18,3 +18,5 @@ run,device,job_id,submitted_utc,circuit,mode,verdict,esp_ratio,predicted_one_min
 3,ibm_fez,dbefmkvsstms73fbvl4g,2026-10-24T18:39:16+00:00,VQE,trojan-masked,REJECT,1.0,0.9352,0.8439,0.967,False,0.8226,0.8597,0.9384,1.0006
 3,ibm_fez,dbefmkvsstms73fbvl4g,2026-10-24T18:39:16+00:00,VQE,trojan-dormant,REJECT,0.997,0.9735,0.8831,1.012,False,0.8596,0.8994,0.9809,1.0464
 3,ibm_fez,dbefmkvsstms73fbvl4g,2026-10-24T18:39:16+00:00,VQE,saboteur,REJECT,0.108,0.6729,0.6642,0.761,False,0.6422,0.6837,0.7346,0.7937
+4,ibm_fez,dbfm3uvgdj9s73bbu600,2026-10-26T14:21:47+00:00,Grover,honest,,,0.8627,0.8442,1.0,False,0.8267,0.8632,1.0,1.0
+4,ibm_fez,dbfm3uvgdj9s73bbu600,2026-10-26T14:21:47+00:00,Grover,saboteur,REJECT,0.883,0.7737,0.7347,0.87,False,0.7147,0.7547,0.84,0.9014

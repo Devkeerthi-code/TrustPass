@@ -1,7 +1,8 @@
 """Predicted vs measured: every real IBM hardware run in bench/, in one chart and one table.
 
-Reads bench/ibm_*.json (run 1 from `demo.py --ibm`, the rest from bench/ibm_runs.py; jobs still
-queued are skipped). Measured ratio = measured 1-TVD / the honest compile's measured 1-TVD for the
+Reads bench/ibm_*.json (run 1 from `demo.py --ibm`, the rest from bench/ibm_runs.py) and the panel's
+bench/live_ibm/*.json (server.py --allow-ibm); jobs still queued are skipped. A panel job's honest
+baseline is the audit's reference, so it has no verdict or ESP ratio of its own ("–"). Measured ratio = measured 1-TVD / the honest compile's measured 1-TVD for the
 same lock on the same device, the hardware counterpart of the ESP ratio. Run 1 recorded no noisy-sim
 prediction, and its 1-TVD is against a 4,000-shot ideal sample instead of the exact distribution.
 The [low, high] intervals are 95% bootstraps over the measured counts (bench/confidence.py).
@@ -16,7 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from confidence import intervals
+from confidence import circuits, done, intervals, jobs
 from verify import NAIVE_TOL
 
 CSV, PNG, WEB = ROOT / "bench" / "hardware.csv", ROOT / "bench" / "compare.png", ROOT / "web" / "hardware.json"
@@ -30,10 +31,22 @@ MARKERS = dict(zip(MODES, ("o", "s", "^", "v", "D")))
 
 def load():
     rows = []
-    for path in sorted((ROOT / "bench").glob("ibm_*.json")):
-        d = json.loads(path.read_text(encoding="utf-8"))
+    for d in jobs():
+        if not done(d):
+            continue
         first = len(rows)
-        if "runs" in d:  # demo.py --ibm: honest + saboteur, one circuit
+        if "results" in d:  # server.py --allow-ibm panel job: judge, then its honest baseline
+            res, fid = d["results"], d["checks"]["fidelity"]
+            for (name, mode, _, _), k in zip(circuits(d), ("judge", "baseline")):
+                judge = k == "judge"
+                rows.append({"device": d["device"], "job_id": d["job_id"], "submitted_utc": d["submitted_utc"],
+                             "circuit": name, "mode": mode, "verdict": d["verdict"] if judge else None,
+                             "esp_ratio": fid["ratio"] if judge else None,
+                             "predicted_one_minus_tvd": d["predicted_one_minus_tvd"][k],
+                             "measured_one_minus_tvd": res[k]["one_minus_tvd"],
+                             "measured_ratio": res["measured_ratio"] if judge else 1.0,
+                             "naive_hw_passed": res[k]["naive_passed"]})
+        elif "runs" in d:  # demo.py --ibm: honest + saboteur, one circuit
             honest = d["runs"]["honest"]["one_minus_tvd"]
             for mode, r in d["runs"].items():
                 rows.append({"device": d["device"], "job_id": d["job_id"], "submitted_utc": d["submitted_utc"],
@@ -42,16 +55,14 @@ def load():
                              "measured_one_minus_tvd": r["one_minus_tvd"],
                              "measured_ratio": round(r["one_minus_tvd"] / honest, 3),
                              "naive_hw_passed": 1 - r["one_minus_tvd"] < NAIVE_TOL})
-        elif all("counts" in e for e in d["circuits"]):
+        else:
             rows += [{"device": d["device"], "job_id": d["job_id"], "submitted_utc": d["submitted_utc"],
                       **{k: e[k] for k in FIELDS[4:]}} for e in d["circuits"]]
-        else:
-            continue
         for r, ci in zip(rows[first:], intervals(d)):  # same circuit order as the rows above
             r.update(zip(CI, ci))
-    jobs = sorted({(r["submitted_utc"], r["job_id"]) for r in rows})
+    ids = sorted({(r["submitted_utc"], r["job_id"]) for r in rows})
     for r in rows:
-        r["run"] = jobs.index((r["submitted_utc"], r["job_id"])) + 1
+        r["run"] = ids.index((r["submitted_utc"], r["job_id"])) + 1
         r["circuit"] = r["circuit"].split(" ")[0]
     order = {m: i for i, m in enumerate(MODES)}
     return sorted(rows, key=lambda r: (r["run"], r["circuit"], order[r["mode"]]))
@@ -111,7 +122,7 @@ def table(rows):
           " | Measured ratio [95% CI] | Naive test on hardware |")
     print("|---|---|---|---|---|---|---|---|---|---|")
     for r in rows:
-        print(f"| {r['run']} | {r['device']} | {r['circuit']} | {r['mode']} | {r['verdict']} | {f(r['esp_ratio'])}"
+        print(f"| {r['run']} | {r['device']} | {r['circuit']} | {r['mode']} | {r['verdict'] or '–'} | {f(r['esp_ratio'])}"
               f" | {f(r['predicted_one_minus_tvd'])} | {ci(r, 'measured_one_minus_tvd', *CI[:2])}"
               f" | {ci(r, 'measured_ratio', *CI[2:])}"
               f" | {'pass' if r['naive_hw_passed'] else 'fail'} |")
@@ -121,7 +132,7 @@ def main():
     sys.stdout.reconfigure(encoding="utf-8")
     rows = load()
     with CSV.open("w", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=FIELDS + CI)
+        w = csv.DictWriter(fh, fieldnames=FIELDS + CI, lineterminator="\n")
         w.writeheader()
         w.writerows(rows)
     chart(rows)

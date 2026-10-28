@@ -80,6 +80,22 @@
         "measured": 0.6642,
         "esp_ratio": 0.108
       }
+    },
+    {
+      "run": 4,
+      "device": "ibm_fez",
+      "date": "2026-10-26",
+      "job_id": "dbfm3uvgdj9s73bbu600",
+      "circuit": "Grover",
+      "honest": {
+        "verdict": null,
+        "measured": 0.8442
+      },
+      "saboteur": {
+        "verdict": "REJECT",
+        "measured": 0.7347,
+        "esp_ratio": 0.883
+      }
     }
   ]
 }
