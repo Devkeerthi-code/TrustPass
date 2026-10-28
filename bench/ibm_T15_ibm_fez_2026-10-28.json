@@ -1,0 +1,90 @@
+{
+  "job": "T",
+  "device": "ibm_fez",
+  "job_id": "dbh5gkhq260s73buior0",
+  "submitted_utc": "2026-10-28T20:17:22+00:00",
+  "calibration_utc": "2026-10-28T20:07:11+00:00",
+  "shots": 2000,
+  "transpiler_seed": 15,
+  "naive_tol": 0.1,
+  "circuits": [
+    {
+      "circuit": "Grover search (marked item)",
+      "secret": "101",
+      "mode": "honest",
+      "qcec": "equivalent_up_to_global_phase",
+      "audit": "ok",
+      "verdict": "ACCEPT",
+      "esp": 0.875,
+      "esp_ratio": 1.0,
+      "qubits": [
+        144,
+        145,
+        146
+      ],
+      "predicted_one_minus_tvd": 0.8792,
+      "ideal": {
+        "000": 0.007812,
+        "001": 0.007812,
+        "010": 0.007812,
+        "011": 0.007812,
+        "100": 0.007812,
+        "101": 0.945312,
+        "110": 0.007812,
+        "111": 0.007812
+      }
+    },
+    {
+      "circuit": "Grover search (marked item)",
+      "secret": "101",
+      "mode": "saboteur",
+      "qcec": "equivalent_up_to_global_phase",
+      "audit": "low_fidelity",
+      "verdict": "REJECT",
+      "esp": 0.3433,
+      "esp_ratio": 0.392,
+      "qubits": [
+        18,
+        31,
+        32
+      ],
+      "predicted_one_minus_tvd": 0.4322,
+      "ideal": {
+        "000": 0.007812,
+        "001": 0.007812,
+        "010": 0.007812,
+        "011": 0.007812,
+        "100": 0.007812,
+        "101": 0.945312,
+        "110": 0.007812,
+        "111": 0.007812
+      }
+    },
+    {
+      "circuit": "Grover search (marked item)",
+      "secret": "101",
+      "mode": "trojan-overt",
+      "qcec": "not_equivalent",
+      "audit": "ok",
+      "verdict": "REJECT",
+      "esp": 0.8748,
+      "esp_ratio": 1.0,
+      "qubits": [
+        144,
+        145,
+        146
+      ],
+      "predicted_one_minus_tvd": 0.0902,
+      "ideal": {
+        "000": 0.007812,
+        "001": 0.007812,
+        "010": 0.007812,
+        "011": 0.007812,
+        "100": 0.007812,
+        "101": 0.945312,
+        "110": 0.007812,
+        "111": 0.007812
+      }
+    }
+  ]
+}
