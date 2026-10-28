@@ -285,8 +285,8 @@ def test_ibm_endpoints_are_guarded():
         for path in ("status?backend=ibm_fez", ok, "job?id=abc"):
             assert code(path) == 403, path
         server.IBM["allowed"] = True
-        for bad in ("status?backend=ibm_marrakesh", "status?backend=ibm_fez&x=1", "job?id=../server", "job?id=nosuchjob",
-                    "submit?circuit=grover&mode=saboteur&backend=ibm_marrakesh",
+        for bad in ("status?backend=ibm_torino", "status?backend=ibm_fez&x=1", "job?id=../server", "job?id=nosuchjob",
+                    "submit?circuit=grover&mode=saboteur&backend=ibm_torino",
                     "submit?circuit=shor&mode=honest&backend=ibm_fez", "submit?circuit=grover&mode=evil&backend=ibm_fez",
                     "submit?circuit=grover&mode=honest&backend=ibm_fez&gate=x",  # gate/qubit/pos only with plant
                     "submit?circuit=grover&mode=plant&backend=ibm_fez&gate=h&qubit=0&pos=end",
