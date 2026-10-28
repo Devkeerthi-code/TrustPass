@@ -116,7 +116,7 @@ Slide-by-slide text for the organisers' Canva template: 10 slides, the limit. Th
 - **MQT QCEC 3.10:** formal equivalence checking.
 - **Pipeline modules:** circuits · lock · compilers · verify · score · pipeline.
 - **UI:** hand-built HTML/CSS/JS instrument; GitHub Pages serves a snapshot of real runs.
-- **10 automated tests**, about 10 s.
+- **15 automated tests**, about 20 s.
 
 *Speaker note:* Everything is open source and runs on Python 3.12. `lock.py` rewrites the circuit; `compilers.py` holds five stand-in compilers (honest, three Trojans, saboteur); `verify.py` runs the naive test, the output-map check plus QCEC, and the ESP audit; `score.py` builds the scorecard; `pipeline.py` ties them together. `server.py` serves the instrument UI with live runs; `server.py --export` writes the snapshot the public page uses. A QCEC check took 0.02-0.34 s in 473 of 474 calls. It does not scale far: on QAOA with random 3-regular graphs it proves equivalence up to 10 qubits (10.3 s) and hits its 30 s timeout at 14 qubits, which is a false REJECT, never an ACCEPT. Scheduled compiles are now verified: delays are removed before QCEC, and the ESP audit charges their idle time from each qubit's T1 and T2. The tests include regressions for the red-team findings.
 
@@ -147,7 +147,7 @@ Slide-by-slide text for the organisers' Canva template: 10 slides, the limit. Th
 | Self-cancelling CX on unconnected qubits scored error-free: ACCEPT | Audit rejects gates the device cannot run |
 
 - Attackers played the malicious compiler: our code, not the key.
-- Each finding confirmed before fixing; 10 automated tests guard the fixes.
+- Each finding confirmed before fixing; 15 automated tests guard the fixes.
 
 *Speaker note:* Two rounds of attackers found 14 findings; a final review before submitting found the 15th, the last row. Before that fix, a self-cancelling CX pair on an unconnected qubit pair came back with an ESP ratio of 1.0 on both device models, and QCEC said equivalent, so the verdict was ACCEPT. Other examples: the public transpiler seed let an attacker replay decoy placement (100% QAOA graph recovery), and a single delay crashed the checker. The checker now fails closed, and since delays are logically the identity, QCEC checks the circuit without them while the ESP audit charges their idle time. The ones we did not fix are listed as limits in the README. The attacks were run with Claude Code; the README's AI-use section says who did what.
 
