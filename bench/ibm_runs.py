@@ -1,8 +1,7 @@
 """Real IBM hardware runs with a budget guard: does the audit's prediction match the device?
 
   python bench/ibm_runs.py A         ibm_fez: all 5 compilers x Grover, QAOA, VQE, one SamplerV2 job
-  python bench/ibm_runs.py B         Grover honest + saboteur on ibm_kingston and on ibm_marrakesh,
-                                     one job per device (--device ibm_kingston for one of them)
+  python bench/ibm_runs.py B         Grover honest + saboteur on ibm_kingston, one job
   python bench/ibm_runs.py fetch F   collect the results of the job saved in bench JSON F
 
 Prints the account's remaining QPU time first and stops under 4 minutes. One fresh lock (OS entropy)
@@ -33,7 +32,7 @@ from verify import NAIVE_TOL, audit_fidelity, check_function, noisy_counts, rech
 
 SHOTS, SEED, MIN_SECONDS = 2000, 7, 240
 JOBS = {"A": [("ibm_fez", list(DEMOS), list(COMPILERS))],
-        "B": [(d, [next(iter(DEMOS))], ["honest", "saboteur"]) for d in ("ibm_kingston", "ibm_marrakesh")]}
+        "B": [("ibm_kingston", [next(iter(DEMOS))], ["honest", "saboteur"])]}
 
 
 def now():

@@ -24,7 +24,7 @@ from compilers import honest
 from lock import Locked, lock, unlock
 from verify import FIDELITY_RATIO, _outputs, audit_fidelity, check_function
 
-BACKENDS = ("FakeBrisbane", "FakeTorino", "ibm_fez", "ibm_kingston", "ibm_marrakesh")
+BACKENDS = ("FakeBrisbane", "FakeTorino", "ibm_fez", "ibm_kingston")
 
 
 class CliError(Exception):
