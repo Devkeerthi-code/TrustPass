@@ -196,7 +196,7 @@ def plant_args(q):
 
 
 # ---------- real IBM hardware: only with --allow-ibm, one job in flight, a hard budget ----------
-IBM_DEVICES = ("ibm_fez", "ibm_kingston")  # ibm_marrakesh is offline until 2026-12-09
+IBM_DEVICES = ("ibm_fez", "ibm_kingston", "ibm_marrakesh")
 IBM_MODES = (*COMPILERS, "plant")
 IBM_SHOTS, IBM_MAX_SUBMITS, IBM_MIN_SECONDS = 2000, 6, 120
 IBM_WORKLOADS = "https://quantum.cloud.ibm.com/workloads"  # qiskit-ibm-runtime exposes no per-job URL
@@ -212,8 +212,6 @@ def ibm_service():
 
 def ibm_device(q):
     name = q.get("backend", "")
-    if name == "ibm_marrakesh":
-        raise ValueError("ibm_marrakesh is offline until 2026-12-09")
     if name not in IBM_DEVICES:
         raise ValueError(f"backend must be one of {', '.join(IBM_DEVICES)}")
     return name
