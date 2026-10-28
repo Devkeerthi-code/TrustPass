@@ -11,7 +11,7 @@ Q-HACK INDIA 2026 (IBM Qiskit Fall Fest), Quantum Security & Cryptography track.
 ```bash
 pip install -r requirements.txt   # Python 3.12; full setup under Quickstart below
 python demo.py --matrix           # the detection matrix: which check catches which attack
-python test_trustpass.py          # 11 checks
+python test_trustpass.py          # 15 checks
 python server.py                  # the live instrument UI: http://localhost:8600
 ```
 
@@ -375,7 +375,7 @@ print(report["trust"])  # e.g. {'confidentiality': 100, 'integrity': 100, 'quali
 | `assets/plates/` | Panel hardware images (knobs, lever, lamps, screws), each with its generation prompt embedded |
 | `.impeccable/`, `DESIGN.md`, `PRODUCT.md` | The UI design record: product brief and decisions (`PRODUCT.md`), design tokens and rules (`DESIGN.md`), and the Impeccable workflow's comps, reviews and captures (`.impeccable/`) |
 | `demo.py` | The terminal demo |
-| `test_trustpass.py` | 14 checks, including regressions for the red-team findings and the calibration-drift re-check |
+| `test_trustpass.py` | 15 checks, including regressions for the red-team findings and the calibration-drift re-check |
 | `bench/` | Measurements behind the README: threshold sweep, scaling, live-calibration matrix, real hardware runs and their comparison, README capture (`pip install -r bench/requirements.txt`) |
 
 ## How we built this (AI use)

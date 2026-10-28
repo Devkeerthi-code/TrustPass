@@ -1,4 +1,4 @@
-"""TrustPass checks. Run: python test_trustpass.py (or pytest). ~10 s."""
+"""TrustPass checks. Run: python test_trustpass.py (or pytest). ~20 s."""
 import copy
 import os
 import tempfile
