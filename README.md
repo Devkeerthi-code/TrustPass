@@ -15,7 +15,7 @@ python test_trustpass.py          # 15 checks
 python server.py                  # the live instrument UI: http://localhost:8600
 ```
 
-**Stack:** Qiskit 2.5 · Qiskit Aer · MQT QCEC 3.10 · IBM fake backends with real calibration data · hand-built HTML/CSS/JS UI.
+**Stack:** Qiskit 2.5 · Qiskit Aer · MQT QCEC 3.10 · IBM device models (FakeBrisbane, FakeTorino) and real IBM hardware (ibm_fez, ibm_kingston) · hand-built HTML/CSS/JS UI.
 
 **Try it in your browser: https://devkeerthi-code.github.io/TrustPass/** (a snapshot of real pipeline runs, nothing to install; run `python server.py` locally for live runs).
 
