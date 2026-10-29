@@ -97,5 +97,137 @@
         "esp_ratio": 0.883
       }
     }
+  ],
+  "sweep": [
+    {
+      "device": "ibm_fez",
+      "jobs": 5,
+      "circuits": 50,
+      "honest_accept": [
+        11,
+        11
+      ],
+      "reject": {
+        "trojan-overt": [
+          10,
+          10
+        ],
+        "trojan-masked": [
+          9,
+          9
+        ],
+        "trojan-dormant": [
+          9,
+          9
+        ],
+        "saboteur": [
+          11,
+          11
+        ]
+      },
+      "saboteur_ratio": [
+        [
+          0.736,
+          0.7034,
+          0.7675
+        ],
+        [
+          0.886,
+          0.8697,
+          0.9248
+        ]
+      ],
+      "saboteur_significant": [
+        11,
+        11
+      ],
+      "naive_pass": {
+        "honest": [
+          7,
+          11
+        ],
+        "trojan-overt": [
+          0,
+          10
+        ],
+        "trojan-masked": [
+          3,
+          9
+        ],
+        "trojan-dormant": [
+          6,
+          9
+        ],
+        "saboteur": [
+          0,
+          11
+        ]
+      }
+    },
+    {
+      "device": "ibm_marrakesh",
+      "jobs": 4,
+      "circuits": 50,
+      "honest_accept": [
+        10,
+        10
+      ],
+      "reject": {
+        "trojan-overt": [
+          10,
+          10
+        ],
+        "trojan-masked": [
+          10,
+          10
+        ],
+        "trojan-dormant": [
+          10,
+          10
+        ],
+        "saboteur": [
+          10,
+          10
+        ]
+      },
+      "saboteur_ratio": [
+        [
+          0.409,
+          0.3828,
+          0.4375
+        ],
+        [
+          0.957,
+          0.9247,
+          0.9894
+        ]
+      ],
+      "saboteur_significant": [
+        10,
+        10
+      ],
+      "naive_pass": {
+        "honest": [
+          4,
+          10
+        ],
+        "trojan-overt": [
+          0,
+          10
+        ],
+        "trojan-masked": [
+          3,
+          10
+        ],
+        "trojan-dormant": [
+          3,
+          10
+        ],
+        "saboteur": [
+          0,
+          10
+        ]
+      }
+    }
   ]
 }
