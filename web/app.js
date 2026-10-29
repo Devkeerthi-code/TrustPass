@@ -440,6 +440,16 @@ fetch("web/hardware.json").then((r) => (r.ok ? r.json() : null)).then((hw) => {
   const v = (w) => (w ? `<span class="${w === "ACCEPT" ? "good" : "bad"}">${w}</span>` : "–");  // a panel job's baseline has no verdict
   $("#hw-rows").innerHTML = hw.runs.map((r) => `<tr><td>${r.device}</td><td>${r.circuit}</td>`
     + `<td>${v(r.honest.verdict)} / ${v(r.saboteur.verdict)}</td><td>${fmt(r.honest.measured)}</td><td>${fmt(r.saboteur.measured)}</td></tr>`).join("");
+  const n = ([a, b]) => `${a}/${b}`, tot = (pairs) => pairs.reduce(([a, b], [c, d]) => [a + c, b + d]);
+  if (hw.sweep?.length) {  // the 2026-10-28 transpiler-seed sweep, one line per device
+    $("#hw-sweep").textContent = "Seed sweep, 2026-10-28: " + hw.sweep.map((s) => {
+      const { honest, ...attacks } = s.naive_pass;
+      return `${s.device}, ${s.circuits} circuits: honest ACCEPT ${n(s.honest_accept)}, attacks REJECT ${n(tot(Object.values(s.reject)))}, `
+        + `saboteur measured ratio ${fmt(s.saboteur_ratio[0][0])}-${fmt(s.saboteur_ratio[1][0])}, `
+        + `histogram test passed by ${n(honest)} honest compiles and ${n(tot(Object.values(attacks)))} attacks`;
+    }).join("; ") + ".";
+    $("#hw-sweep").hidden = false;
+  }
   $("#hw").hidden = false;
 }).catch(() => {});
 

@@ -53,6 +53,6 @@ That's about 440 spoken words, roughly 2:45 at 160 words a minute. Rehearse with
 ## Words to avoid (judges will check)
 
 - Say "**checks** it's not sabotaged", not "proves". The fidelity audit uses a threshold. Only the equivalence check is a proof.
-- Say "on a **127-qubit IBM device model**" or "**simulated** IBM device with real calibration data", never "on real IBM hardware": the demos in the video are simulated. Our hardware results are four jobs on ibm_fez and ibm_kingston on two days (2026-10-24 and 26); if you mention them, say "two days, few repeats" (every saboteur rejected and measured worse on the device: 1-TVD 0.18-0.74 against honest 0.83-0.93).
+- Say "on a **127-qubit IBM device model**" or "**simulated** IBM device with real calibration data", never "on real IBM hardware": the demos in the video are simulated. Our hardware results are 121 measured circuits in 13 jobs on ibm_fez, ibm_kingston and ibm_marrakesh over three days (2026-10-24, 26 and 28; 50 more on ibm_kingston still queued); if you mention them, say "three days, small circuits" (every judged honest compile accepted, every attack rejected, every saboteur measured worse on the device).
 - Say the compiler "learns nothing **about the angles**", not "learns nothing".
 - The QAOA graph is hidden **statistically**, not perfectly. If asked, that's in the README limitations.

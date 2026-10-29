@@ -6,7 +6,8 @@ baseline is the audit's reference, so it has no verdict or ESP ratio of its own 
 same lock on the same device, the hardware counterpart of the ESP ratio. Run 1 recorded no noisy-sim
 prediction, and its 1-TVD is against a 4,000-shot ideal sample instead of the exact distribution.
 The [low, high] intervals are 95% bootstraps over the measured counts (bench/confidence.py).
-Writes bench/hardware.csv, bench/compare.png and web/hardware.json, and prints the README table.
+Jobs S and T of bench/ibm_runs.py (the transpiler-seed sweep) are summarised per device instead of row by row.
+Writes bench/hardware.csv, bench/compare.png and web/hardware.json, and prints the README tables.
     python bench/compare.py
 """
 import csv
@@ -101,18 +102,39 @@ def chart(rows):
     fig.savefig(PNG, dpi=120)
 
 
-def web(rows):
-    """Honest vs saboteur, per device and circuit, for the site's hardware block."""
-    out = []
+def sweep_ids():
+    """Job IDs of the transpiler-seed sweep (bench/ibm_runs.py S and T)."""
+    return {d["job_id"] for d in jobs() if d.get("job") in ("S", "T")}
+
+
+def sweep(rows):
+    """Per device: verdicts, saboteur measured ratios and histogram-test passes over the seed sweep."""
+    ids, out = sweep_ids(), []
+    for device in sorted({r["device"] for r in rows if r["job_id"] in ids}):
+        rs = [r for r in rows if r["job_id"] in ids and r["device"] == device]
+        mode = lambda m: [r for r in rs if r["mode"] == m]
+        sab = sorted(mode("saboteur"), key=lambda r: r["measured_ratio"])
+        out.append({"device": device, "jobs": len({r["job_id"] for r in rs}), "circuits": len(rs),
+                    "honest_accept": [sum(r["verdict"] == "ACCEPT" for r in mode("honest")), len(mode("honest"))],
+                    "reject": {m: [sum(r["verdict"] == "REJECT" for r in mode(m)), len(mode(m))] for m in MODES[1:]},
+                    "saboteur_ratio": [[r["measured_ratio"], r["ratio_ci_low"], r["ratio_ci_high"]] for r in (sab[0], sab[-1])],
+                    "saboteur_significant": [sum(r["ratio_ci_high"] < 1 for r in sab), len(sab)],
+                    "naive_pass": {m: [sum(bool(r["naive_hw_passed"]) for r in mode(m)), len(mode(m))] for m in MODES}})
+    return out
+
+
+def web(rows, summary):
+    """Honest vs saboteur, per device and circuit, for the site's hardware block, plus the seed-sweep summary."""
+    out, ids = [], sweep_ids()
     for r in rows:
-        if r["mode"] != "saboteur":
+        if r["mode"] != "saboteur" or r["job_id"] in ids:
             continue
         h = next(x for x in rows if x["run"] == r["run"] and x["circuit"] == r["circuit"] and x["mode"] == "honest")
         out.append({"run": r["run"], "device": r["device"], "date": r["submitted_utc"][:10], "job_id": r["job_id"],
                     "circuit": r["circuit"], "honest": {"verdict": h["verdict"], "measured": h["measured_one_minus_tvd"]},
                     "saboteur": {"verdict": r["verdict"], "measured": r["measured_one_minus_tvd"],
                                  "esp_ratio": r["esp_ratio"]}})
-    WEB.write_text(json.dumps({"metric": "measured 1-TVD vs ideal", "runs": out}, indent=2), encoding="utf-8")
+    WEB.write_text(json.dumps({"metric": "measured 1-TVD vs ideal", "runs": out, "sweep": summary}, indent=2), encoding="utf-8")
 
 
 def table(rows):
@@ -121,11 +143,30 @@ def table(rows):
     print("| Run | Device | Circuit | Compiler | Verdict | ESP ratio | Predicted 1-TVD | Measured 1-TVD [95% CI]"
           " | Measured ratio [95% CI] | Naive test on hardware |")
     print("|---|---|---|---|---|---|---|---|---|---|")
+    ids = sweep_ids()
     for r in rows:
+        if r["job_id"] in ids:
+            continue
         print(f"| {r['run']} | {r['device']} | {r['circuit']} | {r['mode']} | {r['verdict'] or '–'} | {f(r['esp_ratio'])}"
               f" | {f(r['predicted_one_minus_tvd'])} | {ci(r, 'measured_one_minus_tvd', *CI[:2])}"
               f" | {ci(r, 'measured_ratio', *CI[2:])}"
               f" | {'pass' if r['naive_hw_passed'] else 'fail'} |")
+
+
+def sweep_table(summary):
+    f = lambda xy: f"{xy[0]}/{xy[1]}"
+    print("\n| Device | Jobs | Circuits | Honest ACCEPT | trojan-overt REJECT | trojan-masked REJECT | trojan-dormant REJECT"
+          " | saboteur REJECT | Saboteur measured ratio, lowest / highest [95% CI] | Histogram test passed: honest"
+          " / overt / masked / dormant / saboteur |")
+    print("|---|---|---|---|---|---|---|---|---|---|")
+    for s in summary:
+        lo, hi = (f"{r:.3f} [{a:.3f}, {b:.3f}]" for r, a, b in s["saboteur_ratio"])
+        print(f"| {s['device']} | {s['jobs']} | {s['circuits']} | {f(s['honest_accept'])} | "
+              + " | ".join(f(s["reject"][m]) for m in MODES[1:]) + f" | {lo} / {hi} | "
+              + " / ".join(f(s["naive_pass"][m]) for m in MODES) + " |")
+    pending = [(d["device"], d["job_id"]) for d in jobs() if not done(d)]
+    if pending:
+        print("\nPending: " + ", ".join(f"{dev} `{j}`" for dev, j in pending))
 
 
 def main():
@@ -136,8 +177,10 @@ def main():
         w.writeheader()
         w.writerows(rows)
     chart(rows)
-    web(rows)
+    summary = sweep(rows)
+    web(rows, summary)
     table(rows)
+    sweep_table(summary)
 
 
 if __name__ == "__main__":

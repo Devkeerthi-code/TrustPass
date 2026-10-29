@@ -165,6 +165,7 @@
           <tbody id="hw-rows"></tbody>
         </table>
         <p class="hw-note">Fidelity is 1 − TVD between the device's measured histogram and the ideal output. Each verdict was decided before the job ran, from QCEC and the fidelity audit on the device's live calibration; "–" is a panel job's honest baseline, the audit's reference.</p>
+        <p class="hw-note" id="hw-sweep" hidden></p>
       </div>
     </article>
 
@@ -197,7 +198,7 @@
           <dt>Cost</dt><dd id="cost-line">Locking adds two-qubit gates after compilation.</dd>
           <dt>Out of scope</dt><dd>An attacker who sees your execution results (Grover's output is its secret). Scheduled compiles are verified with delays removed, and their idle time is only estimated from T1/T2. The QAOA graph is hidden statistically, not exactly.</dd>
           <dt>Red-teamed</dt><dd>Two rounds of independent attackers and a final review of the verifier found 15 issues; each was re-verified, then fixed, measured or documented (see the README).</dd>
-          <dt>Built on</dt><dd>Qiskit 2.5 · Qiskit Aer · MQT QCEC · IBM device models (FakeBrisbane, FakeTorino) and real IBM hardware (ibm_fez, ibm_kingston).</dd>
+          <dt>Built on</dt><dd>Qiskit 2.5 · Qiskit Aer · MQT QCEC · IBM device models (FakeBrisbane, FakeTorino) and real IBM hardware (ibm_fez, ibm_kingston, ibm_marrakesh).</dd>
           <dt>Source code</dt><dd><a href="https://github.com/Devkeerthi-code/TrustPass">github.com/Devkeerthi-code/TrustPass</a></dd>
         </dl>
         <p class="plate-note">This page shows precomputed runs of the real pipeline; run server.py for live runs.</p>
