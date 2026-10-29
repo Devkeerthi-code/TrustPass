@@ -1,5 +1,7 @@
 # TrustPass
 
+**[How to read the panel](docs/GUIDE.md)**: every control, readout and bench unit, with screenshots.
+
 [![tests](https://github.com/Devkeerthi-code/TrustPass/actions/workflows/tests.yml/badge.svg)](https://github.com/Devkeerthi-code/TrustPass/actions/workflows/tests.yml)
 
 **Zero-trust compilation for quantum circuits: lock the circuit before an untrusted compiler sees it, then check that what comes back is the same circuit and does not run measurably worse than a free local compile.**
