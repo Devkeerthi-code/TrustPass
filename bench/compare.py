@@ -7,6 +7,8 @@ same lock on the same device, the hardware counterpart of the ESP ratio. Run 1 r
 prediction, and its 1-TVD is against a 4,000-shot ideal sample instead of the exact distribution.
 The [low, high] intervals are 95% bootstraps over the measured counts (bench/confidence.py).
 Jobs S and T of bench/ibm_runs.py (the transpiler-seed sweep) are summarised per device instead of row by row.
+The accuracy summary pools every measured circuit (all runs and the sweep): verdicts, the histogram test,
+noisy-simulator prediction vs measured 1-TVD, and ESP ratio vs measured ratio for the saboteurs.
 Writes bench/hardware.csv, bench/compare.png and web/hardware.json, and prints the README tables.
     python bench/compare.py
 """
@@ -14,6 +16,7 @@ import csv
 import json
 import sys
 from pathlib import Path
+from statistics import median
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -123,6 +126,60 @@ def sweep(rows):
     return out
 
 
+def accuracy(rows):
+    """One summary over every measured circuit: how right were the verdicts and the predictions?"""
+    from scipy.stats import spearmanr
+    honest = [r for r in rows if r["mode"] == "honest"]
+    attack = [r for r in rows if r["mode"] != "honest"]
+    judged = [r for r in honest if r["verdict"]]  # the panel's baseline is not judged
+    pred = [r for r in rows if r["predicted_one_minus_tvd"] is not None]
+    gap = sorted(round(r["measured_one_minus_tvd"] - r["predicted_one_minus_tvd"], 3) for r in pred)
+    sab = [r for r in rows if r["mode"] == "saboteur"]
+    rho = lambda x, y: round(float(spearmanr(x, y).statistic), 3)
+    pair = lambda xs, n: [sum(xs), n]
+    return {"circuits": len(rows), "jobs": len({r["job_id"] for r in rows}),
+            "devices": sorted({r["device"] for r in rows}),
+            "honest_accept": pair([r["verdict"] == "ACCEPT" for r in judged], len(judged)),
+            "attack_reject": pair([r["verdict"] == "REJECT" for r in attack], len(attack)),
+            "saboteur_accepted": [{"run": r["run"], "device": r["device"], "circuit": r["circuit"],
+                                   "esp_ratio": r["esp_ratio"], "measured_ratio": r["measured_ratio"]}
+                                  for r in sab if r["verdict"] == "ACCEPT"],
+            "histogram_honest_flagged": pair([not r["naive_hw_passed"] for r in honest], len(honest)),
+            "histogram_attack_missed": pair([bool(r["naive_hw_passed"]) for r in attack], len(attack)),
+            "sim": {"circuits": len(pred), "gap_min": gap[0], "gap_max": gap[-1],
+                    "median_abs_gap": round(median(abs(g) for g in gap), 3),
+                    "below_prediction": sum(g < 0 for g in gap),
+                    "spearman": rho([r["predicted_one_minus_tvd"] for r in pred], [r["measured_one_minus_tvd"] for r in pred])},
+            "saboteur": {"circuits": len(sab), "measured_worse": sum(r["measured_ratio"] < 1 for r in sab),
+                         "significantly_worse": sum(r["ratio_ci_high"] < 1 for r in sab),
+                         "esp_bigger_loss": sum(r["esp_ratio"] < r["measured_ratio"] for r in sab),
+                         "esp_range": [min(r["esp_ratio"] for r in sab), max(r["esp_ratio"] for r in sab)],
+                         "measured_range": [min(r["measured_ratio"] for r in sab), max(r["measured_ratio"] for r in sab)],
+                         "spearman": rho([r["esp_ratio"] for r in sab], [r["measured_ratio"] for r in sab])}}
+
+
+def accuracy_table(a):
+    f = lambda xy: f"{xy[0]}/{xy[1]}"
+    s, b = a["sim"], a["saboteur"]
+    print(f"\nAccuracy on real hardware: {a['circuits']} circuits, {a['jobs']} jobs, {', '.join(a['devices'])}")
+    print("| Check | Result |\n|---|---|")
+    print(f"| Honest compiles ACCEPTed | {f(a['honest_accept'])} |")
+    print(f"| Attacks REJECTed | {f(a['attack_reject'])} |")
+    print(f"| Histogram test: honest wrongly flagged | {f(a['histogram_honest_flagged'])} |")
+    print(f"| Histogram test: attacks missed | {f(a['histogram_attack_missed'])} |")
+    print(f"| Noisy simulator vs measured 1-TVD ({s['circuits']} circuits) | gap {s['gap_min']:+.3f} to {s['gap_max']:+.3f},"
+          f" median absolute gap {s['median_abs_gap']:.3f}, measured below prediction on {s['below_prediction']},"
+          f" Spearman {s['spearman']:.3f} |")
+    print(f"| Saboteurs measured worse than honest ({b['circuits']}) | {b['measured_worse']}/{b['circuits']}"
+          f" ({b['significantly_worse']} significantly) |")
+    print(f"| ESP ratio predicted a bigger loss than measured | {b['esp_bigger_loss']}/{b['circuits']}"
+          f" (ESP {b['esp_range'][0]:.3f}-{b['esp_range'][1]:.3f}, measured {b['measured_range'][0]:.3f}-"
+          f"{b['measured_range'][1]:.3f}), Spearman {b['spearman']:.3f} |")
+    for r in a["saboteur_accepted"]:
+        print(f"Saboteur ACCEPTED: run {r['run']} {r['device']} {r['circuit']} ESP ratio {r['esp_ratio']:.3f},"
+              f" measured ratio {r['measured_ratio']:.3f}")
+
+
 def web(rows, summary):
     """Honest vs saboteur, per device and circuit, for the site's hardware block, plus the seed-sweep summary."""
     out, ids = [], sweep_ids()
@@ -134,7 +191,8 @@ def web(rows, summary):
                     "circuit": r["circuit"], "honest": {"verdict": h["verdict"], "measured": h["measured_one_minus_tvd"]},
                     "saboteur": {"verdict": r["verdict"], "measured": r["measured_one_minus_tvd"],
                                  "esp_ratio": r["esp_ratio"]}})
-    WEB.write_text(json.dumps({"metric": "measured 1-TVD vs ideal", "runs": out, "sweep": summary}, indent=2), encoding="utf-8")
+    WEB.write_text(json.dumps({"metric": "measured 1-TVD vs ideal", "runs": out, "sweep": summary,
+                               "accuracy": accuracy(rows)}, indent=2), encoding="utf-8")
 
 
 def table(rows):
@@ -181,6 +239,7 @@ def main():
     web(rows, summary)
     table(rows)
     sweep_table(summary)
+    accuracy_table(accuracy(rows))
 
 
 if __name__ == "__main__":

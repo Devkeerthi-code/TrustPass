@@ -96,6 +96,70 @@
         "measured": 0.7347,
         "esp_ratio": 0.883
       }
+    },
+    {
+      "run": 5,
+      "device": "ibm_kingston",
+      "date": "2026-10-26",
+      "job_id": "dbfose8m94ac738u22t0",
+      "circuit": "Grover",
+      "honest": {
+        "verdict": "ACCEPT",
+        "measured": 0.8702
+      },
+      "saboteur": {
+        "verdict": "ACCEPT",
+        "measured": 0.8222,
+        "esp_ratio": 0.911
+      }
+    },
+    {
+      "run": 5,
+      "device": "ibm_kingston",
+      "date": "2026-10-26",
+      "job_id": "dbfose8m94ac738u22t0",
+      "circuit": "QAOA",
+      "honest": {
+        "verdict": "ACCEPT",
+        "measured": 0.943
+      },
+      "saboteur": {
+        "verdict": "ACCEPT",
+        "measured": 0.9109,
+        "esp_ratio": 0.939
+      }
+    },
+    {
+      "run": 5,
+      "device": "ibm_kingston",
+      "date": "2026-10-26",
+      "job_id": "dbfose8m94ac738u22t0",
+      "circuit": "VQE",
+      "honest": {
+        "verdict": "ACCEPT",
+        "measured": 0.884
+      },
+      "saboteur": {
+        "verdict": "ACCEPT",
+        "measured": 0.9353,
+        "esp_ratio": 0.937
+      }
+    },
+    {
+      "run": 6,
+      "device": "ibm_fez",
+      "date": "2026-10-26",
+      "job_id": "dbfoss7gdj9s73bc58lg",
+      "circuit": "Grover",
+      "honest": {
+        "verdict": "ACCEPT",
+        "measured": 0.8102
+      },
+      "saboteur": {
+        "verdict": "REJECT",
+        "measured": 0.3802,
+        "esp_ratio": 0.295
+      }
     }
   ],
   "sweep": [
@@ -152,6 +216,71 @@
         ],
         "trojan-masked": [
           3,
+          9
+        ],
+        "trojan-dormant": [
+          6,
+          9
+        ],
+        "saboteur": [
+          0,
+          11
+        ]
+      }
+    },
+    {
+      "device": "ibm_kingston",
+      "jobs": 5,
+      "circuits": 50,
+      "honest_accept": [
+        11,
+        11
+      ],
+      "reject": {
+        "trojan-overt": [
+          10,
+          10
+        ],
+        "trojan-masked": [
+          9,
+          9
+        ],
+        "trojan-dormant": [
+          9,
+          9
+        ],
+        "saboteur": [
+          11,
+          11
+        ]
+      },
+      "saboteur_ratio": [
+        [
+          0.245,
+          0.2245,
+          0.2651
+        ],
+        [
+          0.908,
+          0.883,
+          0.9402
+        ]
+      ],
+      "saboteur_significant": [
+        11,
+        11
+      ],
+      "naive_pass": {
+        "honest": [
+          7,
+          11
+        ],
+        "trojan-overt": [
+          0,
+          10
+        ],
+        "trojan-masked": [
+          6,
           9
         ],
         "trojan-dormant": [
@@ -229,5 +358,76 @@
         ]
       }
     }
-  ]
+  ],
+  "accuracy": {
+    "circuits": 179,
+    "jobs": 20,
+    "devices": [
+      "ibm_fez",
+      "ibm_kingston",
+      "ibm_marrakesh"
+    ],
+    "honest_accept": [
+      41,
+      41
+    ],
+    "attack_reject": [
+      134,
+      137
+    ],
+    "saboteur_accepted": [
+      {
+        "run": 5,
+        "device": "ibm_kingston",
+        "circuit": "Grover",
+        "esp_ratio": 0.911,
+        "measured_ratio": 0.945
+      },
+      {
+        "run": 5,
+        "device": "ibm_kingston",
+        "circuit": "QAOA",
+        "esp_ratio": 0.939,
+        "measured_ratio": 0.966
+      },
+      {
+        "run": 5,
+        "device": "ibm_kingston",
+        "circuit": "VQE",
+        "esp_ratio": 0.937,
+        "measured_ratio": 1.058
+      }
+    ],
+    "histogram_honest_flagged": [
+      22,
+      42
+    ],
+    "histogram_attack_missed": [
+      30,
+      137
+    ],
+    "sim": {
+      "circuits": 177,
+      "gap_min": -0.37,
+      "gap_max": 0.262,
+      "median_abs_gap": 0.031,
+      "below_prediction": 119,
+      "spearman": 0.902
+    },
+    "saboteur": {
+      "circuits": 42,
+      "measured_worse": 41,
+      "significantly_worse": 40,
+      "esp_bigger_loss": 37,
+      "esp_range": [
+        0.005,
+        0.939
+      ],
+      "measured_range": [
+        0.218,
+        1.058
+      ],
+      "spearman": 0.613
+    }
+  }
 }

@@ -450,6 +450,15 @@ fetch("web/hardware.json").then((r) => (r.ok ? r.json() : null)).then((hw) => {
     }).join("; ") + ".";
     $("#hw-sweep").hidden = false;
   }
+  const a = hw.accuracy;
+  if (a) {  // every measured circuit pooled (bench/compare.py accuracy)
+    $("#hw-acc").textContent = `All ${a.circuits} measured circuits: honest ACCEPT ${n(a.honest_accept)}, attacks REJECT ${n(a.attack_reject)}`
+      + (a.saboteur_accepted.length ? ` (the misses: ${a.saboteur_accepted.length} ${a.saboteur_accepted[0].device} saboteurs that measured`
+        + ` ${fmt(Math.min(...a.saboteur_accepted.map((r) => r.measured_ratio)))}-${fmt(Math.max(...a.saboteur_accepted.map((r) => r.measured_ratio)))} of honest)` : "")
+      + `; histogram test flagged ${n(a.histogram_honest_flagged)} honest compiles and missed ${n(a.histogram_attack_missed)} attacks; `
+      + `noisy simulator vs measured: median gap ${fmt(a.sim.median_abs_gap)}, rank correlation ${fmt(a.sim.spearman)}.`;
+    $("#hw-acc").hidden = false;
+  }
   $("#hw").hidden = false;
 }).catch(() => {});
 
