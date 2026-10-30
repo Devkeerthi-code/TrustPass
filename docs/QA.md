@@ -61,3 +61,11 @@ Split compilation sends parts of the circuit to several compilers, or to one com
 
 **16. Did the audit ever accept a saboteur?**
 Yes, on live calibration. Our 4-of-4 results are on simulated IBM device models (90 matrices on FakeBrisbane and FakeTorino) [README, The detection matrix]. Against the live calibration of ibm_kingston on 2026-10-24, with no job run, the audit accepted the saboteur on QAOA (ESP ratio 0.921) and VQE (0.912): its qubits were only about 8-9% worse than the honest layout's, inside the 10% tolerance by design, while the other 43 of 45 verdicts across ibm_fez, ibm_kingston and ibm_marrakesh were as expected [README, Honest limitations; `bench/live_targets.py`]. The audit flags compiles measurably worse than a free local compile; a saboteur that costs less than the tolerance gets through, and tightening it costs honest compiles: at a threshold of 0.95, 71 of 450 would be false rejects [README, Why 0.90 and 0.10].
+
+## Robustness and speed
+
+**17. Does any circuit parameter, decoy count or optimization level change a verdict?**
+Not in our sweep. `bench/params.py` changed one parameter at a time on FakeBrisbane and FakeTorino: all 8 Grover marked items, 3 QAOA angle settings and 3 graphs, VQE reps and 3 weight seeds, decoys 0-2 and optimization levels 1-3. All 370 runs gave ACCEPT for honest and REJECT for every attack; saboteurs scored 0.397-0.819, the highest 0.081 under the 0.90 threshold [README, Parameter sweep]. Two caveats: `lock()` refuses VQE at reps 1 and 3 (an odd CX count per qubit pair it cannot pad), and the naive test alone passed 60 of 74 masked Trojans and 2 of 74 overt ones, which QCEC caught.
+
+**18. How slow is it, and what costs the most?**
+On one laptop the six steps up to the verdict (lock, compile, unlock, naive test, QCEC, fidelity audit) take 0.16-0.48 s per compile and a full detection matrix a median 0.7-1.0 s [README, Timing; `bench/timing.py`]. Scoring takes 95% of all measured time, nearly all of it the confidentiality score's 30 wrong-key guesses, and 2 decoys roughly double to triple the total. In gates, decoys are also the expensive knob: at 2 decoys QAOA compiles to 54-60 two-qubit gates instead of 16 [README, Parameter sweep].

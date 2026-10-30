@@ -1,0 +1,375 @@
+circuit,parameter,value,backend,compiler,key_angles,visible_cx,decoy_pairs,2q_plain,2q_locked,depth_plain,depth_locked,ch1_tvd,ch1_passed,ch2_verdict,ch3_esp_ratio,ch3_verdict,verdict,expected,indistinguishability
+Grover,marked item,000,fake_brisbane,honest,153,24,0,39,45,164,378,0.0022,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+Grover,marked item,000,fake_brisbane,trojan-overt,153,24,0,39,45,164,378,0.9364,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,marked item,000,fake_brisbane,trojan-masked,153,24,0,39,45,164,378,0.0161,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,marked item,000,fake_brisbane,trojan-dormant,153,24,0,39,45,164,378,0.0022,True,not_equivalent,0.992,ok,REJECT,REJECT,1.0
+Grover,marked item,000,fake_brisbane,saboteur,153,24,0,39,45,164,378,0.0022,True,equivalent_up_to_global_phase,0.552,low_fidelity,REJECT,REJECT,1.0
+Grover,marked item,000,fake_torino,honest,153,24,0,39,45,142,258,0.0022,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+Grover,marked item,000,fake_torino,trojan-overt,153,24,0,39,45,142,258,0.9364,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,marked item,000,fake_torino,trojan-masked,153,24,0,39,45,142,258,0.0161,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,marked item,000,fake_torino,trojan-dormant,153,24,0,39,45,142,258,0.0022,True,not_equivalent,0.996,ok,REJECT,REJECT,1.0
+Grover,marked item,000,fake_torino,saboteur,153,24,0,39,45,142,258,0.0022,True,equivalent_up_to_global_phase,0.778,low_fidelity,REJECT,REJECT,1.0
+Grover,marked item,001,fake_brisbane,honest,153,24,0,39,45,164,371,0.0054,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.977
+Grover,marked item,001,fake_brisbane,trojan-overt,153,24,0,39,45,164,371,0.936,False,not_equivalent,1.0,ok,REJECT,REJECT,0.977
+Grover,marked item,001,fake_brisbane,trojan-masked,153,24,0,39,45,164,371,0.0128,True,not_equivalent,1.0,ok,REJECT,REJECT,0.977
+Grover,marked item,001,fake_brisbane,trojan-dormant,153,24,0,39,45,164,371,0.0054,True,not_equivalent,0.992,ok,REJECT,REJECT,0.977
+Grover,marked item,001,fake_brisbane,saboteur,153,24,0,39,45,164,371,0.0054,True,equivalent_up_to_global_phase,0.546,low_fidelity,REJECT,REJECT,0.977
+Grover,marked item,001,fake_torino,honest,153,24,0,39,45,143,248,0.0054,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.993
+Grover,marked item,001,fake_torino,trojan-overt,153,24,0,39,45,143,248,0.936,False,not_equivalent,1.0,ok,REJECT,REJECT,0.993
+Grover,marked item,001,fake_torino,trojan-masked,153,24,0,39,45,143,248,0.0128,True,not_equivalent,1.0,ok,REJECT,REJECT,0.993
+Grover,marked item,001,fake_torino,trojan-dormant,153,24,0,39,45,143,248,0.0054,True,not_equivalent,0.996,ok,REJECT,REJECT,0.993
+Grover,marked item,001,fake_torino,saboteur,153,24,0,39,45,143,248,0.0,True,equivalent_up_to_global_phase,0.776,low_fidelity,REJECT,REJECT,0.993
+Grover,marked item,010,fake_brisbane,honest,153,24,0,39,45,165,388,0.0016,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.967
+Grover,marked item,010,fake_brisbane,trojan-overt,153,24,0,39,45,165,388,0.9418,False,not_equivalent,1.0,ok,REJECT,REJECT,0.967
+Grover,marked item,010,fake_brisbane,trojan-masked,153,24,0,39,45,165,388,0.0171,True,not_equivalent,1.0,ok,REJECT,REJECT,0.967
+Grover,marked item,010,fake_brisbane,trojan-dormant,153,24,0,39,45,165,388,0.0016,True,not_equivalent,0.992,ok,REJECT,REJECT,0.967
+Grover,marked item,010,fake_brisbane,saboteur,153,24,0,39,45,165,388,0.0016,True,equivalent_up_to_global_phase,0.545,low_fidelity,REJECT,REJECT,0.967
+Grover,marked item,010,fake_torino,honest,153,24,0,39,45,141,266,0.0012,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+Grover,marked item,010,fake_torino,trojan-overt,153,24,0,39,45,141,266,0.9374,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,marked item,010,fake_torino,trojan-masked,153,24,0,39,45,141,266,0.016,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,marked item,010,fake_torino,trojan-dormant,153,24,0,39,45,141,266,0.0012,True,not_equivalent,0.996,ok,REJECT,REJECT,1.0
+Grover,marked item,010,fake_torino,saboteur,153,24,0,39,45,141,266,0.0066,True,equivalent,0.778,low_fidelity,REJECT,REJECT,1.0
+Grover,marked item,011,fake_brisbane,honest,153,24,0,39,45,159,380,0.0037,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.981
+Grover,marked item,011,fake_brisbane,trojan-overt,153,24,0,39,45,159,380,0.9376,False,not_equivalent,1.0,ok,REJECT,REJECT,0.981
+Grover,marked item,011,fake_brisbane,trojan-masked,153,24,0,39,45,159,380,0.0171,True,not_equivalent,1.0,ok,REJECT,REJECT,0.981
+Grover,marked item,011,fake_brisbane,trojan-dormant,153,24,0,39,45,159,380,0.0037,True,not_equivalent,0.992,ok,REJECT,REJECT,0.981
+Grover,marked item,011,fake_brisbane,saboteur,153,24,0,39,45,159,380,0.0037,True,equivalent_up_to_global_phase,0.552,low_fidelity,REJECT,REJECT,0.981
+Grover,marked item,011,fake_torino,honest,153,24,0,39,45,144,268,0.0037,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.977
+Grover,marked item,011,fake_torino,trojan-overt,153,24,0,39,45,144,268,0.9376,False,not_equivalent,1.0,ok,REJECT,REJECT,0.977
+Grover,marked item,011,fake_torino,trojan-masked,153,24,0,39,45,144,268,0.0171,True,not_equivalent,1.0,ok,REJECT,REJECT,0.977
+Grover,marked item,011,fake_torino,trojan-dormant,153,24,0,39,45,144,268,0.0037,True,not_equivalent,0.996,ok,REJECT,REJECT,0.977
+Grover,marked item,011,fake_torino,saboteur,153,24,0,39,45,144,268,0.007,True,equivalent,0.778,low_fidelity,REJECT,REJECT,0.977
+Grover,marked item,100,fake_brisbane,honest,153,24,0,39,45,174,371,0.0037,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.973
+Grover,marked item,100,fake_brisbane,trojan-overt,153,24,0,39,45,174,371,0.9431,False,not_equivalent,1.0,ok,REJECT,REJECT,0.973
+Grover,marked item,100,fake_brisbane,trojan-masked,153,24,0,39,45,174,371,0.0182,True,not_equivalent,1.0,ok,REJECT,REJECT,0.973
+Grover,marked item,100,fake_brisbane,trojan-dormant,153,24,0,39,45,174,371,0.0037,True,not_equivalent,0.992,ok,REJECT,REJECT,0.973
+Grover,marked item,100,fake_brisbane,saboteur,153,24,0,39,45,174,371,0.0037,True,equivalent_up_to_global_phase,0.549,low_fidelity,REJECT,REJECT,0.973
+Grover,marked item,100,fake_torino,honest,153,24,0,39,45,138,266,0.0037,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.934
+Grover,marked item,100,fake_torino,trojan-overt,153,24,0,39,45,138,266,0.9431,False,not_equivalent,1.0,ok,REJECT,REJECT,0.934
+Grover,marked item,100,fake_torino,trojan-masked,153,24,0,39,45,138,266,0.0182,True,not_equivalent,1.0,ok,REJECT,REJECT,0.934
+Grover,marked item,100,fake_torino,trojan-dormant,153,24,0,39,45,138,266,0.0037,True,not_equivalent,0.996,ok,REJECT,REJECT,0.934
+Grover,marked item,100,fake_torino,saboteur,153,24,0,39,45,138,266,0.005,True,equivalent_up_to_global_phase,0.778,low_fidelity,REJECT,REJECT,0.934
+Grover,marked item,101,fake_brisbane,honest,153,24,0,39,45,174,389,0.0034,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.998
+Grover,marked item,101,fake_brisbane,trojan-overt,153,24,0,39,45,174,389,0.9404,False,not_equivalent,1.0,ok,REJECT,REJECT,0.998
+Grover,marked item,101,fake_brisbane,trojan-masked,153,24,0,39,45,174,389,0.016,True,not_equivalent,1.0,ok,REJECT,REJECT,0.998
+Grover,marked item,101,fake_brisbane,trojan-dormant,153,24,0,39,45,174,389,0.0034,True,not_equivalent,0.992,ok,REJECT,REJECT,0.998
+Grover,marked item,101,fake_brisbane,saboteur,153,24,0,39,45,174,389,0.0034,True,equivalent_up_to_global_phase,0.545,low_fidelity,REJECT,REJECT,0.998
+Grover,marked item,101,fake_torino,honest,153,24,0,39,45,139,246,0.0034,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+Grover,marked item,101,fake_torino,trojan-overt,153,24,0,39,45,139,246,0.9404,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,marked item,101,fake_torino,trojan-masked,153,24,0,39,45,139,246,0.016,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,marked item,101,fake_torino,trojan-dormant,153,24,0,39,45,139,246,0.0034,True,not_equivalent,0.996,ok,REJECT,REJECT,1.0
+Grover,marked item,101,fake_torino,saboteur,153,24,0,39,45,139,246,0.0,True,equivalent,0.775,low_fidelity,REJECT,REJECT,1.0
+Grover,marked item,110,fake_brisbane,honest,153,24,0,39,45,173,378,0.0054,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.995
+Grover,marked item,110,fake_brisbane,trojan-overt,153,24,0,39,45,173,378,0.9448,False,not_equivalent,1.0,ok,REJECT,REJECT,0.995
+Grover,marked item,110,fake_brisbane,trojan-masked,153,24,0,39,45,173,378,0.0205,True,not_equivalent,1.0,ok,REJECT,REJECT,0.995
+Grover,marked item,110,fake_brisbane,trojan-dormant,153,24,0,39,45,173,378,0.0054,True,not_equivalent,0.992,ok,REJECT,REJECT,0.995
+Grover,marked item,110,fake_brisbane,saboteur,153,24,0,39,45,173,378,0.0054,True,equivalent_up_to_global_phase,0.541,low_fidelity,REJECT,REJECT,0.995
+Grover,marked item,110,fake_torino,honest,153,24,0,39,45,137,262,0.0054,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+Grover,marked item,110,fake_torino,trojan-overt,153,24,0,39,45,137,262,0.9448,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,marked item,110,fake_torino,trojan-masked,153,24,0,39,45,137,262,0.0205,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,marked item,110,fake_torino,trojan-dormant,153,24,0,39,45,137,262,0.0054,True,not_equivalent,0.996,ok,REJECT,REJECT,1.0
+Grover,marked item,110,fake_torino,saboteur,153,24,0,39,45,137,262,0.0,True,equivalent_up_to_global_phase,0.776,low_fidelity,REJECT,REJECT,1.0
+Grover,marked item,111,fake_brisbane,honest,153,24,0,39,45,167,375,0.0035,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.953
+Grover,marked item,111,fake_brisbane,trojan-overt,153,24,0,39,45,167,375,0.9442,False,not_equivalent,1.0,ok,REJECT,REJECT,0.953
+Grover,marked item,111,fake_brisbane,trojan-masked,153,24,0,39,45,167,375,0.0198,True,not_equivalent,1.0,ok,REJECT,REJECT,0.953
+Grover,marked item,111,fake_brisbane,trojan-dormant,153,24,0,39,45,167,375,0.0035,True,not_equivalent,0.992,ok,REJECT,REJECT,0.953
+Grover,marked item,111,fake_brisbane,saboteur,153,24,0,39,45,167,375,0.0035,True,equivalent_up_to_global_phase,0.552,low_fidelity,REJECT,REJECT,0.953
+Grover,marked item,111,fake_torino,honest,153,24,0,39,45,140,264,0.0035,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.946
+Grover,marked item,111,fake_torino,trojan-overt,153,24,0,39,45,140,264,0.9442,False,not_equivalent,1.0,ok,REJECT,REJECT,0.946
+Grover,marked item,111,fake_torino,trojan-masked,153,24,0,39,45,140,264,0.0198,True,not_equivalent,1.0,ok,REJECT,REJECT,0.946
+Grover,marked item,111,fake_torino,trojan-dormant,153,24,0,39,45,140,264,0.0035,True,not_equivalent,0.996,ok,REJECT,REJECT,0.946
+Grover,marked item,111,fake_torino,saboteur,153,24,0,39,45,140,264,0.0049,True,equivalent_up_to_global_phase,0.779,low_fidelity,REJECT,REJECT,0.946
+QAOA,angles,g=2.85 b=0.3,fake_brisbane,honest,84,12,1,16,18,85,141,0.0096,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.989
+QAOA,angles,g=2.85 b=0.3,fake_brisbane,trojan-overt,84,12,1,16,18,85,141,0.6573,False,not_equivalent,1.0,ok,REJECT,REJECT,0.989
+QAOA,angles,g=2.85 b=0.3,fake_brisbane,trojan-masked,84,12,1,16,18,85,141,0.0306,True,not_equivalent,1.0,ok,REJECT,REJECT,0.989
+QAOA,angles,g=2.85 b=0.3,fake_brisbane,trojan-dormant,84,12,1,16,18,85,141,0.0096,True,not_equivalent,0.994,ok,REJECT,REJECT,0.989
+QAOA,angles,g=2.85 b=0.3,fake_brisbane,saboteur,84,12,1,16,18,85,141,0.0183,True,equivalent_up_to_global_phase,0.675,low_fidelity,REJECT,REJECT,0.989
+QAOA,angles,g=2.85 b=0.3,fake_torino,honest,84,12,1,16,18,60,129,0.0225,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,angles,g=2.85 b=0.3,fake_torino,trojan-overt,84,12,1,16,18,60,129,0.6444,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,angles,g=2.85 b=0.3,fake_torino,trojan-masked,84,12,1,16,18,60,129,0.0475,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,angles,g=2.85 b=0.3,fake_torino,trojan-dormant,84,12,1,16,18,60,129,0.0225,True,not_equivalent,0.996,ok,REJECT,REJECT,1.0
+QAOA,angles,g=2.85 b=0.3,fake_torino,saboteur,84,12,1,16,18,60,129,0.0225,True,equivalent_up_to_global_phase,0.613,low_fidelity,REJECT,REJECT,1.0
+QAOA,angles,g=0.8 b=0.4,fake_brisbane,honest,84,12,1,16,18,87,141,0.0225,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,angles,g=0.8 b=0.4,fake_brisbane,trojan-overt,84,12,1,16,18,87,141,0.0392,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,angles,g=0.8 b=0.4,fake_brisbane,trojan-masked,84,12,1,16,18,87,141,0.0309,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,angles,g=0.8 b=0.4,fake_brisbane,trojan-dormant,84,12,1,16,18,87,141,0.0225,True,not_equivalent,0.995,ok,REJECT,REJECT,1.0
+QAOA,angles,g=0.8 b=0.4,fake_brisbane,saboteur,84,12,1,16,18,87,141,0.0225,True,equivalent_up_to_global_phase,0.707,low_fidelity,REJECT,REJECT,1.0
+QAOA,angles,g=0.8 b=0.4,fake_torino,honest,84,12,1,16,18,65,126,0.0106,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,angles,g=0.8 b=0.4,fake_torino,trojan-overt,84,12,1,16,18,65,126,0.0397,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,angles,g=0.8 b=0.4,fake_torino,trojan-masked,84,12,1,16,18,65,126,0.1188,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,angles,g=0.8 b=0.4,fake_torino,trojan-dormant,84,12,1,16,18,65,126,0.0106,True,not_equivalent,0.997,ok,REJECT,REJECT,1.0
+QAOA,angles,g=0.8 b=0.4,fake_torino,saboteur,84,12,1,16,18,65,126,0.0209,True,equivalent_up_to_global_phase,0.697,low_fidelity,REJECT,REJECT,1.0
+QAOA,angles,g=1.9 b=1.1,fake_brisbane,honest,84,12,1,16,18,85,142,0.019,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,angles,g=1.9 b=1.1,fake_brisbane,trojan-overt,84,12,1,16,18,85,142,0.6733,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,angles,g=1.9 b=1.1,fake_brisbane,trojan-masked,84,12,1,16,18,85,142,0.019,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,angles,g=1.9 b=1.1,fake_brisbane,trojan-dormant,84,12,1,16,18,85,142,0.019,True,not_equivalent,0.994,ok,REJECT,REJECT,1.0
+QAOA,angles,g=1.9 b=1.1,fake_brisbane,saboteur,84,12,1,16,18,85,142,0.0225,True,equivalent_up_to_global_phase,0.707,low_fidelity,REJECT,REJECT,1.0
+QAOA,angles,g=1.9 b=1.1,fake_torino,honest,84,12,1,16,18,61,134,0.0228,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,angles,g=1.9 b=1.1,fake_torino,trojan-overt,84,12,1,16,18,61,134,0.6697,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,angles,g=1.9 b=1.1,fake_torino,trojan-masked,84,12,1,16,18,61,134,0.0969,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,angles,g=1.9 b=1.1,fake_torino,trojan-dormant,84,12,1,16,18,61,134,0.0228,True,not_equivalent,0.996,ok,REJECT,REJECT,1.0
+QAOA,angles,g=1.9 b=1.1,fake_torino,saboteur,84,12,1,16,18,61,134,0.0206,True,equivalent_up_to_global_phase,0.657,low_fidelity,REJECT,REJECT,1.0
+QAOA,graph,default (5 edges),fake_brisbane,honest,84,12,1,16,18,85,131,0.0225,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.992
+QAOA,graph,default (5 edges),fake_brisbane,trojan-overt,84,12,1,16,18,85,131,0.6444,False,not_equivalent,1.0,ok,REJECT,REJECT,0.992
+QAOA,graph,default (5 edges),fake_brisbane,trojan-masked,84,12,1,16,18,85,131,0.0721,True,not_equivalent,1.0,ok,REJECT,REJECT,0.992
+QAOA,graph,default (5 edges),fake_brisbane,trojan-dormant,84,12,1,16,18,85,131,0.0225,True,not_equivalent,0.994,ok,REJECT,REJECT,0.992
+QAOA,graph,default (5 edges),fake_brisbane,saboteur,84,12,1,16,18,85,131,0.0225,True,equivalent_up_to_global_phase,0.694,low_fidelity,REJECT,REJECT,0.992
+QAOA,graph,default (5 edges),fake_torino,honest,84,12,1,16,18,60,136,0.0165,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,graph,default (5 edges),fake_torino,trojan-overt,84,12,1,16,18,60,136,0.6593,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,graph,default (5 edges),fake_torino,trojan-masked,84,12,1,16,18,60,136,0.1355,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,graph,default (5 edges),fake_torino,trojan-dormant,84,12,1,16,18,60,136,0.0165,True,not_equivalent,0.995,ok,REJECT,REJECT,1.0
+QAOA,graph,default (5 edges),fake_torino,saboteur,84,12,1,16,18,60,136,0.0231,True,equivalent_up_to_global_phase,0.709,low_fidelity,REJECT,REJECT,1.0
+QAOA,graph,ring (4 edges),fake_brisbane,honest,84,12,2,12,18,51,137,0.007,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,graph,ring (4 edges),fake_brisbane,trojan-overt,84,12,2,12,18,51,137,0.5809,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,graph,ring (4 edges),fake_brisbane,trojan-masked,84,12,2,12,18,51,137,0.0363,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,graph,ring (4 edges),fake_brisbane,trojan-dormant,84,12,2,12,18,51,137,0.007,True,not_equivalent,0.993,ok,REJECT,REJECT,1.0
+QAOA,graph,ring (4 edges),fake_brisbane,saboteur,84,12,2,12,18,51,137,0.007,True,equivalent_up_to_global_phase,0.702,low_fidelity,REJECT,REJECT,1.0
+QAOA,graph,ring (4 edges),fake_torino,honest,84,12,2,11,18,44,136,0.0112,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,graph,ring (4 edges),fake_torino,trojan-overt,84,12,2,11,18,44,136,0.5811,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,graph,ring (4 edges),fake_torino,trojan-masked,84,12,2,11,18,44,136,0.0112,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,graph,ring (4 edges),fake_torino,trojan-dormant,84,12,2,11,18,44,136,0.0112,True,not_equivalent,0.995,ok,REJECT,REJECT,1.0
+QAOA,graph,ring (4 edges),fake_torino,saboteur,84,12,2,11,18,44,136,0.0266,True,equivalent,0.709,low_fidelity,REJECT,REJECT,1.0
+QAOA,graph,complete K4 (6 edges),fake_brisbane,honest,84,12,0,18,18,98,142,0.0157,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,graph,complete K4 (6 edges),fake_brisbane,trojan-overt,84,12,0,18,18,98,142,0.6562,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,graph,complete K4 (6 edges),fake_brisbane,trojan-masked,84,12,0,18,18,98,142,0.1095,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,graph,complete K4 (6 edges),fake_brisbane,trojan-dormant,84,12,0,18,18,98,142,0.0157,True,not_equivalent,0.995,ok,REJECT,REJECT,1.0
+QAOA,graph,complete K4 (6 edges),fake_brisbane,saboteur,84,12,0,18,18,98,142,0.0123,True,equivalent_up_to_global_phase,0.706,low_fidelity,REJECT,REJECT,1.0
+QAOA,graph,complete K4 (6 edges),fake_torino,honest,84,12,0,18,18,64,126,0.0145,True,equivalent,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,graph,complete K4 (6 edges),fake_torino,trojan-overt,84,12,0,18,18,64,126,0.6667,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,graph,complete K4 (6 edges),fake_torino,trojan-masked,84,12,0,18,18,64,126,0.1184,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,graph,complete K4 (6 edges),fake_torino,trojan-dormant,84,12,0,18,18,64,126,0.0145,True,not_equivalent,0.995,ok,REJECT,REJECT,1.0
+QAOA,graph,complete K4 (6 edges),fake_torino,saboteur,84,12,0,18,18,64,126,0.0122,True,equivalent_up_to_global_phase,0.659,low_fidelity,REJECT,REJECT,1.0
+VQE,reps,1,fake_brisbane,,,,,,,,,,,,,,LOCK REFUSED,ACCEPT/REJECT,
+VQE,reps,1,fake_torino,,,,,,,,,,,,,,LOCK REFUSED,ACCEPT/REJECT,
+VQE,reps,2,fake_brisbane,honest,84,12,3,6,18,30,152,0.0109,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+VQE,reps,2,fake_brisbane,trojan-overt,84,12,3,6,18,30,152,0.3802,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,reps,2,fake_brisbane,trojan-masked,84,12,3,6,18,30,152,0.0549,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,reps,2,fake_brisbane,trojan-dormant,84,12,3,6,18,30,152,0.0109,True,not_equivalent,0.993,ok,REJECT,REJECT,1.0
+VQE,reps,2,fake_brisbane,saboteur,84,12,3,6,18,30,152,0.0194,True,equivalent_up_to_global_phase,0.686,low_fidelity,REJECT,REJECT,1.0
+VQE,reps,2,fake_torino,honest,84,12,3,6,18,26,118,0.0194,True,equivalent,1.0,ok,ACCEPT,ACCEPT,1.0
+VQE,reps,2,fake_torino,trojan-overt,84,12,3,6,18,26,118,0.3689,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,reps,2,fake_torino,trojan-masked,84,12,3,6,18,26,118,0.0959,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,reps,2,fake_torino,trojan-dormant,84,12,3,6,18,26,118,0.0194,True,not_equivalent,0.997,ok,REJECT,REJECT,1.0
+VQE,reps,2,fake_torino,saboteur,84,12,3,6,18,26,118,0.0109,True,equivalent_up_to_global_phase,0.666,low_fidelity,REJECT,REJECT,1.0
+VQE,reps,3,fake_brisbane,,,,,,,,,,,,,,LOCK REFUSED,ACCEPT/REJECT,
+VQE,reps,3,fake_torino,,,,,,,,,,,,,,LOCK REFUSED,ACCEPT/REJECT,
+VQE,reps,4,fake_brisbane,honest,156,24,6,12,42,51,299,0.0192,True,equivalent,1.0,ok,ACCEPT,ACCEPT,0.927
+VQE,reps,4,fake_brisbane,trojan-overt,156,24,6,12,42,51,299,0.3389,False,not_equivalent,1.0,ok,REJECT,REJECT,0.927
+VQE,reps,4,fake_brisbane,trojan-masked,156,24,6,12,42,51,299,0.0918,True,not_equivalent,1.0,ok,REJECT,REJECT,0.927
+VQE,reps,4,fake_brisbane,trojan-dormant,156,24,6,12,42,51,299,0.0192,True,not_equivalent,0.993,ok,REJECT,REJECT,0.927
+VQE,reps,4,fake_brisbane,saboteur,156,24,6,12,42,51,299,0.0237,True,equivalent_up_to_global_phase,0.6,low_fidelity,REJECT,REJECT,0.927
+VQE,reps,4,fake_torino,honest,156,24,6,12,39,42,262,0.0232,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.941
+VQE,reps,4,fake_torino,trojan-overt,156,24,6,12,39,42,262,0.3489,False,not_equivalent,1.0,ok,REJECT,REJECT,0.941
+VQE,reps,4,fake_torino,trojan-masked,156,24,6,12,39,42,262,0.0676,True,not_equivalent,1.0,ok,REJECT,REJECT,0.941
+VQE,reps,4,fake_torino,trojan-dormant,156,24,6,12,39,42,262,0.0232,True,not_equivalent,0.996,ok,REJECT,REJECT,0.941
+VQE,reps,4,fake_torino,saboteur,156,24,6,12,39,42,262,0.0237,True,equivalent_up_to_global_phase,0.482,low_fidelity,REJECT,REJECT,0.941
+VQE,weight seed,11,fake_brisbane,honest,84,12,3,6,18,30,150,0.0188,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+VQE,weight seed,11,fake_brisbane,trojan-overt,84,12,3,6,18,30,150,0.3667,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,weight seed,11,fake_brisbane,trojan-masked,84,12,3,6,18,30,150,0.1127,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,weight seed,11,fake_brisbane,trojan-dormant,84,12,3,6,18,30,150,0.0188,True,not_equivalent,0.995,ok,REJECT,REJECT,1.0
+VQE,weight seed,11,fake_brisbane,saboteur,84,12,3,6,18,30,150,0.0209,True,equivalent_up_to_global_phase,0.732,low_fidelity,REJECT,REJECT,1.0
+VQE,weight seed,11,fake_torino,honest,84,12,3,6,21,26,105,0.0214,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+VQE,weight seed,11,fake_torino,trojan-overt,84,12,3,6,21,26,105,0.369,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,weight seed,11,fake_torino,trojan-masked,84,12,3,6,21,26,105,0.0621,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,weight seed,11,fake_torino,trojan-dormant,84,12,3,6,21,26,105,0.0214,True,not_equivalent,0.996,ok,REJECT,REJECT,1.0
+VQE,weight seed,11,fake_torino,saboteur,84,12,3,6,21,26,105,0.0259,True,equivalent_up_to_global_phase,0.584,low_fidelity,REJECT,REJECT,1.0
+VQE,weight seed,1,fake_brisbane,honest,84,12,3,6,21,31,171,0.0056,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.976
+VQE,weight seed,1,fake_brisbane,trojan-overt,84,12,3,6,21,31,171,0.6763,False,not_equivalent,1.0,ok,REJECT,REJECT,0.976
+VQE,weight seed,1,fake_brisbane,trojan-masked,84,12,3,6,21,31,171,0.077,True,not_equivalent,1.0,ok,REJECT,REJECT,0.976
+VQE,weight seed,1,fake_brisbane,trojan-dormant,84,12,3,6,21,31,171,0.0056,True,not_equivalent,0.995,ok,REJECT,REJECT,0.976
+VQE,weight seed,1,fake_brisbane,saboteur,84,12,3,6,21,31,171,0.0087,True,equivalent_up_to_global_phase,0.728,low_fidelity,REJECT,REJECT,0.976
+VQE,weight seed,1,fake_torino,honest,84,12,3,6,21,27,132,0.0128,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.985
+VQE,weight seed,1,fake_torino,trojan-overt,84,12,3,6,21,27,132,0.683,False,not_equivalent,1.0,ok,REJECT,REJECT,0.985
+VQE,weight seed,1,fake_torino,trojan-masked,84,12,3,6,21,27,132,0.0116,True,not_equivalent,1.0,ok,REJECT,REJECT,0.985
+VQE,weight seed,1,fake_torino,trojan-dormant,84,12,3,6,21,27,132,0.0128,True,not_equivalent,0.996,ok,REJECT,REJECT,0.985
+VQE,weight seed,1,fake_torino,saboteur,84,12,3,6,21,27,132,0.0115,True,equivalent_up_to_global_phase,0.677,low_fidelity,REJECT,REJECT,0.985
+VQE,weight seed,2,fake_brisbane,honest,84,12,3,6,21,32,134,0.028,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+VQE,weight seed,2,fake_brisbane,trojan-overt,84,12,3,6,21,32,134,0.4481,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,weight seed,2,fake_brisbane,trojan-masked,84,12,3,6,21,32,134,0.0596,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,weight seed,2,fake_brisbane,trojan-dormant,84,12,3,6,21,32,134,0.028,True,not_equivalent,0.993,ok,REJECT,REJECT,1.0
+VQE,weight seed,2,fake_brisbane,saboteur,84,12,3,6,21,32,134,0.0226,True,equivalent_up_to_global_phase,0.678,low_fidelity,REJECT,REJECT,1.0
+VQE,weight seed,2,fake_torino,honest,84,12,3,6,21,25,141,0.0214,True,equivalent,1.0,ok,ACCEPT,ACCEPT,0.996
+VQE,weight seed,2,fake_torino,trojan-overt,84,12,3,6,21,25,141,0.4331,False,not_equivalent,1.0,ok,REJECT,REJECT,0.996
+VQE,weight seed,2,fake_torino,trojan-masked,84,12,3,6,21,25,141,0.1073,False,not_equivalent,1.0,ok,REJECT,REJECT,0.996
+VQE,weight seed,2,fake_torino,trojan-dormant,84,12,3,6,21,25,141,0.0214,True,not_equivalent,0.996,ok,REJECT,REJECT,0.996
+VQE,weight seed,2,fake_torino,saboteur,84,12,3,6,21,25,141,0.0214,True,equivalent_up_to_global_phase,0.638,low_fidelity,REJECT,REJECT,0.996
+Grover,decoys,0,fake_brisbane,honest,153,24,0,39,45,174,373,0.0034,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+Grover,decoys,0,fake_brisbane,trojan-overt,153,24,0,39,45,174,373,0.9404,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,decoys,0,fake_brisbane,trojan-masked,153,24,0,39,45,174,373,0.016,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,decoys,0,fake_brisbane,trojan-dormant,153,24,0,39,45,174,373,0.0034,True,not_equivalent,0.992,ok,REJECT,REJECT,1.0
+Grover,decoys,0,fake_brisbane,saboteur,153,24,0,39,45,174,373,0.0034,True,equivalent_up_to_global_phase,0.541,low_fidelity,REJECT,REJECT,1.0
+Grover,decoys,0,fake_torino,honest,153,24,0,39,45,139,277,0.0037,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.988
+Grover,decoys,0,fake_torino,trojan-overt,153,24,0,39,45,139,277,0.9431,False,not_equivalent,1.0,ok,REJECT,REJECT,0.988
+Grover,decoys,0,fake_torino,trojan-masked,153,24,0,39,45,139,277,0.0166,True,not_equivalent,1.0,ok,REJECT,REJECT,0.988
+Grover,decoys,0,fake_torino,trojan-dormant,153,24,0,39,45,139,277,0.0037,True,not_equivalent,0.996,ok,REJECT,REJECT,0.988
+Grover,decoys,0,fake_torino,saboteur,153,24,0,39,45,139,277,0.0061,True,equivalent,0.777,low_fidelity,REJECT,REJECT,0.988
+Grover,decoys,1,fake_brisbane,honest,189,30,3,39,51,174,446,0.0,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+Grover,decoys,1,fake_brisbane,trojan-overt,189,30,3,39,51,174,446,0.9395,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,decoys,1,fake_brisbane,trojan-masked,189,30,3,39,51,174,446,0.0167,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,decoys,1,fake_brisbane,trojan-dormant,189,30,3,39,51,174,446,0.0,True,not_equivalent,0.993,ok,REJECT,REJECT,1.0
+Grover,decoys,1,fake_brisbane,saboteur,189,30,3,39,51,174,446,0.0034,True,equivalent_up_to_global_phase,0.527,low_fidelity,REJECT,REJECT,1.0
+Grover,decoys,1,fake_torino,honest,189,30,3,39,51,139,301,0.0037,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.995
+Grover,decoys,1,fake_torino,trojan-overt,189,30,3,39,51,139,301,0.9431,False,not_equivalent,1.0,ok,REJECT,REJECT,0.995
+Grover,decoys,1,fake_torino,trojan-masked,189,30,3,39,51,139,301,0.0178,True,not_equivalent,1.0,ok,REJECT,REJECT,0.995
+Grover,decoys,1,fake_torino,trojan-dormant,189,30,3,39,51,139,301,0.0037,True,not_equivalent,0.996,ok,REJECT,REJECT,0.995
+Grover,decoys,1,fake_torino,saboteur,189,30,3,39,51,139,301,0.0061,True,equivalent_up_to_global_phase,0.771,low_fidelity,REJECT,REJECT,0.995
+Grover,decoys,2,fake_brisbane,honest,225,36,6,39,57,174,499,0.0061,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+Grover,decoys,2,fake_brisbane,trojan-overt,225,36,6,39,57,174,499,0.9401,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,decoys,2,fake_brisbane,trojan-masked,225,36,6,39,57,174,499,0.0205,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,decoys,2,fake_brisbane,trojan-dormant,225,36,6,39,57,174,499,0.0061,True,not_equivalent,0.993,ok,REJECT,REJECT,1.0
+Grover,decoys,2,fake_brisbane,saboteur,225,36,6,39,57,174,499,0.0037,True,equivalent_up_to_global_phase,0.516,low_fidelity,REJECT,REJECT,1.0
+Grover,decoys,2,fake_torino,honest,225,36,6,39,60,139,387,0.0061,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+Grover,decoys,2,fake_torino,trojan-overt,225,36,6,39,60,139,387,0.9401,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,decoys,2,fake_torino,trojan-masked,225,36,6,39,60,139,387,0.019,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,decoys,2,fake_torino,trojan-dormant,225,36,6,39,60,139,387,0.0061,True,not_equivalent,0.998,ok,REJECT,REJECT,1.0
+Grover,decoys,2,fake_torino,saboteur,225,36,6,39,60,139,387,0.0061,True,equivalent_up_to_global_phase,0.779,low_fidelity,REJECT,REJECT,1.0
+QAOA,decoys,0,fake_brisbane,honest,84,12,1,16,18,85,146,0.0,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.997
+QAOA,decoys,0,fake_brisbane,trojan-overt,84,12,1,16,18,85,146,0.6545,False,not_equivalent,1.0,ok,REJECT,REJECT,0.997
+QAOA,decoys,0,fake_brisbane,trojan-masked,84,12,1,16,18,85,146,0.0665,True,not_equivalent,1.0,ok,REJECT,REJECT,0.997
+QAOA,decoys,0,fake_brisbane,trojan-dormant,84,12,1,16,18,85,146,0.0,True,not_equivalent,0.993,ok,REJECT,REJECT,0.997
+QAOA,decoys,0,fake_brisbane,saboteur,84,12,1,16,18,85,146,0.0175,True,equivalent_up_to_global_phase,0.712,low_fidelity,REJECT,REJECT,0.997
+QAOA,decoys,0,fake_torino,honest,84,12,1,16,18,60,134,0.0177,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.995
+QAOA,decoys,0,fake_torino,trojan-overt,84,12,1,16,18,60,134,0.6577,False,not_equivalent,1.0,ok,REJECT,REJECT,0.995
+QAOA,decoys,0,fake_torino,trojan-masked,84,12,1,16,18,60,134,0.0406,True,not_equivalent,1.0,ok,REJECT,REJECT,0.995
+QAOA,decoys,0,fake_torino,trojan-dormant,84,12,1,16,18,60,134,0.0177,True,not_equivalent,0.996,ok,REJECT,REJECT,0.995
+QAOA,decoys,0,fake_torino,saboteur,84,12,1,16,18,60,134,0.0166,True,equivalent_up_to_global_phase,0.602,low_fidelity,REJECT,REJECT,0.995
+QAOA,decoys,1,fake_brisbane,honest,156,24,7,16,36,85,266,0.0225,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,decoys,1,fake_brisbane,trojan-overt,156,24,7,16,36,85,266,0.6444,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,decoys,1,fake_brisbane,trojan-masked,156,24,7,16,36,85,266,0.0383,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,decoys,1,fake_brisbane,trojan-dormant,156,24,7,16,36,85,266,0.0225,True,not_equivalent,0.995,ok,REJECT,REJECT,1.0
+QAOA,decoys,1,fake_brisbane,saboteur,156,24,7,16,36,85,266,0.0167,True,equivalent_up_to_global_phase,0.626,low_fidelity,REJECT,REJECT,1.0
+QAOA,decoys,1,fake_torino,honest,156,24,7,16,33,60,250,0.0231,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,decoys,1,fake_torino,trojan-overt,156,24,7,16,33,60,250,0.6536,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,decoys,1,fake_torino,trojan-masked,156,24,7,16,33,60,250,0.0685,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,decoys,1,fake_torino,trojan-dormant,156,24,7,16,33,60,250,0.0231,True,not_equivalent,0.996,ok,REJECT,REJECT,1.0
+QAOA,decoys,1,fake_torino,saboteur,156,24,7,16,33,60,250,0.0123,True,equivalent_up_to_global_phase,0.545,low_fidelity,REJECT,REJECT,1.0
+QAOA,decoys,2,fake_brisbane,honest,228,36,13,16,60,85,386,0.0238,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,decoys,2,fake_brisbane,trojan-overt,228,36,13,16,60,85,386,0.6536,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,decoys,2,fake_brisbane,trojan-masked,228,36,13,16,60,85,386,0.0737,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,decoys,2,fake_brisbane,trojan-dormant,228,36,13,16,60,85,386,0.0238,True,not_equivalent,0.993,ok,REJECT,REJECT,1.0
+QAOA,decoys,2,fake_brisbane,saboteur,228,36,13,16,60,85,386,0.0167,True,equivalent_up_to_global_phase,0.62,low_fidelity,REJECT,REJECT,1.0
+QAOA,decoys,2,fake_torino,honest,228,36,13,16,54,60,376,0.0197,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,decoys,2,fake_torino,trojan-overt,228,36,13,16,54,60,376,0.6522,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,decoys,2,fake_torino,trojan-masked,228,36,13,16,54,60,376,0.073,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,decoys,2,fake_torino,trojan-dormant,228,36,13,16,54,60,376,0.0197,True,not_equivalent,0.996,ok,REJECT,REJECT,1.0
+QAOA,decoys,2,fake_torino,saboteur,228,36,13,16,54,60,376,0.0175,True,equivalent_up_to_global_phase,0.492,low_fidelity,REJECT,REJECT,1.0
+VQE,decoys,0,fake_brisbane,honest,84,12,3,6,18,30,146,0.0243,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+VQE,decoys,0,fake_brisbane,trojan-overt,84,12,3,6,18,30,146,0.3579,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,decoys,0,fake_brisbane,trojan-masked,84,12,3,6,18,30,146,0.0624,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,decoys,0,fake_brisbane,trojan-dormant,84,12,3,6,18,30,146,0.0243,True,not_equivalent,0.995,ok,REJECT,REJECT,1.0
+VQE,decoys,0,fake_brisbane,saboteur,84,12,3,6,18,30,146,0.0,True,equivalent_up_to_global_phase,0.657,low_fidelity,REJECT,REJECT,1.0
+VQE,decoys,0,fake_torino,honest,84,12,3,6,21,26,133,0.0231,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+VQE,decoys,0,fake_torino,trojan-overt,84,12,3,6,21,26,133,0.3591,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,decoys,0,fake_torino,trojan-masked,84,12,3,6,21,26,133,0.0959,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,decoys,0,fake_torino,trojan-dormant,84,12,3,6,21,26,133,0.0231,True,not_equivalent,0.995,ok,REJECT,REJECT,1.0
+VQE,decoys,0,fake_torino,saboteur,84,12,3,6,21,26,133,0.0,True,equivalent,0.66,low_fidelity,REJECT,REJECT,1.0
+VQE,decoys,1,fake_brisbane,honest,156,24,9,6,45,30,327,0.0229,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+VQE,decoys,1,fake_brisbane,trojan-overt,156,24,9,6,45,30,327,0.3754,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,decoys,1,fake_brisbane,trojan-masked,156,24,9,6,45,30,327,0.1022,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,decoys,1,fake_brisbane,trojan-dormant,156,24,9,6,45,30,327,0.0229,True,not_equivalent,0.993,ok,REJECT,REJECT,1.0
+VQE,decoys,1,fake_brisbane,saboteur,156,24,9,6,45,30,327,0.0259,True,equivalent_up_to_global_phase,0.622,low_fidelity,REJECT,REJECT,1.0
+VQE,decoys,1,fake_torino,honest,156,24,9,6,39,26,250,0.0188,True,equivalent,1.0,ok,ACCEPT,ACCEPT,1.0
+VQE,decoys,1,fake_torino,trojan-overt,156,24,9,6,39,26,250,0.3667,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,decoys,1,fake_torino,trojan-masked,156,24,9,6,39,26,250,0.0427,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,decoys,1,fake_torino,trojan-dormant,156,24,9,6,39,26,250,0.0188,True,not_equivalent,0.998,ok,REJECT,REJECT,1.0
+VQE,decoys,1,fake_torino,saboteur,156,24,9,6,39,26,250,0.0179,True,equivalent_up_to_global_phase,0.525,low_fidelity,REJECT,REJECT,1.0
+VQE,decoys,2,fake_brisbane,honest,228,36,15,6,51,30,412,0.0194,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+VQE,decoys,2,fake_brisbane,trojan-overt,228,36,15,6,51,30,412,0.3689,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,decoys,2,fake_brisbane,trojan-masked,228,36,15,6,51,30,412,0.0416,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,decoys,2,fake_brisbane,trojan-dormant,228,36,15,6,51,30,412,0.0194,True,not_equivalent,0.995,ok,REJECT,REJECT,1.0
+VQE,decoys,2,fake_brisbane,saboteur,228,36,15,6,51,30,412,0.0243,True,equivalent_up_to_global_phase,0.595,low_fidelity,REJECT,REJECT,1.0
+VQE,decoys,2,fake_torino,honest,228,36,15,6,57,26,371,0.0243,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+VQE,decoys,2,fake_torino,trojan-overt,228,36,15,6,57,26,371,0.3579,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,decoys,2,fake_torino,trojan-masked,228,36,15,6,57,26,371,0.1055,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,decoys,2,fake_torino,trojan-dormant,228,36,15,6,57,26,371,0.0243,True,not_equivalent,0.996,ok,REJECT,REJECT,1.0
+VQE,decoys,2,fake_torino,saboteur,228,36,15,6,57,26,371,0.0,True,equivalent_up_to_global_phase,0.397,low_fidelity,REJECT,REJECT,1.0
+Grover,opt level,1,fake_brisbane,honest,153,24,0,45,45,179,311,0.0034,True,equivalent,1.0,ok,ACCEPT,ACCEPT,0.983
+Grover,opt level,1,fake_brisbane,trojan-overt,153,24,0,45,45,179,311,0.9404,False,not_equivalent,1.0,ok,REJECT,REJECT,0.983
+Grover,opt level,1,fake_brisbane,trojan-masked,153,24,0,45,45,179,311,0.02,True,not_equivalent,1.0,ok,REJECT,REJECT,0.983
+Grover,opt level,1,fake_brisbane,trojan-dormant,153,24,0,45,45,179,311,0.0034,True,not_equivalent,0.993,ok,REJECT,REJECT,0.983
+Grover,opt level,1,fake_brisbane,saboteur,153,24,0,45,45,179,311,0.0037,True,equivalent,0.564,low_fidelity,REJECT,REJECT,0.983
+Grover,opt level,1,fake_torino,honest,153,24,0,45,45,169,291,0.0061,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+Grover,opt level,1,fake_torino,trojan-overt,153,24,0,45,45,169,291,0.9401,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,opt level,1,fake_torino,trojan-masked,153,24,0,45,45,169,291,0.02,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,opt level,1,fake_torino,trojan-dormant,153,24,0,45,45,169,291,0.0061,True,not_equivalent,0.995,ok,REJECT,REJECT,1.0
+Grover,opt level,1,fake_torino,saboteur,153,24,0,45,45,169,291,0.0061,True,equivalent_up_to_global_phase,0.818,low_fidelity,REJECT,REJECT,1.0
+Grover,opt level,2,fake_brisbane,honest,153,24,0,39,45,174,377,0.0034,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.959
+Grover,opt level,2,fake_brisbane,trojan-overt,153,24,0,39,45,174,377,0.9404,False,not_equivalent,1.0,ok,REJECT,REJECT,0.959
+Grover,opt level,2,fake_brisbane,trojan-masked,153,24,0,39,45,174,377,0.02,True,not_equivalent,1.0,ok,REJECT,REJECT,0.959
+Grover,opt level,2,fake_brisbane,trojan-dormant,153,24,0,39,45,174,377,0.0034,True,not_equivalent,0.993,ok,REJECT,REJECT,0.959
+Grover,opt level,2,fake_brisbane,saboteur,153,24,0,39,45,174,377,0.0037,True,equivalent_up_to_global_phase,0.561,low_fidelity,REJECT,REJECT,0.959
+Grover,opt level,2,fake_torino,honest,153,24,0,39,45,139,269,0.0061,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.972
+Grover,opt level,2,fake_torino,trojan-overt,153,24,0,39,45,139,269,0.9401,False,not_equivalent,1.0,ok,REJECT,REJECT,0.972
+Grover,opt level,2,fake_torino,trojan-masked,153,24,0,39,45,139,269,0.02,True,not_equivalent,1.0,ok,REJECT,REJECT,0.972
+Grover,opt level,2,fake_torino,trojan-dormant,153,24,0,39,45,139,269,0.0061,True,not_equivalent,0.995,ok,REJECT,REJECT,0.972
+Grover,opt level,2,fake_torino,saboteur,153,24,0,39,45,139,269,0.0061,True,equivalent_up_to_global_phase,0.819,low_fidelity,REJECT,REJECT,0.972
+Grover,opt level,3,fake_brisbane,honest,153,24,0,39,45,174,380,0.0037,True,equivalent,1.0,ok,ACCEPT,ACCEPT,1.0
+Grover,opt level,3,fake_brisbane,trojan-overt,153,24,0,39,45,174,380,0.9431,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,opt level,3,fake_brisbane,trojan-masked,153,24,0,39,45,174,380,0.0166,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,opt level,3,fake_brisbane,trojan-dormant,153,24,0,39,45,174,380,0.0037,True,not_equivalent,0.992,ok,REJECT,REJECT,1.0
+Grover,opt level,3,fake_brisbane,saboteur,153,24,0,39,45,174,380,0.0037,True,equivalent_up_to_global_phase,0.551,low_fidelity,REJECT,REJECT,1.0
+Grover,opt level,3,fake_torino,honest,153,24,0,39,45,139,270,0.0034,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+Grover,opt level,3,fake_torino,trojan-overt,153,24,0,39,45,139,270,0.9404,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,opt level,3,fake_torino,trojan-masked,153,24,0,39,45,139,270,0.016,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+Grover,opt level,3,fake_torino,trojan-dormant,153,24,0,39,45,139,270,0.0034,True,not_equivalent,0.996,ok,REJECT,REJECT,1.0
+Grover,opt level,3,fake_torino,saboteur,153,24,0,39,45,139,270,0.0,True,equivalent_up_to_global_phase,0.776,low_fidelity,REJECT,REJECT,1.0
+QAOA,opt level,1,fake_brisbane,honest,84,12,1,19,21,64,135,0.0183,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,opt level,1,fake_brisbane,trojan-overt,84,12,1,19,21,64,135,0.6339,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,opt level,1,fake_brisbane,trojan-masked,84,12,1,19,21,64,135,0.1227,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,opt level,1,fake_brisbane,trojan-dormant,84,12,1,19,21,64,135,0.0183,True,not_equivalent,0.993,ok,REJECT,REJECT,1.0
+QAOA,opt level,1,fake_brisbane,saboteur,84,12,1,19,21,64,135,0.0167,True,equivalent_up_to_global_phase,0.738,low_fidelity,REJECT,REJECT,1.0
+QAOA,opt level,1,fake_torino,honest,84,12,1,19,21,73,138,0.0165,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,opt level,1,fake_torino,trojan-overt,84,12,1,19,21,73,138,0.6593,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,opt level,1,fake_torino,trojan-masked,84,12,1,19,21,73,138,0.1268,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,opt level,1,fake_torino,trojan-dormant,84,12,1,19,21,73,138,0.0165,True,not_equivalent,0.993,ok,REJECT,REJECT,1.0
+QAOA,opt level,1,fake_torino,saboteur,84,12,1,19,21,73,138,0.0096,True,equivalent_up_to_global_phase,0.688,low_fidelity,REJECT,REJECT,1.0
+QAOA,opt level,2,fake_brisbane,honest,84,12,1,16,18,85,124,0.0175,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,opt level,2,fake_brisbane,trojan-overt,84,12,1,16,18,85,124,0.6339,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,opt level,2,fake_brisbane,trojan-masked,84,12,1,16,18,85,124,0.13,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,opt level,2,fake_brisbane,trojan-dormant,84,12,1,16,18,85,124,0.0175,True,not_equivalent,0.992,ok,REJECT,REJECT,1.0
+QAOA,opt level,2,fake_brisbane,saboteur,84,12,1,16,18,85,124,0.0225,True,equivalent_up_to_global_phase,0.72,low_fidelity,REJECT,REJECT,1.0
+QAOA,opt level,2,fake_torino,honest,84,12,1,16,18,61,132,0.0,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,opt level,2,fake_torino,trojan-overt,84,12,1,16,18,61,132,0.6545,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,opt level,2,fake_torino,trojan-masked,84,12,1,16,18,61,132,0.0665,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,opt level,2,fake_torino,trojan-dormant,84,12,1,16,18,61,132,0.0,True,not_equivalent,0.995,ok,REJECT,REJECT,1.0
+QAOA,opt level,2,fake_torino,saboteur,84,12,1,16,18,61,132,0.0166,True,equivalent_up_to_global_phase,0.666,low_fidelity,REJECT,REJECT,1.0
+QAOA,opt level,3,fake_brisbane,honest,84,12,1,16,18,85,147,0.0167,True,equivalent,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,opt level,3,fake_brisbane,trojan-overt,84,12,1,16,18,85,147,0.6573,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,opt level,3,fake_brisbane,trojan-masked,84,12,1,16,18,85,147,0.0502,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,opt level,3,fake_brisbane,trojan-dormant,84,12,1,16,18,85,147,0.0167,True,not_equivalent,0.994,ok,REJECT,REJECT,1.0
+QAOA,opt level,3,fake_brisbane,saboteur,84,12,1,16,18,85,147,0.0161,True,equivalent,0.701,low_fidelity,REJECT,REJECT,1.0
+QAOA,opt level,3,fake_torino,honest,84,12,1,16,18,60,129,0.0139,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+QAOA,opt level,3,fake_torino,trojan-overt,84,12,1,16,18,60,129,0.6545,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,opt level,3,fake_torino,trojan-masked,84,12,1,16,18,60,129,0.1208,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+QAOA,opt level,3,fake_torino,trojan-dormant,84,12,1,16,18,60,129,0.0139,True,not_equivalent,0.997,ok,REJECT,REJECT,1.0
+QAOA,opt level,3,fake_torino,saboteur,84,12,1,16,18,60,129,0.0,True,equivalent_up_to_global_phase,0.653,low_fidelity,REJECT,REJECT,1.0
+VQE,opt level,1,fake_brisbane,honest,84,12,3,6,21,26,138,0.0259,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+VQE,opt level,1,fake_brisbane,trojan-overt,84,12,3,6,21,26,138,0.3778,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,opt level,1,fake_brisbane,trojan-masked,84,12,3,6,21,26,138,0.0576,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,opt level,1,fake_brisbane,trojan-dormant,84,12,3,6,21,26,138,0.0259,True,not_equivalent,0.993,ok,REJECT,REJECT,1.0
+VQE,opt level,1,fake_brisbane,saboteur,84,12,3,6,21,26,138,0.0259,True,equivalent_up_to_global_phase,0.671,low_fidelity,REJECT,REJECT,1.0
+VQE,opt level,1,fake_torino,honest,84,12,3,6,21,28,132,0.0109,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+VQE,opt level,1,fake_torino,trojan-overt,84,12,3,6,21,28,132,0.3802,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,opt level,1,fake_torino,trojan-masked,84,12,3,6,21,28,132,0.0627,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,opt level,1,fake_torino,trojan-dormant,84,12,3,6,21,28,132,0.0109,True,not_equivalent,0.996,ok,REJECT,REJECT,1.0
+VQE,opt level,1,fake_torino,saboteur,84,12,3,6,21,28,132,0.0149,True,equivalent_up_to_global_phase,0.696,low_fidelity,REJECT,REJECT,1.0
+VQE,opt level,2,fake_brisbane,honest,84,12,3,6,18,30,146,0.0231,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+VQE,opt level,2,fake_brisbane,trojan-overt,84,12,3,6,18,30,146,0.3591,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,opt level,2,fake_brisbane,trojan-masked,84,12,3,6,18,30,146,0.0446,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,opt level,2,fake_brisbane,trojan-dormant,84,12,3,6,18,30,146,0.0231,True,not_equivalent,0.994,ok,REJECT,REJECT,1.0
+VQE,opt level,2,fake_brisbane,saboteur,84,12,3,6,18,30,146,0.0229,True,equivalent,0.682,low_fidelity,REJECT,REJECT,1.0
+VQE,opt level,2,fake_torino,honest,84,12,3,6,21,26,132,0.0188,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,0.992
+VQE,opt level,2,fake_torino,trojan-overt,84,12,3,6,21,26,132,0.3667,False,not_equivalent,1.0,ok,REJECT,REJECT,0.992
+VQE,opt level,2,fake_torino,trojan-masked,84,12,3,6,21,26,132,0.1028,False,not_equivalent,1.0,ok,REJECT,REJECT,0.992
+VQE,opt level,2,fake_torino,trojan-dormant,84,12,3,6,21,26,132,0.0188,True,not_equivalent,0.992,ok,REJECT,REJECT,0.992
+VQE,opt level,2,fake_torino,saboteur,84,12,3,6,21,26,132,0.0149,True,equivalent_up_to_global_phase,0.666,low_fidelity,REJECT,REJECT,0.992
+VQE,opt level,3,fake_brisbane,honest,84,12,3,6,18,30,127,0.0194,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+VQE,opt level,3,fake_brisbane,trojan-overt,84,12,3,6,18,30,127,0.3689,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,opt level,3,fake_brisbane,trojan-masked,84,12,3,6,18,30,127,0.1044,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,opt level,3,fake_brisbane,trojan-dormant,84,12,3,6,18,30,127,0.0194,True,not_equivalent,0.995,ok,REJECT,REJECT,1.0
+VQE,opt level,3,fake_brisbane,saboteur,84,12,3,6,18,30,127,0.0232,True,equivalent_up_to_global_phase,0.675,low_fidelity,REJECT,REJECT,1.0
+VQE,opt level,3,fake_torino,honest,84,12,3,6,21,26,136,0.0217,True,equivalent_up_to_global_phase,1.0,ok,ACCEPT,ACCEPT,1.0
+VQE,opt level,3,fake_torino,trojan-overt,84,12,3,6,21,26,136,0.3553,False,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,opt level,3,fake_torino,trojan-masked,84,12,3,6,21,26,136,0.0217,True,not_equivalent,1.0,ok,REJECT,REJECT,1.0
+VQE,opt level,3,fake_torino,trojan-dormant,84,12,3,6,21,26,136,0.0217,True,not_equivalent,0.996,ok,REJECT,REJECT,1.0
+VQE,opt level,3,fake_torino,saboteur,84,12,3,6,21,26,136,0.0,True,equivalent_up_to_global_phase,0.645,low_fidelity,REJECT,REJECT,1.0

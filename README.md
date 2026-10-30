@@ -160,6 +160,50 @@ Other QCEC configurations do not fix this yet. `bench/qcec_configs.py` ran the 1
 
 None gave a proof, so `verify.py` is unchanged. We did not try QCEC's hybrid Schrödinger-Feynman checker, which only checks approximate equivalence.
 
+### Parameter sweep
+
+`bench/params.py` changes one parameter at a time from the demo defaults and runs the full pipeline (lock → 5 compilers → unlock → naive test, QCEC, fidelity audit → score) on FakeBrisbane and FakeTorino: one fresh lock per setting and backend, shared by the 5 compilers, transpiler seed 7. The optimization level is the compiler's: honest, attacks, the audit's baseline and the overhead compiles all run at the swept level. `qaoa_maxcut` has one layer, so its angles are swept, not a layer count. Raw numbers (key angles, depth, CH1 TVD, CH2 verdict, indistinguishability) in `bench/params.csv`.
+
+| Circuit | Parameter (values) | Visible CX | Compiled 2q gates, plain → locked | Saboteur ESP ratio | Verdicts as expected |
+|---|---|---|---|---|---|
+| Grover-3 | marked item (000-111) | 24 | 39 → 45 | 0.541-0.779 | 80 of 80 |
+| Grover-3 | decoys (0, 1, 2) | 24-36 | 39 → 45-60 | 0.516-0.779 | 30 of 30 |
+| Grover-3 | optimization level (1, 2, 3) | 24 | 39-45 → 45 | 0.551-0.819 | 30 of 30 |
+| QAOA-4 | angles γ, β (2.85, 0.30; 0.8, 0.4; 1.9, 1.1) | 12 | 16 → 18 | 0.613-0.707 | 30 of 30 |
+| QAOA-4 | graph (default 5 edges, ring, complete K4) | 12 | 11-18 → 18 | 0.659-0.709 | 30 of 30 |
+| QAOA-4 | decoys (0, 1, 2) | 12-36 | 16 → 18-60 | 0.492-0.712 | 30 of 30 |
+| QAOA-4 | optimization level (1, 2, 3) | 12 | 16-19 → 18-21 | 0.653-0.738 | 30 of 30 |
+| VQE-4 | reps (1, 2, 3, 4) | 12-24 | 6-12 → 18-42 | 0.482-0.686 | 20 of 20; reps 1 and 3: lock refused |
+| VQE-4 | weight seed (11, 1, 2) | 12 | 6 → 18-21 | 0.584-0.732 | 30 of 30 |
+| VQE-4 | decoys (0, 1, 2) | 12-36 | 6 → 18-57 | 0.397-0.660 | 30 of 30 |
+| VQE-4 | optimization level (1, 2, 3) | 12 | 6 → 18-21 | 0.645-0.696 | 30 of 30 |
+
+![Fidelity audit ESP ratio, honest and saboteur, for every swept parameter on FakeBrisbane and FakeTorino](bench/params_esp.png)
+
+Decoys change the cost most: each extra round adds 2 CX to every qubit pair, so at 2 decoys QAOA compiles to 54-60 two-qubit gates instead of 16 and VQE to 51-57 instead of 6, while the secrets themselves (marked item, angles, weights) leave the visible skeleton unchanged ([locking cost per parameter](bench/params_overhead.png)). No setting changed a verdict: 370 of 370 runs gave ACCEPT for honest and REJECT for every attack, with the honest ESP ratio at 1.00 by construction and saboteurs at 0.397-0.819, the highest (Grover, FakeTorino, level 2) 0.081 below the threshold. `lock()` refused VQE at reps 1 and 3, whose odd CX count per qubit pair it cannot pad without leaving the graph visible; and the naive test passed 60 of 74 masked Trojans and 2 of 74 overt ones (QAOA at γ = 0.8, β = 0.4, whose near-uniform output hides a bit flip: TVD 0.039), all caught by QCEC.
+
+### Timing
+
+`bench/timing.py` times each step separately for every circuit × backend (FakeBrisbane, FakeTorino) × decoys (0, 1, 2) × compiler (5): 90 combinations, 3 repeats each with a fresh lock, transpiler seed 7, on one laptop (Intel Core Ultra 7 256V, 8 logical cores, Windows 11, Python 3.12.10, Qiskit 2.6.1, MQT QCEC 3.11.0). "Lock to verdict" is the sum of the median lock, compile, unlock, naive test, QCEC and fidelity audit (which includes its baseline compile); scoring is the confidentiality and overhead report. Ranges are over the 10 backend × compiler combinations; the last column is the fastest and slowest single repeat. Raw numbers in `bench/timing.csv`.
+
+| Circuit | Decoys | Lock to verdict | of which QCEC | Scoring | Total (median) | Total (any repeat) |
+|---|---|---|---|---|---|---|
+| Grover-3 | 0 | 0.19-0.27 s | 0.02-0.05 s | 2.5-5.4 s | 2.7-5.7 s | 2.6-6.7 s |
+| Grover-3 | 1 | 0.23-0.48 s | 0.02-0.07 s | 3.2-6.4 s | 3.4-6.6 s | 3.1-8.9 s |
+| Grover-3 | 2 | 0.24-0.34 s | 0.03-0.07 s | 6.5-7.7 s | 6.9-8.0 s | 6.1-8.4 s |
+| QAOA-4 | 0 | 0.16-0.30 s | 0.01-0.04 s | 2.5-3.3 s | 2.6-3.6 s | 2.6-5.3 s |
+| QAOA-4 | 1 | 0.18-0.24 s | 0.02-0.06 s | 2.3-5.3 s | 2.5-5.6 s | 2.3-9.4 s |
+| QAOA-4 | 2 | 0.26-0.39 s | 0.03-0.09 s | 6.8-13.1 s | 7.1-13.4 s | 5.0-19.7 s |
+| VQE-4 | 0 | 0.17-0.30 s | 0.01-0.05 s | 1.3-4.1 s | 1.5-4.3 s | 1.4-6.0 s |
+| VQE-4 | 1 | 0.18-0.32 s | 0.02-0.09 s | 2.4-5.4 s | 2.6-5.7 s | 2.5-6.2 s |
+| VQE-4 | 2 | 0.22-0.44 s | 0.02-0.16 s | 3.8-8.8 s | 4.1-9.3 s | 3.9-14.8 s |
+
+One full detection matrix (lock + 5 compilers, no scoring) took a median 0.7-1.0 s per circuit and backend.
+
+![Median seconds per step, lock to verdict stacked (left) and scoring (right), for every circuit, backend, decoy count and compiler](bench/timing.png)
+
+Decoys cost the most time: at 2 decoys the median total roughly doubles to triples (QAOA 2.6-3.6 s → 7.1-13.4 s), while the backend and the compiler under test shift it less and in no consistent direction. Timing does not touch the verdicts; the verdict itself arrives in 0.16-0.48 s, of which QCEC takes at most 0.16 s at these sizes. The slowest step is scoring, 95% of all measured time: nearly all of it is the confidentiality score's 30 wrong-key guesses on 6 input states each, since its two overhead compiles cost about as much as two compile steps (0.03 s median each).
+
 ## Real hardware runs
 
 Every row was verified before it ran: QCEC plus the ESP audit against the device's live calibration, with the honest compile of the same fresh lock as the baseline (transpiler seed 7). Run 1 is the original `python demo.py --ibm` run (4,000 shots, 1-TVD against a 4,000-shot ideal sample, no noisy-sim prediction). Runs 2 and 3 are `python bench/ibm_runs.py B` and `A` on 2026-10-24 (2,000 shots per circuit, 1-TVD against the exact ideal distribution, prediction from `AerSimulator.from_backend` on the same device). Measured ratio = measured 1-TVD / the honest compile's measured 1-TVD for the same lock and device, the hardware counterpart of the ESP ratio. Naive test = TVD < 0.10 between the measured histogram and the ideal output. Run 4 is the first job from the panel (`python server.py --allow-ibm`, [below](#run-on-ibm-hardware-from-the-panel)) on 2026-10-26: Grover, saboteur vs the honest compile of the same lock, same 2,000 shots, exact ideal and noisy-sim prediction; the honest compile there is the audit's baseline, not a separately judged circuit, so it has no verdict or ESP ratio of its own. Jobs: `dbe5hp7pc3tc739l5al0` (run 1), `dbefmkom94ac738rnks0` (run 2), `dbefmkvsstms73fbvl4g` (run 3), `dbfm3uvgdj9s73bbu600` (run 4); 13 s of QPU time for runs 2-3, 3 s for run 4. Intervals are 95% bootstraps (`bench/confidence.py`: 1,000 resamples of each circuit's measured counts, the ideal reference held fixed); a difference from the honest compile is significant when the ratio interval excludes 1. Raw counts are in `bench/ibm_*.json` and `bench/live_ibm/*.json`, this table in `bench/hardware.csv` (`python bench/compare.py`).
