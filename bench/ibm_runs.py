@@ -2,6 +2,8 @@
 
   python bench/ibm_runs.py A         ibm_fez: all 5 compilers x Grover, QAOA, VQE, one SamplerV2 job
   python bench/ibm_runs.py B         Grover honest + saboteur on ibm_kingston, one job
+  python bench/ibm_runs.py C         ibm_kingston: honest + saboteur x Grover, QAOA, VQE, one job (run 2026-10-26)
+  python bench/ibm_runs.py D         Grover honest + saboteur on ibm_fez (repeat of A), one job (run 2026-10-26)
   python bench/ibm_runs.py S         seed sweep, one job per (device, transpiler seed): ibm_marrakesh 50
                                      circuits (seeds 21-23 all 15, seed 24 QAOA x 5 compilers), ibm_fez 47
                                      (seeds 11-13 all 15, seed 14 VQE honest + saboteur), ibm_kingston 2
@@ -41,6 +43,8 @@ SHOTS, SEED, MIN_SECONDS = 2000, 7, 180
 GROVER, QAOA, VQE = DEMOS
 JOBS = {"A": [("ibm_fez", list(DEMOS), list(COMPILERS), SEED)],
         "B": [("ibm_kingston", [GROVER], ["honest", "saboteur"], SEED)],
+        "C": [("ibm_kingston", list(DEMOS), ["honest", "saboteur"], SEED)],
+        "D": [("ibm_fez", [GROVER], ["honest", "saboteur"], SEED)],
         "S": [*(("ibm_marrakesh", list(DEMOS), list(COMPILERS), s) for s in (21, 22, 23)),
               ("ibm_marrakesh", [QAOA], list(COMPILERS), 24),
               *(("ibm_fez", list(DEMOS), list(COMPILERS), s) for s in (11, 12, 13)),
@@ -156,7 +160,7 @@ def main():
     if remaining(service) < MIN_SECONDS:
         sys.exit("Under 3 minutes of QPU time left: stopping.")
     if args[0] == "fetch":
-        return fetch(service, Path(args[1]))
+        return fetch(service, Path(args[1]).resolve())
     only = args[args.index("--device") + 1] if "--device" in args else None
     for device, names, modes, seed in JOBS[args[0]]:
         if only in (None, device):
