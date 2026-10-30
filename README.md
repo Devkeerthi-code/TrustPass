@@ -8,6 +8,12 @@
 
 ![The TrustPass TP-1 front panel (static snapshot, Grover-3 on FakeBrisbane): SOURCE turns from Honest to Saboteur, and the lamp goes from green ACCEPT to red REJECT while the naive and equivalence channels still say PASS](docs/source-honest-to-saboteur.gif)
 
+**Results at a glance (real IBM hardware, 179 circuits in 20 jobs on ibm_fez, ibm_kingston and ibm_marrakesh, 2026-10-24 to 28):**
+
+- Honest compiles ACCEPTed: **41/41**. Attacks REJECTed before they ran: **134/137**; the 3 misses are mild ibm_kingston saboteurs that measured 0.945-1.058 of their honest compile, inside the 10% tolerance ([Accuracy on real hardware](#accuracy-on-real-hardware)).
+- The usual histogram check (TVD < 0.10) missed 30 of 137 attacks and wrongly flagged 22 of 42 honest compiles.
+- Our honest Grover runs kept 81% of the ideal success probability, against 61-68% published for the same circuit on IBM's 2021 devices ([Comparison with published results](#comparison-with-published-results)).
+
 Q-HACK INDIA 2026 (IBM Qiskit Fall Fest), Quantum Security & Cryptography track. Round 1 prototype.
 
 ```bash
