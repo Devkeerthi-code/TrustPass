@@ -289,6 +289,39 @@ The audit runs before the job, and the device's calibration moves in between. Ri
 
 Drift moved the same circuit both ways: run 1's saboteur rose from 0.831 to 0.892, 0.008 short of passing, and run 2's fell from 0.894 to 0.874. The swing between runs is larger because the saboteur chooses its qubits from the calibration of the day: on ibm_fez the Grover saboteur scored 0.83 in run 1 and 0.005 in run 3, eleven and a half hours later. Limit: the re-check is relative to the check-time baseline, so drift that degrades the baseline's qubits as much as the returned circuit's (always the case for the honest compile, which is its own baseline) leaves the ratio unchanged, and it never asks whether a fresh compile would now pick better qubits.
 
+## Comparison with published results
+
+Two outside checks on whether our hardware numbers are plausible. No new jobs were run for either.
+
+**IBM's own published device data.** `python bench/attested_device.py` reads IBM's calibration archive for each job's calibration time (`backend.properties(datetime=...)`) and the exact circuits each job submitted (IBM job inputs), and multiplies (1 − error) over every CZ, SX/X and measurement: once with the device-wide published medians (sees the gate count, not which qubits were used) and once with the published values of the qubits actually used. Both are the probability that no error occurs, so they are expected to sit below the measured 1-TVD, which an error does not always lower. All 179 circuits are in `bench/attested_device.csv`.
+
+| Device | Calibrations used (UTC) | Median CZ error | Median SX error | Median readout error | Median T1 / T2 (µs) | IBM device page, 2026-10-30: 2Q error (layered) · CLOPS |
+|---|---|---|---|---|---|---|
+| ibm_fez (Heron r2) | 2026-10-24, 26, 28 | 2.46-2.62 × 10⁻³ | 2.9-3.2 × 10⁻⁴ | 1.00-1.10 × 10⁻² | 127-144 / 89-99 | 4.107 × 10⁻³ · 320K |
+| ibm_kingston (Heron r2) | 2026-10-24, 26, 28 | 1.71-1.76 × 10⁻³ | 2.4-2.6 × 10⁻⁴ | 0.91-1.09 × 10⁻² | 239-252 / 148-162 | 3.272 × 10⁻³ · 340K |
+| ibm_marrakesh (Heron r2) | 2026-10-28 | 2.87 × 10⁻³ | 4.4 × 10⁻⁴ | 1.98 × 10⁻² | 146 / 82 | 4.592 × 10⁻³ · 300K |
+
+| Expected success from IBM's published data | Honest compiles (42) | Saboteurs (42) |
+|---|---|---|
+| Device medians | 0.761-0.908; measured 1-TVD at or above it on 32 | 0.744-0.896, ratio to honest 0.955-0.993: every saboteur would pass a 0.90 check; measured below it on 39 |
+| Published values of the qubits used | 0.862-0.930; measured at or above it on 16 | 0.005-0.872, ratio to honest 0.005-0.939 (39 of 42 under 0.90; the 3 above are run 5's); rank correlation with the measured ratio 0.613 |
+
+**Published experiments by others.** Only sources we opened; full citations and the exact table or figure are in `bench/attested_literature.csv`. "Of ideal" divides by the noiseless value of the same circuit.
+
+| Circuit and metric | Source | Device (year) | Published | Of ideal | Ours (honest, Heron r2, 2026) | Of ideal |
+|---|---|---|---|---|---|---|
+| Grover, 3 qubits, 2 iterations: P(marked) | Zhang et al. 2021, Table 6 | ibmq_vigo, 5-qubit Falcon (2021) | 0.575 ± 0.042 | 0.61 | median 0.762 (0.739-0.816; 0.467 for the T35 outlier), n=17 | 0.81 |
+| | Zhang et al. 2021, Table 6 | ibmq_athens, 5-qubit Falcon (2021) | 0.638 ± 0.027 | 0.68 | | |
+| | AbuGhanem 2025, Table 3, oracle 101 | ibm_sherbrooke/osaka/kyoto, Eagle r3 (2024) | ASP 0.640 (not like-for-like) | – | | |
+| QAOA MaxCut, 4 nodes, p=1: approximation ratio | Graham et al. 2022, Fig. 4c | neutral atoms (2021) | 0.669 ± 0.009 | 0.87 | median 0.788 (0.770-0.808), n=13 | 0.97 |
+| VQE hardware-efficient ansatz: 1-TVD | none found | – | – | – | 0.863-0.959, n=12 | – |
+
+Not like-for-like: Zhang et al. average 30 random marked items on 5-qubit devices with 8,192 shots per trial, and their two-qubit gate was a CNOT with 0.86-1.25 × 10⁻² error (their Table 2), against our CZ at 1.7-2.9 × 10⁻³; AbuGhanem's "ASP" is defined differently, the paper says the Grover operator is iterated ten times while quoting the one-iteration ideal (78.125%), and the shot count for these runs is not stated, so we list it but do not compare it; Graham et al. ran a different 4-node graph on a different platform; our compiles carry TrustPass decoys and CZ padding (45 CZ for every honest Grover), and none of the runs on either side report error mitigation.
+
+Our honest Grover runs kept 81% of the ideal success probability, more than the 61-68% the same two-iteration circuit kept on IBM's 2021 Falcon devices, which is the direction their published two-qubit error rates (3-7 times ours) predict, so our measurements sit where a newer device generation should rather than outside what others report. For QAOA we found one comparable result and it is on another platform and graph, and for the VQE ansatz we found none, so those two circuits are checked only against IBM's device data and our own noisy simulator, not against independent experiments. These comparisons support the validity of the measured numbers, not of TrustPass's verdicts, and IBM's device-wide medians alone could not have caught a single saboteur (they predict at most a 4.5% loss), which is why the audit reads per-qubit calibration.
+
+Sources: K. Zhang, P. Rao, K. Yu, H. Lim, V. Korepin, *Implementation of efficient quantum search algorithms on NISQ computers*, Quantum Inf. Process. 20, 233 (2021), [doi:10.1007/s11128-021-03165-2](https://doi.org/10.1007/s11128-021-03165-2), [arXiv:2102.01783](https://arxiv.org/abs/2102.01783) · M. AbuGhanem, *Comprehensive characterization of three-qubit Grover search algorithm on IBM's 127-qubit superconducting quantum computers*, Sci. Rep. 15, 1281 (2025), [doi:10.1038/s41598-024-80188-6](https://doi.org/10.1038/s41598-024-80188-6), [arXiv:2406.16018](https://arxiv.org/abs/2406.16018) · T. M. Graham et al., *Multi-qubit entanglement and algorithms on a programmable neutral-atom quantum computer*, Nature 604, 457-462 (2022), [doi:10.1038/s41586-022-04603-6](https://doi.org/10.1038/s41586-022-04603-6), [arXiv:2112.14589](https://arxiv.org/abs/2112.14589) · IBM Quantum device pages, [quantum.cloud.ibm.com/computers](https://quantum.cloud.ibm.com/computers) (accessed 2026-10-30) · IBM calibration archive via `qiskit-ibm-runtime` `backend.properties(datetime=...)`.
+
 ## Signed receipts
 
 `receipt.py` turns a verification into an Ed25519-signed JSON receipt: SHA-256 hashes of the original, locked and returned circuits (QASM 3), the verdict, the QCEC verdict, ESP, ESP ratio and threshold, the backend and its calibration time, the TrustPass commit, a UTC timestamp, and a commitment to the lock key, SHA-256(32-byte random salt ‖ canonical JSON of the key). The salt and key stay in `~/.trustpass/keys`, as does the signing key (`~/.trustpass/signing_key`); only the public key is shared.

@@ -244,7 +244,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .rating dd { margin: 0; max-width: 75ch; }
 .rating a { color: var(--ink); text-underline-offset: 0.2em; overflow-wrap: anywhere; }
 .plate-note { margin: calc(18 * var(--u)) 0 0; font-size: max(12px, calc(15 * var(--u))); color: #4a4e53; }
-.unit.hardware, .unit.plant, .unit.ibm, .unit.benchmarks { grid-column: 1 / -1; }
+.unit.hardware, .unit.plant, .unit.ibm, .unit.benchmarks, .unit.attested { grid-column: 1 / -1; }
 .charts { display: grid; gap: calc(24 * var(--u)); }  /* one chart per row: their legends need the width */
 .charts figure { margin: 0; }
 .charts img { display: block; width: 100%; height: auto; }
@@ -267,6 +267,10 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .hw td { padding: calc(10 * var(--u)) calc(16 * var(--u)) calc(10 * var(--u)) 0; border-bottom: calc(1 * var(--u)) solid #bdbbb6; }
 .hw .good { color: var(--pass); font-weight: 700; }
 .hw .bad { color: var(--fail); font-weight: 700; }
+.hw-wrap { overflow-x: auto; }
+.hw-wrap + .hw-note + .hw-wrap { margin-top: calc(28 * var(--u)); }
+.hw td small { font-size: max(11px, calc(16 * var(--u))); color: #4a4e53; }
+.hw a { color: var(--ink); text-underline-offset: 0.2em; }
 .hw-note { margin: calc(14 * var(--u)) 0 0; max-width: 75ch; font-size: max(13px, calc(17 * var(--u))); line-height: 1.45; }
 
 /* ---------- phones: the modules restack, --u follows the screen ---------- */
