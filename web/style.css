@@ -268,7 +268,10 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .hw .good { color: var(--pass); font-weight: 700; }
 .hw .bad { color: var(--fail); font-weight: 700; }
 .hw-wrap { overflow-x: auto; }
-.hw-wrap + .hw-note + .hw-wrap { margin-top: calc(28 * var(--u)); }
+.hw-wrap + .hw-more + .hw-wrap { margin-top: calc(28 * var(--u)); }
+.hw-more { margin-top: calc(6 * var(--u)); }
+.hw-more summary { cursor: pointer; width: fit-content; padding: 8px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; font-size: max(11px, calc(16 * var(--u))); }
+.hw-more summary::marker { color: var(--rule); }
 .hw td small { font-size: max(11px, calc(16 * var(--u))); color: #4a4e53; }
 .hw a { color: var(--ink); text-underline-offset: 0.2em; }
 .hw-note { margin: calc(14 * var(--u)) 0 0; max-width: 75ch; font-size: max(13px, calc(17 * var(--u))); line-height: 1.45; }

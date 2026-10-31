@@ -164,9 +164,11 @@
             <th scope="col">Fidelity<br><small>honest</small></th><th scope="col">Fidelity<br><small>saboteur</small></th></tr></thead>
           <tbody id="hw-rows"></tbody>
         </table>
+        <details class="hw-more"><summary>What these numbers mean</summary>
         <p class="hw-note">Fidelity is 1 − TVD between the device's measured histogram and the ideal output. Each verdict was decided before the job ran, from QCEC and the fidelity audit on the device's live calibration; "–" is a panel job's honest baseline, the audit's reference.</p>
         <p class="hw-note" id="hw-sweep" hidden></p>
         <p class="hw-note" id="hw-acc" hidden></p>
+        </details>
       </div>
     </article>
 
@@ -183,7 +185,9 @@
             <tr><td>VQE ansatz, 4 qubits<br><small>1 − TVD</small></td><td>No published hardware result found</td><td>–</td><td>0.863-0.959, 12 runs</td><td>–</td></tr>
           </tbody>
         </table></div>
+        <details class="hw-more"><summary>What this comparison means</summary>
         <p class="hw-note">"Of ideal" divides by the noiseless value of the same circuit (Grover 0.945, QAOA 0.772 for their graph and 0.809 for ours). Not like-for-like: Zhang et al. average 30 marked items on 5-qubit devices whose CNOT error was 3-7 times our CZ error, and Graham et al. ran another graph on another platform. Our Grover runs sit where a newer device generation should; QAOA has one outside comparison and VQE none.</p>
+        </details>
         <div class="hw-wrap"><table class="hw">
           <thead><tr><th scope="col">Device</th><th scope="col">Median CZ error<br><small>our run dates</small></th><th scope="col">Median readout error<br><small>our run dates</small></th>
             <th scope="col">2Q error (layered) · CLOPS<br><small>IBM device page, 2026-10-30</small></th></tr></thead>
@@ -193,7 +197,9 @@
             <tr><td>ibm_marrakesh</td><td>2.87 × 10⁻³</td><td>1.98 × 10⁻²</td><td>4.592 × 10⁻³ · 300K</td></tr>
           </tbody>
         </table></div>
+        <details class="hw-more"><summary>What IBM's device data predicts</summary>
         <p class="hw-note">From IBM's calibration archive for each job, the chance that no error occurs in the exact submitted circuit is 0.76-0.91 for our honest compiles with these device medians; the measured fidelity was at or above it on 32 of 42. The medians cannot see which qubits a compile used: they predict every saboteur loses at most 4.5%, while the published values of the qubits actually used put 39 of 42 saboteurs under the 0.90 threshold.</p>
+        </details>
       </div>
     </article>
 
